@@ -1,0 +1,101 @@
+{
+	"pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+		{
+			"path": "pages/tabBar/index/index",
+			"style": {
+				"navigationBarTitleText": "none",
+				"app-plus": {
+					"bounce": "vertical",
+					
+					"titleNView": false
+				}
+			}
+		},
+		{
+			"path": "pages/tabBar/run/run",
+			"style": {
+				"navigationBarTitleText": "none",
+				"app-plus": {
+					"titleNView": false
+				}
+			}
+		},
+		{
+			"path": "pages/tabBar/mine/mine",
+			"style": {
+				"navigationBarTitleText": "none",
+				"app-plus": {
+					"titleNView": false
+				}
+			}
+		}
+        ,{
+            "path" : "pages/userAccount/userAccount",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/userRb/userRb",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/invite/invite",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+        ,{
+            "path" : "pages/userSetting/userSetting",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
+    ],
+	
+	"tabBar": { 
+		"color": "#7A7E83",
+		"selectedColor": "#007AFF",
+		"borderStyle": "black",
+		"backgroundColor": "#F8F8F8",
+		"list": [{
+				"pagePath": "pages/tabBar/index/index",
+				"iconPath": "static/Group11576.png",
+				"selectedIconPath": "static/Group11576.png",
+				"text": "首页"
+			},
+			{
+				"pagePath": "pages/tabBar/run/run",
+				"iconPath": "static/Group6.png",
+				"selectedIconPath": "static/Group6.png",
+				"text": "商店"
+			}, {
+				"pagePath": "pages/tabBar/mine/mine",
+				"iconPath": "static/Group%2011578.png",
+				"selectedIconPath": "static/Group%2011578.png",
+				"text": "背包"
+			}
+		]
+	},
+	"globalStyle": {
+		"navigationBarTextStyle": "black",
+		"navigationBarTitleText": "uni-app",
+		"navigationBarBackgroundColor": "#F8F8F8",
+		"backgroundColor": "#F8F8F8",
+		  "app-plus": {"titleNView": false}
+	}
+}

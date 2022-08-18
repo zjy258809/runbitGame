@@ -1,0 +1,9 @@
+{
+    "id": "vendersen-dapp",
+    "name": "Dapp开发工具包",
+    "version": "1.0.0",
+    "description": "菜逼封装的一个Dapp开发工具包",
+    "keywords": [
+        "Dapp,以太坊,火币生态链,HECO"
+    ]
+}
