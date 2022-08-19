@@ -1,70 +1,70 @@
 <template>
 	<view class="content">
 
-			<view class="bg">
+		<view class="bg">
 
-				<view class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
-					<img class="flex-item" src="../../../static/heard.png" style="width:3.125rem;" />
-					<img class="currentImg" src="../../../static/Ellipse38.png" />
-					<view class="currentbs">在线300步</view>
-					<img class="userName" src="../../../static/Group3.png" />
-				</view>
-
-				<view class="person">
-					<img class="gp11 gp12" src="../../../static/Group11.png" />
-					<img class="gp12" src="../../../static/Group12070.png" />
-					<img class="gp12" src="../../../static/Group12071.png" />
-				</view>
-
-				<img class="gp5" @tap="inputDialogToggle()" src="../../../static/Group5-1.png" />
-
-				<uni-card title="" extra="" style="width: 70%; margin: 0.625rem auto;">
-					<view class="uni-flex uni-row">
-						<img class="currentImg2" src="../../../static/Vector14.png" />
-
-						<view class="uni-flex uni-column">
-
-							<view class="curId uni-flex uni-row">
-								<view class="flex-item ">功能性</view>
-								<view class="flex-item idvalue">103</view>
-							</view>
-
-							<view class="curId uni-flex uni-row">
-								<view class="flex-item ">美观性</view>
-								<view class="flex-item idvalue">351</view>
-							</view>
-							<view class="curId uni-flex uni-row">
-								<view class="flex-item ">舒适性</view>
-								<view class="idvalue">101</view>
-							</view>
-						</view>
-
-					</view>
-
-				</uni-card>
-
-				<uni-card title="" extra="" style="width: 70%; margin: 0.225rem auto;">
-					<view class="uni-flex uni-row">
-						<img class="currentImg2" src="../../../static/Vector14.png" />
-
-						<view class="uni-flex uni-column">
-
-							<view class="curId uni-flex uni-row">
-								<view class="flex-item ">预计收益</view>
-								<view class="flex-item idvalue2">10000</view>
-							</view>
-
-						</view>
-
-					</view>
-
-				</uni-card>
-
-				<img @tap="getDay()" class="gp4" src="../../../static/Group4.png" />
-
-				<view class="bs">已同步1000步</view>
-
+			<view class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
+				<img class="flex-item" src="../../../static/heard.png" style="width:3.125rem;" />
+				<img class="currentImg" src="../../../static/Ellipse38.png" />
+				<view class="currentbs">在线300步</view>
+				<img class="userName" src="../../../static/Group3.png" />
 			</view>
+
+			<view class="person">
+				<img class="gp11 gp12" src="../../../static/Group11.png" />
+				<img class="gp12" src="../../../static/Group12070.png" />
+				<img class="gp12" src="../../../static/Group12071.png" />
+			</view>
+
+			<img class="gp5" @tap="inputDialogToggle()" src="../../../static/Group5-1.png" />
+
+			<uni-card title="" extra="" style="width: 70%; margin: 0.625rem auto;">
+				<view class="uni-flex uni-row">
+					<img class="currentImg2" src="../../../static/Vector14.png" />
+
+					<view class="uni-flex uni-column">
+
+						<view class="curId uni-flex uni-row">
+							<view class="flex-item ">功能性</view>
+							<view class="flex-item idvalue">103</view>
+						</view>
+
+						<view class="curId uni-flex uni-row">
+							<view class="flex-item ">美观性</view>
+							<view class="flex-item idvalue">351</view>
+						</view>
+						<view class="curId uni-flex uni-row">
+							<view class="flex-item ">舒适性</view>
+							<view class="idvalue">101</view>
+						</view>
+					</view>
+
+				</view>
+
+			</uni-card>
+
+			<uni-card title="" extra="" style="width: 70%; margin: 0.225rem auto;">
+				<view class="uni-flex uni-row">
+					<img class="currentImg2" src="../../../static/Vector14.png" />
+
+					<view class="uni-flex uni-column">
+
+						<view class="curId uni-flex uni-row">
+							<view class="flex-item ">预计收益</view>
+							<view class="flex-item idvalue2">10000</view>
+						</view>
+
+					</view>
+
+				</view>
+
+			</uni-card>
+
+			<img @tap="getDay()" class="gp4" src="../../../static/Group4.png" />
+
+			<view class="bs">已同步1000步</view>
+
+		</view>
 
 		<!-- 赛道弹框 -->
 		<view>
@@ -96,6 +96,17 @@
 </template>
 
 <script>
+	import {
+		ethers,
+		BigNumber
+	} from 'ethers'
+	import {
+		refStoreAddress,
+		refAbi
+	} from '../../../contract/address.js'
+	import {
+		useContract
+	} from '../../../contract/useContract.js'
 	export default {
 		data() {
 			return {
@@ -104,20 +115,32 @@
 				scrrenHeight: 10,
 				value: "",
 				title: 'Hello',
-				layerAddress:'',
-				rpcaddr:'',
+				layerAddress: '',
+				rpcaddr: '',
 				myAccount: '',
-				layerAbi:'',
+				layerAbi: '',
+				contract: null,
+				refer: '0x0000000000000000000000000000000000000000'
 			}
 		},
 		onLoad() {
-        this.rpcaddr = getApp().globalData.rpcaddr;
-		 this.layerAddress = getApp().globalData.layerAddress;
-		  this.layerAbi = getApp().globalData.layerAbi;
+			//      this.rpcaddr = getApp().globalData.rpcaddr;
+			// this.layerAddress = getApp().globalData.layerAddress;
+			//  this.layerAbi = getApp().globalData.layerAbi;
 		},
 		mounted() {
 			this.scrrenHeight = uni.getSystemInfoSync().windowHeight;
 			// this.$refs.isopen.open();
+			try {
+				this.getMetamskConnect().then(res => {
+					this.getReferrer(this.myAccount[0])
+					console.log(this.myAccount[0], this.refer)
+				})
+				if (this.refer === '0x0000000000000000000000000000000000000000') this.$refs.isopen.open();
+			} catch (e) {
+				console.error(e);
+			}
+
 		},
 		beforeCreate() {
 
@@ -131,65 +154,84 @@
 					title: '3秒后会关闭'
 				})
 
-				setTimeout(() => {
-					uni.hideLoading()
-					console.log(val)
-					this.value = val
-					// 关闭窗口后，恢复默认内容
-					this.$refs.inputDialog.close()
-				}, 3000)
+
+				this.$refs.inputDialog.close()
 			},
-			dialogInputConfirm2(val) {
-				uni.showLoading({
-					title: '3秒后会关闭'
-				})
-			
-				setTimeout(() => {
-					uni.hideLoading()
-					console.log(val)
-					this.value = val
-					// 关闭窗口后，恢复默认内容
-					this.$refs.isopen.close()
-				}, 3000)
+			async dialogInputConfirm2(val) {
+				console.log(val)
+				try {
+					let tx = await this.contract.addReferrerWithCheck(val)
+					console.log(tx.hash)
+					uni.showLoading({
+						title: '请稍等...'
+					})
+					tx.wait().then(res => {
+						uni.hideLoading()
+					})
+				} catch (e) {
+					console.error(e)
+				}
+
+				// setTimeout(() => {
+				// 	uni.hideLoading()
+				// 	console.log(val)
+				// 	this.value = val
+				// 	// 关闭窗口后，恢复默认内容
+				// 	this.$refs.isopen.close()
+				// }, 3000)
 			},
-			get() {
-				if (window.ethereum) {
-					window.ethereum.enable().then((res) => {
-						alert("当前钱包地址:" + res[0]);
-						this.myAccount = res[0];
+			// get() {
+			// 	if (window.ethereum) {
+			// 		window.ethereum.enable().then((res) => {
+			// 			alert("当前钱包地址:" + res[0]);
+			// 			this.myAccount = res[0];
+			// 		});
+			// 	} else {
+			// 		alert("请安装MetaMask钱包");
+			// 	}
+			// },
+			isMetaMask() {
+				const {
+					ethereum
+				} = window;
+				return Boolean(ethereum && ethereum.isMetaMask);
+			},
+			async getChainId() {
+				const {
+					ethereum
+				} = window;
+				try {
+					const chainId = await ethereum.request({
+						method: "eth_chainId"
 					});
-				} else {
-					alert("请安装MetaMask钱包");
+				} catch (err) {
+					console.error(err);
 				}
 			},
-
-			async getDay() {
-				const _this = this
-				window.web3 = new this.Web3(window.ethereum)
-
-				let contract = new web3.eth.Contract(_this.layerAbi, _this.layerAddress);
-				let gasPrice = await web3.eth.getGasPrice() * 2;
-				contract.methods.transfer("1000").send({
-						from: "0xb9eaE99d3E3a1fD3bBf1De4c635114063F6e3573",
-						gas: 1200000,
-						gasPrice: gasPrice
-					},
-					function(error, transactionHash) {
-						if (!error) {
-
-						} else {
-							console.log(error);
-						}
-					});
-
-				// var Referrer = await contract.methods.referrer("0xb9eaE99d3E3a1fD3bBf1De4c635114063F6e3573").call();
-
-				// let contract = new window.web3.eth.Contract(_this.layerAbi, _this.layerAddress);
-				// var Referrer =  contract.methods.getDay().call();
-
-
-
-			}
+			async getMetamskConnect() {
+				if (!this.isMetaMask()) {
+					openUrl("https://metamask.io/", "install metamsk");
+				}
+				if (window.ethereum) {
+					try {
+						const provider = new ethers.providers.Web3Provider(window.ethereum);
+						this.myAccount = await provider.send("eth_requestAccounts", []);
+						const signer = provider.getSigner();
+						var balance = await signer.getBalance();
+						let readercontract = new ethers.Contract(refStoreAddress, refAbi, provider);
+						this.contract = readercontract.connect(signer)
+						// console.log("accc",this.myAccount[0])
+					} catch (error) {
+						console.error(error);
+					}
+				} else {
+					alert("请安装MetaMask钱包");
+					console.warn("Please authorize to access tour account");
+				}
+			},
+			async getReferrer(address) {
+				this.refer = await this.contract.referrer(address);
+			},
 
 
 		}
@@ -235,7 +277,8 @@
 		font-size: 36rpx;
 		color: #8f8f94;
 	}
-/* 修改 */
+
+	/* 修改 */
 	.currentbs {
 		display: flex;
 
@@ -284,7 +327,8 @@
 	.gp12 {
 		margin-left: 0.625rem;
 	}
-/* //修改 */
+
+	/* //修改 */
 	.gp5 {
 		width: 50%;
 		margin: 0 auto;
@@ -293,7 +337,7 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		
+
 	}
 
 	.curId {
@@ -317,12 +361,12 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		
+
 	}
 
 	.bs {
 		width: 100%;
-display: inline-block;
+		display: inline-block;
 		text-decoration: underline;
 		flex-direction: column;
 		justify-content: center;
@@ -333,7 +377,7 @@ display: inline-block;
 		height: 69.44rpx;
 		margin-bottom: 3rem;
 		text-align: center;
-		
+
 	}
 
 	.dialogimg {
