@@ -7,7 +7,7 @@
 				<img class="flex-item" src="../../../static/heard.png" style="width:3.125rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
 				<view class="currentbs">在线300步</view>
-				<img class="userName" src="../../../static/Group3.png" />
+				<img class="userName" src="../../../static/Group3.png"></img>
 			</view>
 
 			<view class="person">
@@ -102,10 +102,16 @@
 	} from 'ethers'
 	import {
 		refStoreAddress,
-		refAbi
+		refAbi,
+		RunbitCollectionAddress,
+		RunbitCollectionAbi,
+		RBAddress,
+		RBAbi
 	} from '../../../contract/address.js'
 	import {
-		useContract
+		useContract,
+		getApproveState,
+		contractApprove
 	} from '../../../contract/useContract.js'
 	export default {
 		data() {
@@ -119,8 +125,8 @@
 				rpcaddr: '',
 				myAccount: '',
 				layerAbi: '',
-				contract: null,
-				refer: '0x0000000000000000000000000000000000000000'
+				collectContract: null,
+				approveState: true
 			}
 		},
 		onLoad() {
@@ -132,11 +138,22 @@
 			this.scrrenHeight = uni.getSystemInfoSync().windowHeight;
 			// this.$refs.isopen.open();
 			try {
-				this.getMetamskConnect().then(res => {
-					this.getReferrer(this.myAccount[0])
-					console.log(this.myAccount[0], this.refer)
-				})
-				if (this.refer === '0x0000000000000000000000000000000000000000') this.$refs.isopen.open();
+
+				const provider = new ethers.providers.Web3Provider(window.ethereum);
+				provider.send("eth_requestAccounts", []).then(accounts => {
+					this.myAccount = accounts[0]
+					//判断是否需要填激活码		 
+					useContract(refStoreAddress, refAbi).then(refContract => {
+						refContract.referrer(this.myAccount).then(refer => {
+							if (refer === '0x0000000000000000000000000000000000000000')
+								this.$refs.isopen.open();
+						})
+					})						 
+
+				});
+
+
+
 			} catch (e) {
 				console.error(e);
 			}
@@ -146,6 +163,10 @@
 
 		},
 		methods: {
+
+			async approve() {
+
+			},
 			inputDialogToggle() {
 				this.$refs.inputDialog.open()
 			},
@@ -229,10 +250,8 @@
 					console.warn("Please authorize to access tour account");
 				}
 			},
-			async getReferrer(address) {
-				this.refer = await this.contract.referrer(address);
-			},
 
+//
 
 		}
 	}

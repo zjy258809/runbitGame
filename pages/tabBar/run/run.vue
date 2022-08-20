@@ -171,6 +171,23 @@
 </template>
 
 <script>
+	import {
+		ethers,
+		BigNumber
+	} from 'ethers'
+	import {
+		refStoreAddress,
+		refAbi,
+		RunbitCollectionAddress,
+		RunbitCollectionAbi,
+		RBAddress,
+		RBAbi
+	} from '../../../contract/address.js'
+	import {
+		useContract,
+		getApproveState,
+		contractApprove
+	} from '../../../contract/useContract.js'
 	export default {
 		data() {
 			return {
@@ -205,7 +222,42 @@
 				items: ['选项卡1', '选项卡2'],
 				styleType: 'button',
 				activeColor: '#FFEB34',
+				contract:null
 			}
+		},
+		mounted(){
+			try {
+
+				const provider = new ethers.providers.Web3Provider(window.ethereum);
+				provider.send("eth_requestAccounts", []).then(accounts => {
+					this.myAccount = accounts[0]
+
+					//加载属性卡和装备库
+					useContract(RunbitCollectionAddress, RunbitCollectionAbi).then(collectContract => {
+						this.collectContract = collectContract
+						this.getCards(collectContract)
+						this.getEquips(collectContract)
+					});
+						//查询商店合约授权情况，授权后才能购买和兑换
+					useContract(RBAddress,RBAbi).then(RBContract=>{
+						RBContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
+							if (data.eq(BigNumber.from(0))) {
+								this.approveState = false
+							} else {
+								this.approveState = true
+							}
+						})
+					})
+						 
+
+				});
+
+
+
+			} catch (e) {
+				console.error(e);
+			}
+
 		},
 		methods: {
 			actionSheetTap() {
@@ -263,7 +315,152 @@
 			change()
 			{
 				
+			},
+						async getCards(contract) {
+				//获取属性卡数量numOfCard和属性卡合集cardCollect
+				//cardLoading=true获取数据中
+				var numOfCard, cardCollect = [],
+					cardLoading = true;
+
+				contract.getCardCollectCount().then(num => {
+					for (let i = 0; num && i < num; i++) {
+						contract.getCardCollection(i).then(card => {
+							cardCollect[i] = card
+							cardLoading = false
+						})
+					}
+
+					console.log("card", cardCollect)
+				});
+			},
+						//获取装备集合
+			async getEquips(contract) {
+				//获取装备数量numOfEquip和装备合集equipCollect
+				var numOfEquip, equipCollect = [],
+					equipLoading = true;
+				contract.getEquipCollectCount().then(num => {
+					for (let i = 0; num && i < num; i++) {
+						contract.getEquipCollection(i).then(equip => {
+							equipCollect[i] = equip
+							equipLoading = false;
+						})
+					}
+					console.log("equip", equipCollect)
+				});
+			},
+			//购买卡片
+			async buyCard(contract, cardId) {
+				try {
+					//判断是否授权
+					if (!this.approveState) {
+						//未授权，弹窗提示授权？
+						return
+						//用户点击确认授权后，调用授权代码，如下						
+						await contractApprove(RunbitCollectionAddress)
+						this.approveState = true
+						console.log("approveState2", this.approveState)
+						
+
+					}
+					//已授权
+					let tx = await contract.buyCard(cardId)
+					//交易hash
+					console.log("buycard", tx.hash)
+					tx.wait().then(res => {
+						//购买成功的一些操作，如关闭loading
+					})
+
+				} catch (e) {
+					//出错的一些操作
+
+					console.error(e)
+				}
+			},
+			//购买装备
+			async buyEquip(contract, equipId) {
+				try {
+					//判断是否授权
+					if (!this.approveState) {
+						//未授权，弹窗提示授权？
+						return
+						//用户点击确认授权后，调用授权代码，如下						
+						await contractApprove(RunbitCollectionAddress)
+						this.approveState = true
+						console.log("approveState2", this.approveState)
+						
+
+					}
+					//已授权
+					let tx = await contract.buyEquip(equipId)
+					//交易hash
+					console.log(tx.hash)
+					tx.wait().then(res => {
+						//购买成功的一些操作，如关闭loading
+					})
+
+				} catch (e) {
+					//出错的一些操作
+
+					console.error(e)
+				}
+			},
+			//兑换属性卡
+			async redeemCard(contract, cardId) {
+				try {
+					//判断是否授权
+					if (!this.approveState) {
+						//未授权，弹窗提示授权？
+						return
+						//用户点击确认授权后，调用授权代码，如下						
+						await contractApprove(RunbitCollectionAddress)
+						this.approveState = true
+						console.log("approveState2", this.approveState)
+						
+
+					}
+					//已授权
+					let tx = await contract.redeemCard(cardId)
+					//交易hash
+					console.log(tx.hash)
+					tx.wait().then(res => {
+						//兑换成功的一些操作，如关闭loading
+					})
+
+				} catch (e) {
+					//出错的一些操作
+
+					console.error(e)
+				}
+			},
+			//兑换装备
+			async redeemEquip(contract, equipId) {
+				try {
+					//判断是否授权
+					if (!this.approveState) {
+						//未授权，弹窗提示授权？
+						return
+						//用户点击确认授权后，调用授权代码，如下						
+						await contractApprove(RunbitCollectionAddress)
+						this.approveState = true
+						console.log("approveState2", this.approveState)
+						
+
+					}
+					//已授权
+					let tx = await contract.redeemEquip(equipId)
+					//交易hash
+					console.log(tx.hash)
+					tx.wait().then(res => {
+						//兑换成功的一些操作，如关闭loading
+					})
+
+				} catch (e) {
+					//出错的一些操作
+
+					console.error(e)
+				}
 			}
+
 		}
 	}
 </script>
