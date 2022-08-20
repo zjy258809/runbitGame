@@ -3,9 +3,9 @@ import {
 	BigNumber
 } from 'ethers'
 import {
-	refStoreAddress,
-	refAbi
-} from '@/contract/address.js'
+	RBAddress,
+	RBAbi
+} from '../contract/address.js'
 
 function isMetaMask() {
 	const {
@@ -13,8 +13,36 @@ function isMetaMask() {
 	} = window;
 	return Boolean(ethereum && ethereum.isMetaMask);
 }
-export async function useContract() {
-	var readContract,writeContract,accounts,balance,chainid,provider;
+//查询合约授权情况
+const tokenContract = useContract(RBAddress, RBAbi)
+export async function getApproveState(account, spender) {
+	var state
+	try {
+		tokenContract.then(contract => {
+			contract.allowance(account, spender)
+		})
+	} catch (e) {
+		console.error(e)
+		//失败
+	}
+}
+export async function contractApprove(spender) {
+	try {
+		tokenContract.then(contract => {
+			let tx = contract.approve(spender, '100000000000000000000000000000')
+			//设置授权时的loading
+			console.log(tx.hash)
+		})
+
+		await tx.wait()
+
+	} catch (e) {
+
+	}
+
+}
+export async function useContract(address, abi) {
+	var readContract, writeContract, accounts, balance, chainid, provider;
 	if (!isMetaMask()) {
 		openUrl("https://metamask.io/", "install metamsk");
 	}
@@ -24,7 +52,7 @@ export async function useContract() {
 			const signer = provider.getSigner();
 			let accounts = await provider.send("eth_requestAccounts", []);
 			var balance = await signer.getBalance();
-			readContract = new ethers.Contract(refStoreAddress, refAbi, provider);
+			readContract = new ethers.Contract(address, abi, provider);
 			writeContract = readContract.connect(signer);
 		} catch (error) {
 			console.error(error);
@@ -34,4 +62,3 @@ export async function useContract() {
 	}
 	return writeContract;
 }
-
