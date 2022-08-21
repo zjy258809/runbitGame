@@ -190,6 +190,7 @@
 		getApproveState,
 		contractApprove
 	} from '../../../contract/useContract.js'
+	import {big2num} from '../../../contract/ultis.js'
 	export default {
 		data() {
 			return {
@@ -250,14 +251,14 @@
 					useContract(RBAddress, RBAbi).then(RBContract => {
 						//获取rb余额
 						RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
-							this.balanceOfRB = balanceOfRB
+							this.balanceOfRB = big2num(this.balanceOfRB)
 						})
 						//获取RB对商品合约的授权情况
 						RBContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
 							if (data.eq(BigNumber.from(0))) {
-								this.approveState = false
+								this.approveRB = false
 							} else {
-								this.approveState = true
+								this.approveRB = true
 							}
 						})
 					});
@@ -265,18 +266,35 @@
 					useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
 						this.RBCTContract = RBCTContract
 						RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
-							this.balanceofRBCT = balanceofRBCT
-							console.log("balanceofRBCT", balanceofRBCT)
+							this.balanceofRBCT = big2num(balanceofRBCT)
+							console.log("balanceofRBCT", this.balanceofRBCT)
+						})
+						//获取RBCT属性卡碎片对商品合约的授权情况
+						RBCTContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
+							if (data.eq(BigNumber.from(0))) {
+								this.approveRBCT = false
+							} else {
+								this.approveRBCT = true
+							}
+							console.log("approveRBCT",this.approveRBCT)
 						})
 					});
 					//获取装备碎片
 					useContract(RBETAddress, RBETAbi).then(RBETContract => {
 						this.RBETContract = RBETContract
 						RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
-							this.balanceofRBET = balanceofRBET
-							console.log("balanceofRBET", balanceofRBET)
+							this.balanceofRBET = big2num(balanceofRBET)
+							console.log("balanceofRBET", this.balanceofRBET)
 						})
-
+						//获取RBET装备碎片对商品合约的授权情况
+						RBETContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
+							if (data.eq(BigNumber.from(0))) {
+								this.approveRBET = false
+							} else {
+								this.approveRBET = true
+							}
+							console.log("approveRBET",this.approveRBET)
+						})
 					});
 
 
@@ -350,8 +368,14 @@
 					cardLoading = true;
 
 				contract.getCardCollectCount().then(num => {
+					var card
 					for (let i = 0; num && i < num; i++) {
-						contract.getCardCollection(i).then(card => {
+						contract.getCardCollection(i).then(cardResult => {
+						card.card=cardResult
+						card.collection_id = i
+						// todo通过接口获取card的图片
+						// cardImg = getImage(0,i)
+						// card.img = cardImg
 							cardCollect[i] = card
 							cardLoading = false
 						})
@@ -367,7 +391,13 @@
 					equipLoading = true;
 				contract.getEquipCollectCount().then(num => {
 					for (let i = 0; num && i < num; i++) {
-						contract.getEquipCollection(i).then(equip => {
+						var equip ={}
+						contract.getEquipCollection(i).then(equipResult => {
+						equip.equip=equipResult
+						equip.collection_id = i
+						// todo通过接口获取equip的图片
+						// equipImg = getImage(0,i)
+						// equip.img = equipImg
 							equipCollect[i] = equip
 							equipLoading = false;
 						})
@@ -376,53 +406,57 @@
 				});
 			},
 			//购买卡片
-			async buyCard(contract, cardId) {
+			async buyCard(contract, collection_id) {
 				try {
-					//判断是否授权
-					if (!this.approveState) {
+					//todo
+					//判断余额是否不足,弹窗。
+					// if{this.balanceOfRB<this.cardCollect[cardId].price1}
+					//判断是否授权RB 
+					if (!this.approveRB) {
 						//未授权，弹窗提示授权？
+						//to-do
 						return
-						//用户点击确认授权后，调用授权代码，如下						
+						//todo用户点击确认授权后，调用授权代码，如下						
 						await contractApprove(RunbitCollectionAddress)
-						this.approveState = true
-						console.log("approveState2", this.approveState)
+						this.approveRB = true
+						console.log("approveState2", this.approveRB)
 
 
 					}
-					//已授权
-					let tx = await contract.buyCard(cardId)
+					//已授权RB
+					let tx = await contract.buyCard(collection_id)
 					//交易hash
 					console.log("buycard", tx.hash)
 					tx.wait().then(res => {
-						//购买成功的一些操作，如关闭loading
+						//todo购买成功的一些操作，如关闭loading
 					})
 
 				} catch (e) {
-					//出错的一些操作
+					//todo出错的一些操作
 
 					console.error(e)
 				}
 			},
 			//购买装备
-			async buyEquip(contract, equipId) {
+			async buyEquip(contract, collection_id) {
 				try {
-					//判断是否授权
-					if (!this.approveState) {
-						//未授权，弹窗提示授权？
+					//判断是否授权RB和装备碎片的消费
+					if (!this.approveRB) {
+						//todo未授权，弹窗提示授权？
 						return
-						//用户点击确认授权后，调用授权代码，如下						
-						await contractApprove(RunbitCollectionAddress)
-						this.approveState = true
-						console.log("approveState2", this.approveState)
+						//todo用户点击确认授权后，调用授权代码，如下						
+						await contractApprove(this.RBContract,RunbitCollectionAddress)
+						this.approveRB = true
+						console.log("approveRB", this.approveRB)
 
 
-					}
+					}					
 					//已授权
-					let tx = await contract.buyEquip(equipId)
+					let tx = await contract.buyEquip(collection_id)
 					//交易hash
 					console.log(tx.hash)
 					tx.wait().then(res => {
-						//购买成功的一些操作，如关闭loading
+						//todo购买成功的一些操作，如关闭loading
 					})
 
 				} catch (e) {
@@ -434,16 +468,25 @@
 			//兑换属性卡
 			async redeemCard(contract, cardId) {
 				try {
-					//判断是否授权
-					if (!this.approveState) {
+					//先判断是否授权花费碎片
+					if (!this.approveRB) {
 						//未授权，弹窗提示授权？
 						return
 						//用户点击确认授权后，调用授权代码，如下						
 						await contractApprove(RunbitCollectionAddress)
-						this.approveState = true
-						console.log("approveState2", this.approveState)
+						this.approveRB = true
+						console.log("approveRB", this.approveRB)
 
 
+					}
+					//再判断是否授权属性卡碎片的消费
+					if (!this.approveRBCT) {
+						//todo未授权，弹窗提示授权？
+						return
+						//todo用户点击确认授权后，调用授权代码，如下						
+						await contractApprove(this.RBCTContract,RunbitCollectionAddress)
+						this.approveRBCT = true
+						console.log("approveRBCT", this.approveRBCT)
 					}
 					//已授权
 					let tx = await contract.redeemCard(cardId)
@@ -463,15 +506,24 @@
 			async redeemEquip(contract, equipId) {
 				try {
 					//判断是否授权
-					if (!this.approveState) {
+					if (!this.approveRB) {
 						//未授权，弹窗提示授权？
 						return
 						//用户点击确认授权后，调用授权代码，如下						
 						await contractApprove(RunbitCollectionAddress)
-						this.approveState = true
-						console.log("approveState2", this.approveState)
+						this.approveRB = true
+						console.log("approveRB", this.approveRB)
 
 
+					}
+					//再判断是否授权属性卡碎片的消费
+					if (!this.approveRBET) {
+						//todo未授权，弹窗提示授权？
+						return
+						//todo用户点击确认授权后，调用授权代码，如下						
+						await contractApprove(this.RBETContract,RunbitCollectionAddress)
+						this.approveRBET = true
+						console.log("approveRBET", this.approveRBET)
 					}
 					//已授权
 					let tx = await contract.redeemEquip(equipId)
