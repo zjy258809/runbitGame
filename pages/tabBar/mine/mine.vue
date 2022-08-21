@@ -239,6 +239,26 @@
 </template>
 
 <script>
+	import {
+		ethers,
+		BigNumber
+	} from 'ethers'
+	import {
+		refStoreAddress,
+		refAbi,
+		RunbitCollectionAddress,
+		RunbitCollectionAbi,
+		RBAddress,
+		RunbitAddress,
+		RunbitAbi,
+		RBAbi,
+		cardAddress,cardAbi,equipAddress,equipAbi
+	} from '../../../contract/address.js'
+	import {
+		useContract,
+	} from '../../../contract/useContract.js'
+	import {bindCard,bindEquip,unbindEquip,unbindCard,getBindEquip,getBindEquips,getBindCards} from '../../../contract/useRunbit.js'
+	import{getMyCards,getMyEquips} from  '../../../contract/useEquipCard.js'
 	export default {
 		data() {
 			return {
@@ -297,9 +317,63 @@
 				styleType: 'button',
 				activeColor: '#FFEB34',
 			}
+		},		mounted() {
+			try {
+
+				const provider = new ethers.providers.Web3Provider(window.ethereum);
+				provider.send("eth_requestAccounts", []).then(accounts => {
+					this.myAccount = accounts[0]
+
+
+					//加载我的属性卡和装备库 
+					useContract(equipAddress, equipAbi).then(contract => {
+						this.equipContract = contract
+						getMyEquips(this.myAccount,contract).then(myEquips=>{							
+							console.log("myEquips--------",myEquips)
+						})
+					});
+					useContract(cardAddress, cardAbi).then(contract => {
+						this.cardContract = contract
+						getMyCards(this.myAccount,contract).then(myCards=>{							
+							console.log("myCards--------",myCards)
+
+						})
+					});
+					
+						
+					useContract(RunbitAddress,RunbitAbi).then(contract=>{
+						this.runContract = contract
+						// try{
+						// getBindCards(contract,20007).then(equips=>{
+						// 	//查询结果data
+						// 	console.log("bindEquips--------",equips)
+						// })
+					
+						// }catch (e) {
+						// 		//出错的一些操作
+
+						// 	console.error(e)
+						// }
+						
+						// bindCard(contract,20007,20005,0).then(tx=>
+						// {
+						// 	console.log("tx------------",tx.hash)
+						// })
+						// bindEquip(contract,20007)
+						// unbindEquip(contract,0)
+						// unbindCard(contract,20007,0)
+					})
+				});
+
+
+
+			} catch (e) {
+				console.error(e);
+			}
+
 		},
 		methods: {
-			
+
 			synthetic()
 			{
 				this.$refs.inputDialog.open()
