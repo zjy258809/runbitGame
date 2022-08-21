@@ -14,8 +14,7 @@ function isMetaMask() {
 	return Boolean(ethereum && ethereum.isMetaMask);
 }
 //查询合约授权情况
-const tokenContract = useContract(RBAddress, RBAbi)
-export async function getApproveState(account, spender) {
+export async function getApproveState(tokenContract,account, spender) {
 	var state
 	try {
 		tokenContract.then(contract => {
@@ -26,7 +25,7 @@ export async function getApproveState(account, spender) {
 		//失败
 	}
 }
-export async function contractApprove(spender) {
+export async function contractApprove(tokenContract,spender) {
 	try {
 		tokenContract.then(contract => {
 			let tx = contract.approve(spender, '100000000000000000000000000000')
