@@ -15,29 +15,17 @@ function isMetaMask() {
 }
 //查询合约授权情况
 export async function getApproveState(tokenContract,account, spender) {
-	var state
-	try {
-		tokenContract.then(contract => {
-			contract.allowance(account, spender)
-		})
-	} catch (e) {
-		console.error(e)
-		//失败
-	}
+
+return tokenContract.allowance(account, spender)
+
+
 }
 export async function contractApprove(tokenContract,spender) {
-	try {
-		tokenContract.then(contract => {
-			let tx = contract.approve(spender, '100000000000000000000000000000')
+
+			let tx = tokenContract.approve(spender, '100000000000000000000000000000')
 			//设置授权时的loading
-			console.log(tx.hash)
-		})
+			return tx
 
-		await tx.wait()
-
-	} catch (e) {
-
-	}
 
 }
 export async function useContract(address, abi) {

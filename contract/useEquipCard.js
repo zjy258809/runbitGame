@@ -9,11 +9,11 @@ export async function getEquip(contract,equipId){
     var equip = {}
     return contract.tokenMeta(equipId).then(e=>{
         equip.equip = e
-        equip.id = equipId        
-        // return contract.tokenURI(0).then(uri=>{
-        //     equip.img=uri
+        equip.id = equipId   
+        return contract.tokenURI(equipId).then(uri=>{
+            equip.img=uri
             return equip
-        // })
+        })
     })
 
 }
@@ -22,10 +22,10 @@ export async function getCard(contract,cardId){
     return contract.tokenMeta(cardId).then(e=>{
         card.card = e
         card.id = cardId
-        // return contract.tokenURI(1).then(uri=>{
-        //     card.img=uri
+        return contract.tokenURI(cardId).then(uri=>{
+            card.img=uri
             return card
-        // })
+        })
     })
 
 }
@@ -59,5 +59,18 @@ export async function  getMyEquips(account,contract) {
         }
         return equipCollect
     });
+}
+//获取授权情况 tokenContract对operate授权的情况
+export async function getNFTApprove(tokenContract,owner,operator){
+    return tokenContract.isApprovedForAll(owner,operator)
+}
+//授权 tokenContract对operate授权
+export async function approveNFT(tokenContract,operate){
+    return tokenContract.setApprovalForAll(operate,true)
+
+}
+//转让 
+export async function transferNFT(ntfToken,from,to,nftId){
+return ntfToken["safeTransferFrom(address,address,uint256)"](from,to,nftId)
 }
 
