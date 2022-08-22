@@ -4,21 +4,29 @@
 		<view class="bg">
 
 			<view class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
-				<img class="flex-item" src="../../../static/heard.png" style="width:3.125rem;" />
+				<img class="flex-item" src="../../../static/heard.png" style="width:3rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
-				<view class="currentbs">在线300步</view>
-				<img class="userName" src="../../../static/Group3.png"></img>
+				<view class="currentbs">3000步</view>
+				<view class="userName">
+					<img class="input_edi" src="../../../static/input_edi.png"></img>
+					<img class="input_logo" src="../../../static/inputlogo.png" ></img>
+					<view class="input_txt">1100****1210</view>
+				</view>
+				
 			</view>
 
 			<view class="person">
-				<img class="gp11 gp12" src="../../../static/Group11.png" />
-				<img class="gp12" src="../../../static/Group12070.png" />
-				<img class="gp12" src="../../../static/Group12071.png" />
+				<img class="user_person" src="../../../static/group5.png"></img>
+				<img  @tap="inputDialogToggle()" class="userlogo" src="../../../static/group-5-2.png"></img>
+				<view class="user_person_item uni-flex uni-column">
+				<img class="gp11 " src="../../../static/chooseImg.png" />
+				<img class="gp12" src="../../../static/chooseImg.png" />
+				<img class="gp12" src="../../../static/chooseImg.png" />
+				</view>
 			</view>
 
-			<img class="gp5" @tap="inputDialogToggle()" src="../../../static/Group5-1.png" />
 
-			<uni-card title="" extra="" style="width: 70%; margin: 0.625rem auto;">
+			<uni-card title="" extra="" style="width: 70%; margin: 1rem auto;">
 				<view class="uni-flex uni-row">
 					<img class="currentImg2" src="../../../static/Vector14.png" />
 
@@ -45,7 +53,7 @@
 
 			<uni-card title="" extra="" style="width: 70%; margin: 0.225rem auto;">
 				<view class="uni-flex uni-row">
-					<img class="currentImg2" src="../../../static/Vector14.png" />
+					<img class="currentImg2" src="../../../static/Frame 11972.png" />
 
 					<view class="uni-flex uni-column">
 
@@ -82,6 +90,24 @@
 				</uni-popup-dialog>
 
 			</uni-popup>
+		</view>
+		
+		<!-- 装备选择 -->
+		<view>
+			<uni-popup ref="inputDialog4" type="dialog">
+		
+		
+				<uni-popup-dialog ref="inputClose" :mask-click="true" cancelText="取消" confirmText="添加" title="裝備選擇"
+					value="對話框預置提示內容!" placeholder="請輸入內容" @confirm="dialogInputConfirm">
+					<view>
+						
+						<oct-goods2 :lists="goodsArr" price-type="$" @onGoods="onGoods" />
+		
+					</view>
+				</uni-popup-dialog>
+		
+			</uni-popup>
+		
 		</view>
 
 		<!-- 激活码弹框 -->
@@ -258,6 +284,37 @@
 </script>
 
 <style>
+	.userlogo{
+		position: absolute;
+		right: 0rpx;
+		top: 300.88rpx;
+		width: 180.83rpx;
+	}
+	.input_edi{
+		position: absolute;
+		width: 300.44rpx;
+	}
+	.input_logo{
+		margin-left: 0.2rem;
+		position: absolute;
+		width: 70.44rpx;
+	}
+	.input_txt{
+		color: #000000;
+		position: absolute;
+		margin-left: 2.5rem;
+		text-align: center;
+		height: 70.72rpx;
+		line-height: 70.72rpx;
+	}
+	.user_person{
+		position: absolute;
+		height: 80%;
+	}
+	.user_person_item{
+		position: absolute;
+		height: 100%;
+	}
 	.content {
 		display: flex;
 		flex-direction: column;
@@ -327,24 +384,25 @@
 		display: block;
 		margin: auto 0;
 		margin-left: 1.1rem;
-		width: 9rem;
+		width: 10rem;
 		height: 2.25rem;
 	}
 
 	.person {
 		width: 30%;
 		height: 21rem;
-		background-image: url(../../../static/Group5.png);
-		background-repeat: no-repeat, repeat;
 		margin: 0 auto;
 	}
 
 	.gp11 {
-		margin-top: 3.4rem;
+		margin-top: 5.2rem;
+		margin-left: 0.625rem;
+		width: 200.88rpx;
 	}
 
 	.gp12 {
-		margin-left: 0.625rem;
+		width: 200.88rpx;
+		margin-left: 0.825rem;
 	}
 
 	/* //修改 */
