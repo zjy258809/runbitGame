@@ -9,19 +9,19 @@
 				<view class="currentbs">3000步</view>
 				<view class="userName">
 					<img class="input_edi" src="../../../static/input_edi.png"></img>
-					<img class="input_logo" src="../../../static/inputlogo.png" ></img>
+					<img class="input_logo" src="../../../static/inputlogo.png"></img>
 					<view class="input_txt">1100****1210</view>
 				</view>
-				
+
 			</view>
 
 			<view class="person">
 				<img class="user_person" src="../../../static/Group5.png"></img>
-				<img  @tap="inputDialogToggle()" class="userlogo" src="../../../static/group-5-2.png"></img>
+				<img @tap="inputDialogToggle()" class="userlogo" src="../../../static/group-5-2.png"></img>
 				<view class="user_person_item uni-flex uni-column">
-				<img class="gp11 " src="../../../static/chooseImg.png" />
-				<img class="gp12" src="../../../static/chooseImg.png" />
-				<img class="gp12" src="../../../static/chooseImg.png" />
+					<img class="gp11 " src="../../../static/chooseImg.png" />
+					<img class="gp12" src="../../../static/chooseImg.png" />
+					<img class="gp12" src="../../../static/chooseImg.png" />
 				</view>
 			</view>
 
@@ -70,7 +70,7 @@
 
 			<img @tap="getDay()" class="gp4" src="../../../static/Group4.png" />
 
-			<view class="bs">已同步{{steps}}步</view>
+			<view class="bs">已同步{{ steps }}步</view>
 
 		</view>
 
@@ -83,9 +83,9 @@
 					@confirm="dialogInputConfirm">
 					<view>
 
-						<image class="dialogimg" src="../../../static/Group11595.png"></image>
-						<image class="dialogimg" src="../../../static/Group12072.png"></image>
-						<image class="dialogimg" src="../../../static/Group12073.png"></image>
+						<image class="dialogimg" src="../../../static/Group11595.png" @click="chooseTrack(0)"></image>
+						<image class="dialogimg" src="../../../static/Group12072.png" @click="chooseTrack(0)"></image>
+						<image class="dialogimg" src="../../../static/Group12073.png" @click="chooseTrack(0)"></image>
 					</view>
 				</uni-popup-dialog>
 
@@ -95,19 +95,19 @@
 		<!-- 装备选择 -->
 		<view>
 			<uni-popup ref="inputDialog4" type="dialog">
-		
-		
+
+
 				<uni-popup-dialog ref="inputClose" :mask-click="true" cancelText="取消" confirmText="添加" title="裝備選擇"
 					value="對話框預置提示內容!" placeholder="請輸入內容" @confirm="dialogInputConfirm">
 					<view>
-						
+
 						<oct-goods2 :lists="goodsArr" price-type="$" @onGoods="onGoods" />
-		
+
 					</view>
 				</uni-popup-dialog>
-		
+
 			</uni-popup>
-		
+
 		</view>
 
 		<!-- 激活码弹框 -->
@@ -141,6 +141,7 @@ import {
 	contractApprove
 } from '../../../contract/useContract.js'
 import { setTrack, getTrackId, getBindEquips, getBindCards } from '../../../contract/useRunbit.js'
+import { title } from 'process'
 export default {
 	data() {
 		return {
@@ -255,108 +256,174 @@ export default {
 				console.error(e)
 			}
 
-				// setTimeout(() => {
-				// 	uni.hideLoading()
-				// 	console.log(val)
-				// 	this.value = val
-				// 	// 关闭窗口后，恢复默认内容
-				// 	this.$refs.isopen.close()
-				// }, 3000)
-			},
-			// get() {
-			// 	if (window.ethereum) {
-			// 		window.ethereum.enable().then((res) => {
-			// 			alert("当前钱包地址:" + res[0]);
-			// 			this.myAccount = res[0];
-			// 		});
-			// 	} else {
-			// 		alert("请安装MetaMask钱包");
-			// 	}
-			// },
-			isMetaMask() {
-				const {
-					ethereum
-				} = window;
-				return Boolean(ethereum && ethereum.isMetaMask);
-			},
-			async getChainId() {
-				const {
-					ethereum
-				} = window;
+			// setTimeout(() => {
+			// 	uni.hideLoading()
+			// 	console.log(val)
+			// 	this.value = val
+			// 	// 关闭窗口后，恢复默认内容
+			// 	this.$refs.isopen.close()
+			// }, 3000)
+		},
+		// get() {
+		// 	if (window.ethereum) {
+		// 		window.ethereum.enable().then((res) => {
+		// 			alert("当前钱包地址:" + res[0]);
+		// 			this.myAccount = res[0];
+		// 		});
+		// 	} else {
+		// 		alert("请安装MetaMask钱包");
+		// 	}
+		// },
+		isMetaMask() {
+			const {
+				ethereum
+			} = window;
+			return Boolean(ethereum && ethereum.isMetaMask);
+		},
+		async getChainId() {
+			const {
+				ethereum
+			} = window;
+			try {
+				const chainId = await ethereum.request({
+					method: "eth_chainId"
+				});
+			} catch (err) {
+				console.error(err);
+			}
+		},
+		async getMetamskConnect() {
+			if (!this.isMetaMask()) {
+				openUrl("https://metamask.io/", "install metamsk");
+			}
+			if (window.ethereum) {
 				try {
-					const chainId = await ethereum.request({
-						method: "eth_chainId"
-					});
-				} catch (err) {
-					console.error(err);
+					const provider = new ethers.providers.Web3Provider(window.ethereum);
+					this.myAccount = await provider.send("eth_requestAccounts", []);
+					const signer = provider.getSigner();
+					var balance = await signer.getBalance();
+					let readercontract = new ethers.Contract(refStoreAddress, refAbi, provider);
+					this.contract = readercontract.connect(signer)
+					// console.log("accc",this.myAccount[0])
+				} catch (error) {
+					console.error(error);
 				}
-			},
-			async getMetamskConnect() {
-				if (!this.isMetaMask()) {
-					openUrl("https://metamask.io/", "install metamsk");
-				}
-				if (window.ethereum) {
-					try {
-						const provider = new ethers.providers.Web3Provider(window.ethereum);
-						this.myAccount = await provider.send("eth_requestAccounts", []);
-						const signer = provider.getSigner();
-						var balance = await signer.getBalance();
-						let readercontract = new ethers.Contract(refStoreAddress, refAbi, provider);
-						this.contract = readercontract.connect(signer)
-						// console.log("accc",this.myAccount[0])
-					} catch (error) {
-						console.error(error);
+			} else {
+				alert("请安装MetaMask钱包");
+				console.warn("Please authorize to access tour account");
+			}
+		},
+		//选中赛道
+		chooseTrack(id){
+			//更新选中的赛道
+			this.setTrackId = id
+			//todo 选中的赛道更新样式
+		},
+		//确认更新赛道
+		setTrack(){
+			try{
+				this.runContract.updateTrack(id).then(tx=>{
+					//更新成功
+					this.trackId = id
+				})
+			}catch(e){
+				//出错处理
+			}
+		},
+		//获取最新步数
+		getStep() {
+			//从接口获取最新步数
+			return new Promise((resolve, reject) => {
+				//todo 设置baseurl
+				this.baseurl = 'http://218.17.157.9:8866/api/v1/'
+				uni.request({
+					url: this.baseurl + 'game/getUserLastSteps',
+					data: {
+						addr: this.myAccount
+					},
+					method: "GET",
+					success: res => {
+						if (res.data.code === 0) {
+							this.getSteps = res.data.data.steps
+							this.check_sum = res.data.data.check_sum
+						}
 					}
-				} else {
-					alert("请安装MetaMask钱包");
-					console.warn("Please authorize to access tour account");
-				}
-			},
+				})
+			})
+		},
+		//更新到合约中
+		async updateStep() {
+			uni.showLoading({
+				title: '同步中...'
+			})
+			//从接口获取最新步数
+			await this.getStep()
+			if (this.getSteps === this.steps) {
+				//todo 提示无需更新
+				return
+			}
+			try {
+				this.runContract.updateSteps(this.check_sum).then(res => {
+					this.steps = this.getSteps
+				})
+			} catch (e) {
+				//todo 出错
+			}
+			finally {
+				uni.hideLoading()
+			}
+		}
 
-//
+		//
 
 	}
 }
 </script>
 
 <style>
-	.userlogo{
-		position: absolute;
-		right: 0rpx;
-		top: 300.88rpx;
-		width: 180.83rpx;
-	}
-	.input_edi{
-		position: absolute;
-		width: 300.44rpx;
-	}
-	.input_logo{
-		margin-left: 0.2rem;
-		position: absolute;
-		width: 70.44rpx;
-	}
-	.input_txt{
-		color: #000000;
-		position: absolute;
-		margin-left: 2.5rem;
-		text-align: center;
-		height: 70.72rpx;
-		line-height: 70.72rpx;
-	}
-	.user_person{
-		position: absolute;
-		height: 80%;
-	}
-	.user_person_item{
-		position: absolute;
-		height: 100%;
-	}
-	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		height: 100%;
+.userlogo {
+	position: absolute;
+	right: 0rpx;
+	top: 300.88rpx;
+	width: 180.83rpx;
+}
+
+.input_edi {
+	position: absolute;
+	width: 300.44rpx;
+}
+
+.input_logo {
+	margin-left: 0.2rem;
+	position: absolute;
+	width: 70.44rpx;
+}
+
+.input_txt {
+	color: #000000;
+	position: absolute;
+	margin-left: 2.5rem;
+	text-align: center;
+	height: 70.72rpx;
+	line-height: 70.72rpx;
+}
+
+.user_person {
+	position: absolute;
+	height: 80%;
+}
+
+.user_person_item {
+	position: absolute;
+	height: 100%;
+}
+
+.content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
 
 }
 
@@ -420,7 +487,7 @@ export default {
 	display: block;
 	margin: auto 0;
 	margin-left: 1.1rem;
-		width: 10rem;
+	width: 10rem;
 	height: 2.25rem;
 }
 
@@ -431,14 +498,14 @@ export default {
 }
 
 .gp11 {
-		margin-top: 5.2rem;
-		margin-left: 0.625rem;
-		width: 200.88rpx;
+	margin-top: 5.2rem;
+	margin-left: 0.625rem;
+	width: 200.88rpx;
 }
 
 .gp12 {
-		width: 200.88rpx;
-		margin-left: 0.825rem;
+	width: 200.88rpx;
+	margin-left: 0.825rem;
 }
 
 /* //修改 */
@@ -502,4 +569,4 @@ export default {
 
 }
 </style>
->>>>>>> Stashed changes
+
