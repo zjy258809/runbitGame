@@ -2,30 +2,19 @@
 	<view>
 		<view class="goods--box">
 			<view class="goods--item" v-for="(item, index) in lists" :key="index" @click="$emit('onGoods', index)">
-				<view class="imgtop uni-flex uni-row">
-					<view class="flex-item">
-						<image class="smicon " src="http://192.168.1.201:8866/images/star.png"></image>
-						<image v-if="item.equip.level>=2" class="smicon " src="http://192.168.1.201:8866/images/star.png"></image>
-						<image v-if="item.equip.level>=3" class="smicon " src="http://192.168.1.201:8866/images/star.png"></image>
-						<image v-if="item.equip.level>=4" class="smicon " src="http://192.168.1.201:8866/images/star.png"></image>
-						<image v-if="item.equip.level>=5" class="smicon " src="http://192.168.1.201:8866/images/star.png"></image>
-					</view>
-					<view class="smtxt" v-if="item.equip.equipType==0">鞋子</view>
-					<view class="smtxt" v-if="item.equip.equipType==1">裤子</view>
-					<view class="smtxt" v-if="item.equip.equipType==2">衣服</view>
-				</view>
+				
 
 
 				<image class="logo" :src="item.cover" />
-				<view class="itemDesc">{{item.equip.stock}}mint</view>
+				<view class="itemDesc">{{item.card.stock}}mint</view>
 				<view class="progress-box">
 					<progress :percent="item.balance" activeColor="#10AEFF" stroke-width="8" />
 				</view>
 				<view class="uni-flex uni-row itemdesc-box">
 					<image class="itemprice1" src="http://192.168.1.201:8866/images/runbit.png" />
-					<view class="itemdesc-boxtxt">{{item.equip.price1/100000000000000000}}</view>
+					<view class="itemdesc-boxtxt">{{item.card.price1/100000000000000000}}</view>
 					<image class="itemprice1" src="http://192.168.1.201:8866/images/chip.png" />
-					<view class="itemdesc-boxtxt">{{item.equip.price0}}</view>
+					<view class="itemdesc-boxtxt">{{item.card.price0}}</view>
 				</view>
 				<!-- <view class="item--content">
 					<view class="title">{{item.name}}</view>
@@ -51,7 +40,10 @@
 				default: "￥"
 			}
 		},
-		mounted() {}
+		mounted() 
+		{
+			console.log(this.lists);
+		}
 	}
 </script>
 <style lang="scss" scoped>
@@ -140,12 +132,11 @@
 	}
 
 	.logo {
-		width: 80px;
-		height: 80px;
+		width: 130px;
+		height: 180px;
 		text-align: true;
-		margin: 15 auto;
 		display: inline-block;
-		margin: 1.25rem auto;
+		margin: 0.2rem auto;
 
 		display: flex;
 		flex-direction: column;
