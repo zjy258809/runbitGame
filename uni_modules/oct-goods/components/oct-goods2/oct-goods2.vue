@@ -2,7 +2,7 @@
 	<view>
 		<view class="goods--box">
 			<view class="goods--item" v-for="(item, index) in lists"  :key="index" @click="onGoods(item,index)">
-				<image  :class="currentIndex== index?'active':'active2'"   :src="item.cover"  />
+				<image  :class="currentIndex== index?'active':'active2'"   :src="item.img"  />
 				<!-- <view class="item--content">
 					<view class="title">{{item.name}}</view>
 					<view class="price"><text>{{priceType}}</text>{{item.price.price_min || '0'}}</view>
@@ -60,72 +60,29 @@
 	}
 	.active {
 		border: 1px solid red !important;
-		border-radius: 20.83rpx;
+		border-radius: 34.83rpx;
+		width: 220.44rpx;
+		height: 220.44rpx;
+		margin-left: 3.94rpx;
 	}
 	.active2 {
 		border: 1px solid black !important;
-		border-radius: 20.83rpx;
+		border-radius: 34.83rpx;
+		width: 220.44rpx;
+		height: 220.44rpx;
+		margin-left: 3.94rpx;
 	}
 	
-	.ellipsis-2{
-		max-width: 50%;
-		display: -webkit-box;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		-webkit-box-orient: vertical;
-		-webkit-line-clamp: 2;
-		
-		
-	}
-	image{
-		width: 182.88rpx;
-		height: 182rpx;
-	}
 	.goods--box{
 		display: flex;
 		flex-wrap: wrap;
-		width: 95%;
-		margin-left: 10%;
+		width: 100%;
 		.goods--item{
 			width: 40%;
-			height: 190.44rpx;
-			
-			
+			height: 220.44rpx;
 			border-radius: $radius;
-			overflow: hidden;
 			margin: 5.88rpx;
-			
-			
-			
-			.item--cover{
-				width: 100%;
-				
-				padding-top: 100%;
-				background-position: center;
-				background-size: cover;
-			}
-			.item--content{
-				padding: $padding - 10;
-				& > .title{
-					font-size: 28rpx;
-					line-height: 40rpx;
-					height: 80rpx;
-					color: #333;
-					@extend .ellipsis-2;
-				}
-				& > .price{
-					padding-top: $padding/2;
-					line-height: 40rpx;
-					font-weight: bold;
-					color: #d4282d;
-					font-size: 28rpx;
-					@extend .ellipsis-1;
-					text{
-						margin-right: $margin/2;
-						font-size: 80%;
-					}
-				}
-			}
+			padding-left: 5%;
 		}
 	}
 </style>

@@ -54,7 +54,7 @@
 
 
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item ">级别</view>
+								<view class="flex-item ">級别</view>
 								<view class="flex-item idvalue2">稀有度</view>
 							</view>
 
@@ -810,7 +810,7 @@
 	}
 
 	.flex-item {
-		width: 95.55rpx;
+		width: 195.55rpx;
 		height: 34.72rpx;
 		text-align: center;
 	}

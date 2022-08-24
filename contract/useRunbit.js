@@ -54,17 +54,17 @@ export async function getBindEquip(contract, account, equipType) {
 
 }
 //一次性获取account绑定着装情况,equipId=0代表未配备
-export function getBindEquips(contract, account) {
+export async function getBindEquips(contract, account) {
     var equips = []
-    return useContract(equipAddress, equipAbi).then(equipContract => {
+    return useContract(equipAddress, equipAbi).then(async equipContract => {
         for (let equipType = 0; equipType < 3; equipType++) {
-            contract.getBindEquip(account, equipType).then(equipId => {
+          await  contract.getBindEquip(account, equipType).then(async equipId => {
                 //equipId=0代表未配备,不去获取装备详情
                 if (equipId.toNumber() === 0)
                 equips[equipType] = 0
                 //equipId不为0代表已配备,获取装备详情
                 //进一步获取equip详情
-                else  getEquip(equipContract, equipId).then(equip => {
+                else await getEquip(equipContract, equipId).then(equip => {
                         equips[equipType] = equip
                     })
 
@@ -79,15 +79,15 @@ export function getBindEquips(contract, account) {
 //0-没属性卡 非0-绑定的cardId
 export async function getBindCards(contract, equipId) {
     var cards = []
-    return useContract(cardAddress, cardAbi).then(cardContract => {
+    return useContract(cardAddress, cardAbi).then(async cardContract => {
         for (let index = 0; index < 3; index++) {
-            contract.getBindCard(equipId, index).then(cardId => {
+           await contract.getBindCard(equipId, index).then(async cardId => {
                 if (cardId.toNumber() === 0)
                 cards[index] = 0
                 //cardId=0代表未配备,不去获取装备详情
                 //cardId不为0代表已配备,获取装备详情
                 //进一步获取card详情
-                else getCard(cardContract, cardId).then(card => {
+                else await getCard(cardContract, cardId).then(card => {
                         cards[index] = card
                     })
 

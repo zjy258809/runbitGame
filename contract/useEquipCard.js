@@ -52,7 +52,7 @@ export async function  getMyEquips(account,contract) {
     return contract.balanceOf(account).then(num => {
         for (let i = 0; i < num; i++) {
             contract.tokenOfOwnerByIndex(account,i).then(equipId => {
-                    getEquip(contract,equipId).then(equip=>{			
+                    getEquip(contract,equipId).then(equip=>{
                     equipCollect[i] = equip
                 })
             })
