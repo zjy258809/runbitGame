@@ -9,3 +9,6 @@ export  function big2num(bignumber){
 	return bignumber.div(BigNumber.from(10).pow(18)).toNumber()
 	
 }
+export function displayAdddress(address) {
+	return address.substring(0, 6) + "..." + address.substring(address.length - 8, address.length - 1)
+}

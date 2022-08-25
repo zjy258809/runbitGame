@@ -7,18 +7,18 @@
 				<img @tap="setting" class="logo2" src="../../static/Group12016.png" />
 			</view>
 			<img class="gp5" @tap="inputDialogToggle()" src="../../static/Group12009.png" />
-			<view class="gp5-txt">0 RB</view>
+			<view class="gp5-txt">{{ balanceOfRB }} RB</view>
 
 			<view class="uni-flex uni-row">
-				<view class="uni-flex uni-column accept">
+				<view class="uni-flex uni-column accept" @click="buy">
 					<img class="fontImg" src="../../static/Group12010.png" />
-					<view class="fontz">接收</view>
+					<view class="fontz">購買</view>
 				</view>
-				<view class="uni-flex uni-column accept">
+				<view class="uni-flex uni-column accept" @click="transfer">
 					<img class="fontImg" src="../../static/Group11585.png" />
 					<view class="fontz">轉移</view>
 				</view>
-				<view class="uni-flex uni-column accept">
+				<view class="uni-flex uni-column accept" @click="transaction">
 					<img class="fontImg" src="../../static/Group11584.png" />
 					<view class="fontz">交易</view>
 				</view>
@@ -36,9 +36,9 @@
 
 
 						<view class="curId uni-flex uni-row">
-							<view class="level2">{{ item.lable }}</view>
-							<view class="level3">{{ item.num }}</view>
-							<view class="level4">{{ item.time }}</view>
+							<view class="level2">{{ displayAdddress(item.address )}}</view>
+							<view class="level3">{{ item.value }}</view>
+							<view class="level4">{{ item.create_time.substring(0,10) }}</view>
 						</view>
 
 
@@ -54,9 +54,9 @@
 
 
 						<view class="curId uni-flex uni-row">
-							<view class="level2">{{ item.lable }}</view>
-							<view class="level3">{{ item.num }}</view>
-							<view class="level4">{{ item.time }}</view>
+							<view class="level2">{{ displayAdddress(item.address) }}</view>
+							<view class="level3">{{ item.value }}</view>
+							<view class="level4">{{ item.create_time.substring(0,10) }}</view>
 						</view>
 
 
@@ -74,32 +74,55 @@
 </template>
 
 <script>
+import {
+	ethers,
+} from 'ethers'
+import {
+	RBAddress,
+	RBAbi,
+	RBCTAddress,
+	RBETAddress,
+	RBCTAbi,
+	RBETAbi,
+	USDT, USDTAbi, RunbitAddress, RunbitAbi
+} from '../../contract/address.js'
+import {
+	useContract,
+} from '../../contract/useContract.js'
+import {
+	big2num,displayAdddress
+} from '../../contract/ultis.js'
+
+import { myRequest } from '../../utils/api.js'
+
 export default {
 	data() {
 		return {
-			data: [{
-				lable: '0x14..SD12',
-				num: '1000 RB',
-				time: '2022-08-17'
-			},
-			{
-				lable: '0x14..SD14',
-				num: '2000 RB',
-				time: '2022-08-17'
-			},
-			{
-				lable: '0x14..7D14',
-				num: '1000 RB',
-				time: '2022-08-17'
-			},
-			{
-				lable: '0x14..SD24',
-				num: '5000 RB',
-				time: '2022-08-17'
-			},
-			],
+			data: [],
 			data2: [],
 			curList: 0,
+			balanceOfRB: 0
+		}
+	},
+	onLoad() {
+		try {
+
+			const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+			provider.send("eth_requestAccounts", []).then(accounts => {
+				this.myAccount = accounts[0]
+				useContract(RBAddress, RBAbi).then(RBContract => {
+					//获取rb余额
+					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
+						this.balanceOfRB = big2num(balanceOfRB)
+					})
+
+				});
+
+				//获取交易记录
+			})
+		} catch (e) {
+			console.error(e);
 		}
 	},
 	onload() {
@@ -110,6 +133,7 @@ export default {
 			provider.on(this.myAccount, (balance) => {
 				console.log('New Balance: ' + balance);
 			});
+			this.getTransactions(1)
 
 		})
 	},
@@ -121,12 +145,30 @@ export default {
 		},
 		recordList(index) {
 			this.curList = index;
+			this.getTransactions(2)
 		},
 		setting() {
 			uni.navigateTo({
 				url: '../userSetting/userSetting'
 			});
 		},
+		getTransactions(type) {
+			myRequest({
+				url: 'game/getRBTransfer',
+				method: 'GET',
+				data: {
+					addr: this.myAccount,
+					trans_type: type
+				}
+			}).then(data => {
+				if (type == 1)
+					this.data = data.list
+				else this.data2 = data.list
+			})
+		},
+		  displayAdddress(address) {
+	return address.substring(0, 6) + "..." + address.substring(address.length - 8, address.length - 1)
+}
 	}
 }
 </script>

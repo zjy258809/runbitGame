@@ -13,7 +13,7 @@ export const myRequest = (options) => { //暴露一个function：myRequest，使
                             title: "数据获取失败！"
                         })
                     }
-                    resolve(res) //成功,将数据返回
+                    resolve(res.data.data) //成功,将数据返回
                 },
                 fail: (err) => { //失败操作
                     uni.showToast({

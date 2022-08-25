@@ -37,8 +37,8 @@
 
 							<view class="curId uni-flex uni-row">
 								<image class="smicon " src="../../static/Group120671.png"></image>
-								<view class="level ">{{ balanceofRBET }}</view>
-								<view class="rare">20</view>
+								<view class="level ">装备碎片</view>
+								<view class="rare">{{ balanceofRBET }}</view>
 							</view>
 
 
@@ -99,7 +99,7 @@
 
 							<view class="curId uni-flex uni-row">
 								<view class="level ">未領取收益</view>
-								<view class="rare" style="color: #FF5C00;">20000 RB</view>
+								<view class="rare" style="color: #FF5C00;">{{ unclaimReward }} RB</view>
 							</view>
 							<view
 								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -107,7 +107,7 @@
 
 							<view class="curId uni-flex uni-row">
 								<view class="level ">已領取收益</view>
-								<view class="rare">20 RB</view>
+								<view class="rare">{{ claimedReward }} RB</view>
 							</view>
 							<view
 								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -117,9 +117,9 @@
 
 
 						</uni-card>
-						<img class="gp5" @tap="inputDialogToggle()" src="../../static/Group11571.png" />
+						<img class="gp5" @tap="claim" src="../../static/Group11571.png" />
 
-						<view @tap="recordList(0)" class="recordList">獲獎記錄</view>
+						<view @tap="recordList(0)" class="recordList">收益記錄</view>
 						<view style="" class="text" v-for="(item, index) in data" :key="index">
 							<uni-card title="" extra=""
 								style="width: 90%; border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
@@ -255,7 +255,6 @@
 <script>
 import {
 	ethers,
-	BigNumber
 } from 'ethers'
 import {
 	RBAddress,
@@ -321,6 +320,12 @@ export default {
 			],
 
 			list: ['錢包', '收益', '抽獎'],
+			balanceOfRB: 0,
+			balanceofRBCT: 0,
+			balanceofRBET: 0,
+			balanceofUSDT: 0,
+			unclaimReward: 0,
+			claimedReward: 0
 		}
 	},
 
@@ -332,11 +337,14 @@ export default {
 
 			provider.send("eth_requestAccounts", []).then(accounts => {
 				this.myAccount = accounts[0]
-				//查询商店合约授权情况，授权后才能购买和兑换
+				useContract(RunbitAddress, RunbitAbi).then(runContract => {
+					this.runContract = runContract
+// this.runContract.isLucky(this.myAccount,(1661097600+28800)/86400)
+				});
 				useContract(RBAddress, RBAbi).then(RBContract => {
 					//获取rb余额
 					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
-						this.balanceOfRB = balanceOfRB
+						this.balanceOfRB = big2num(balanceOfRB)
 					})
 
 				});
@@ -356,12 +364,11 @@ export default {
 				})
 				//获取USDT余额
 				useContract(USDT, USDTAbi).then(USDTContract => {
-					USDTContract.balanceOf(this.myAccount).then(USDTContract => {
+					USDTContract.balanceOf(this.myAccount).then(balanceofUSDT => {
 						this.balanceofUSDT = parseInt(balanceofUSDT)
 					})
 				})
 				//获取交易记录
-				
 			})
 		} catch (e) {
 			console.error(e);
@@ -371,6 +378,10 @@ export default {
 		//切换tab
 		sectionChange(index) {
 			this.curNow = index;
+			//加载收益
+			if (index === 1) {
+				this.getUnclaimReward()
+			}
 
 		},
 		recordList(index) {
@@ -395,6 +406,44 @@ export default {
 			this.$refs.inputDialog2.open()
 		},
 		/**钱包相关 */
+
+		/**收益 */
+		//未领取收益
+		getUnclaimReward() {
+			this.runContract.getUnclaimReward(this.myAccount).then(reward => {
+				this.unclaimReward = reward
+			})
+
+		},
+		//已领取记录
+
+		//领取收益
+		async claim() {
+			let tx = await this.runContract.claim(this.unclaimReward,this.myAccount)
+			try {
+				tx.wait().then(res => {
+					uni.showToast({
+						title: "领取成功",
+						icon: "success"
+					})
+				})
+			} catch (e) {
+				uni.showToast({
+					title: "领取失败，请稍后再试",
+					icon: "none"
+				})
+			}
+
+		},
+		//收益记录
+
+		/**抽奖 */
+		//查看是否获奖，获奖内容
+		isLucky(){
+			this.runContract.isLucky()
+		},
+
+
 
 
 	}
