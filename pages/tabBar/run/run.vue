@@ -5,8 +5,12 @@
 			<view class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
 				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:3.125rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
-				<view class="currentbs">3000步</view>
-				<img class="userName" src="../../../static/Group3.png" />
+				<view class="currentbs">{{getSteps}}步</view>
+				<view class="userName">
+					<img class="input_edi" src="../../../static/input_edi.png"></img>
+					<img class="input_logo" src="../../../static/inputlogo.png"></img>
+					<view class="input_txt">{{userAccount}}</view>
+				</view>
 			</view>
 
 			<view style="margin-top: 123.88rpx; height:69.44rpx ; width: 100%;">
@@ -33,7 +37,7 @@
 							</view>
 
 						</view>
-						<cardItem :lists="cardCollect" price-type="$" @onGoods="onGoods2" /> 
+						<cardItem :lists="cardCollect" price-type="$" @onGoods="onGoods2" />
 
 					</view>
 				</view>
@@ -54,7 +58,7 @@
 
 
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item ">級别</view>
+								<view class="flex-item ">级别</view>
 								<view class="flex-item idvalue2">稀有度</view>
 							</view>
 
@@ -149,8 +153,8 @@
 			<uni-popup ref="inputDialog3" type="dialog">
 
 
-				<uni-popup-dialog ref="inputClose" :mask-click="true" cancelText="兑换" confirmText="购买" title="购买"
-					value="对话框预置提示内容!" placeholder="请输入内容" @close="redmCardBtn" @confirm="buyCardBtn">
+				<uni-popup-dialog ref="inputClose" cancelText="兑换" confirmText="购买" title="购买" value="对话框预置提示内容!"
+					placeholder="请输入内容" @close="redmCardBtn" @confirm="buyCardBtn">
 					<view>
 
 						<img class="cards" :src="currentCard.cover" />
@@ -198,7 +202,8 @@
 	import {
 		useContract,
 		getApproveState,
-		contractApprove
+		contractApprove,
+		hideBankCards
 	} from '../../../contract/useContract.js'
 	import {
 		big2num
@@ -206,6 +211,8 @@
 	export default {
 		data() {
 			return {
+				getSteps:'',
+				userAccount: '',
 				currentcover: '',
 				currentprice0: 0,
 				currentprice1: 0,
@@ -269,7 +276,8 @@
 				activeColor: '#FFEB34',
 				contract: null,
 				RBETContract: null,
-				RBCTContract:null,
+				RBCTContract: null,
+				RBContract: null
 			}
 		},
 		mounted() {
@@ -278,13 +286,14 @@
 		},
 		onLoad() {
 			var that = this;
+			that.getSteps =getApp().globalData.userStep
 			try {
 
 				const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 				provider.send("eth_requestAccounts", []).then(accounts => {
 					this.myAccount = accounts[0]
-
+					this.userAccount = hideBankCards(accounts[0]);
 					//加载属性卡和装备库
 					useContract(RunbitCollectionAddress, RunbitCollectionAbi).then(collectContract => {
 						this.collectContract = collectContract
@@ -294,9 +303,10 @@
 					//查询商店合约授权情况，授权后才能购买和兑换
 					useContract(RBAddress, RBAbi).then(RBContract => {
 						//获取rb余额
+						this.RBContract = RBContract;
 						RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
 							this.balanceOfRB = balanceOfRB
-							console.log("balanceOfRB",this.balanceOfRB);
+							console.log("balanceOfRB", this.balanceOfRB);
 						})
 						//获取RB对商品合约的授权情况
 						RBContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
@@ -353,27 +363,26 @@
 		},
 		methods: {
 			//兑换卡片确认按钮
-			redmCardBtn()
-			{
+			redmCardBtn() {
 				this.currentPayType = 0;
-					if(this.balanceofRBCT>this.currentCard.card.price0){
-				this.redeemCard(this.collectContract, this.collectionId);
-				}else{
+				if (this.balanceofRBCT > this.currentCard.card.price0) {
+					this.redeemCard(this.collectContract, this.collectionId);
+				} else {
 					uni.showToast({
 						title: "属性卡碎片不足",
 						icon: "error"
 					})
 				}
-				
+
 			},
 			//兑换装备确认按钮
 			redeemCardBtn() {
 				this.currentPayType = 0;
 				// this.$refs.inputDialogs.colse();
 				console.log(this.currentEquips.equip.price0);
-				if(this.balanceofRBET>this.currentEquips.equip.price0){
-				this.redeemEquip(this.collectContract, this.collectionId);
-				}else{
+				if (this.balanceofRBET > this.currentEquips.equip.price0) {
+					this.redeemEquip(this.collectContract, this.collectionId);
+				} else {
 					uni.showToast({
 						title: "装备碎片不足",
 						icon: "error"
@@ -383,13 +392,13 @@
 			},
 			//装备购买确认按钮
 			dialogInputConfirm(val) {
-				
+
 
 				this.currentPayType = 1;
 				this.$refs.inputDialogs.close();
-				if(this.balanceOfRB>this.currentEquips.equip.price1/1000000000000000000){
-				this.buyEquip(this.collectContract, this.currentEquips.equip.equipType, this.collectionId);
-				}else{
+				if (this.balanceOfRB > this.currentEquips.equip.price1 / 1000000000000000000) {
+					this.buyEquip(this.collectContract, this.currentEquips.equip.equipType, this.collectionId);
+				} else {
 					uni.showToast({
 						title: "余额不足",
 						icon: "error"
@@ -407,9 +416,9 @@
 			},
 			buyCardBtn() {
 				this.currentPayType = 1;
-				if(this.balanceOfRB>this.currentCard.card.price1/1000000000000000000){
-				this.buyCard(this.collectContract,this.collectionId);
-				}else{
+				if (this.balanceOfRB > this.currentCard.card.price1 / 1000000000000000000) {
+					this.buyCard(this.collectContract, this.collectionId);
+				} else {
 					uni.showToast({
 						title: "余额不足",
 						icon: "error"
@@ -420,7 +429,7 @@
 			//点击装备列表
 			onGoods(item) {
 				this.collectionId = item;
-				console.log("collectionId:",this.collectionId);
+				console.log("collectionId:", this.collectionId);
 				this.currentEquips = this.equipCollect[item];
 				this.currentprice0 = this.currentEquips.equip.price0;
 				this.currentprice1 = this.currentEquips.equip.price1;
@@ -455,7 +464,7 @@
 				this.collectionId = index;
 				this.currentCard = this.cardCollect[index];
 				this.currentprice0 = this.currentCard.card.price0;
-				this.currentprice1 = this.currentCard.card.price1/100000000000000000;
+				this.currentprice1 = this.currentCard.card.price1 / 100000000000000000;
 				this.currentcover = this.currentCard.cover;
 				this.$refs.inputDialog3.open()
 			},
@@ -488,7 +497,7 @@
 				contract.getCardCollectCount().then(async num => {
 					for (let i = 0; num && i < num; i++) {
 						await contract.getCardCollection(i).then(async card => {
-							await that.getImg(2, i,card);
+							await that.getImg(2, i, card);
 							uni.hideLoading();
 						})
 
@@ -513,8 +522,8 @@
 						await contract.getEquipCollection(i).then(async equip => {
 
 							// that.equips.equip = equip;
-							
-							await that.getImg(1, i,equip);
+
+							await that.getImg(1, i, equip);
 							equipLoading = false;
 							uni.hideLoading();
 						})
@@ -524,7 +533,7 @@
 
 			},
 
-			 getImg(img_type, collection_id,currentObj) {
+			getImg(img_type, collection_id, currentObj) {
 
 				var imgs = "";
 				var that = this;
@@ -536,27 +545,27 @@
 						collection_id: collection_id, //每一页12个数据
 					},
 
-					 success: function( res) {
+					success: function(res) {
 						if (res.data.code == 0) {
 							imgs = "http://192.168.1.201:8866/images/" + res.data.data;
-							
+
 						}
 						if (img_type == 1) {
-							console.log("price0:"+currentObj.price0);
-							console.log("price1:"+currentObj.price1);
-							var resultObj = { };
+							console.log("price0:" + currentObj.price0);
+							console.log("price1:" + currentObj.price1);
+							var resultObj = {};
 							resultObj.balance = currentObj.sales / currentObj.stock * 100
 							resultObj.cover = imgs;
-							resultObj.equip =currentObj;
+							resultObj.equip = currentObj;
 							that.equipCollect.push(resultObj); //获取内容
 						} else {
-							var resultObj = { };
-							
+							var resultObj = {};
+
 							resultObj.balance = currentObj.sales / currentObj.stock * 100
 							resultObj.card = currentObj;
-								resultObj.cover =imgs;
-							 that.cardCollect.push(resultObj); //获取内容
-							
+							resultObj.cover = imgs;
+							that.cardCollect.push(resultObj); //获取内容
+
 						}
 
 					},
@@ -573,15 +582,15 @@
 					//判断是否授权
 					if (!this.approveState) {
 						//未授权，弹窗提示授权？
-						return
 						//用户点击确认授权后，调用授权代码，如下						
-						await contractApprove(RunbitCollectionAddress)
+						await contractApprove(this.RBContract, RunbitCollectionAddress)
 						this.approveState = true
 						console.log("approveState2", this.approveState)
 						uni.showToast({
 							title: "授权中,授权成功后重新点击购买",
 							icon: "none"
 						})
+						return
 
 					}
 					this.$refs.inputDialog2.open()
@@ -606,28 +615,25 @@
 			//购买装备
 			async buyEquip(contract, equipType, collectionid) {
 				try {
+					debugger
 					//判断是否授权
+
 					if (!this.approveState) {
 						//未授权，弹窗提示授权？
 						//用户点击确认授权后，调用授权代码，如下						
-						await contractApprove(contract, RunbitCollectionAddress)
+						await contractApprove(this.RBContract, RunbitCollectionAddress)
 						this.approveState = true
 						console.log("approveState2", this.approveState)
 
 						uni.showToast({
-							title: "授权中,授权成功后重新点击购买",
+							title: "授权中,授权后重新点击购买",
 							icon: "none"
 						})
 					}
 					//已授权
 
 					this.$refs.inputDialog2.open()
-					setTimeout(() => {
-						uni.hideLoading()
 
-						// 关闭窗口后，恢复默认内容
-						this.$refs.inputDialog2.close()
-					}, 1000)
 					let tx = await contract.buyEquip(collectionid)
 					//交易hash
 					console.log(tx.hash)
@@ -656,6 +662,11 @@
 						await contractApprove(this.RBCTContract, RunbitCollectionAddress)
 						this.approveRBCT = true
 						console.log("approveRBCT", this.approveRBCT)
+						uni.showToast({
+							title: "授权中,授权后重新兑换",
+							icon: "none"
+						})
+						return;
 					}
 					this.$refs.inputDialog2.open()
 					//已授权
@@ -679,7 +690,7 @@
 			async redeemEquip(contract, collectionId) {
 				try {
 					if (!this.approveRBET) {
-						console.log("开始授权----"+collectionId);
+						console.log("开始授权----" + collectionId);
 
 						await contractApprove(this.RBETContract, RunbitCollectionAddress)
 						console.log(contractApprove);
@@ -691,19 +702,19 @@
 						})
 						return
 					}
-					console.log("装备兑换开始----"+collectionId);
+					console.log("装备兑换开始----" + collectionId);
 
 					this.$refs.inputDialog2.open()
-					
+
 					let tx = await contract.redeemEquip(collectionId)
 					console.log(tx.hash)
 					tx.wait().then(res => {
-						console.log("装备兑换成功----"+collectionId);
+						console.log("装备兑换成功----" + collectionId);
 						uni.showToast({
 							title: "兑换成功",
 							icon: "success"
 						})
-							this.$refs.inputDialog2.close()
+						this.$refs.inputDialog2.close()
 						//兑换成功的一些操作，如关闭loading
 					})
 
@@ -762,7 +773,7 @@
 		display: block;
 		margin: auto 0;
 		margin-left: 1.1rem;
-		width: 9rem;
+		width: 10rem;
 		height: 2.25rem;
 	}
 
@@ -779,7 +790,26 @@
 		padding-top: 18.94rpx;
 
 	}
+.input_edi {
+		position: absolute;
+		width: 300.44rpx;
+	}
 
+	.input_logo {
+		margin-left: 0.2rem;
+		position: absolute;
+		width: 70.44rpx;
+	}
+
+	.input_txt {
+		color: #000000;
+		position: absolute;
+		font-size: 28.33rpx;
+		margin-left: 2.5rem;
+		text-align: center;
+		height: 70.72rpx;
+		line-height: 70.72rpx;
+	}
 	.dialogimg {
 		display: block;
 		margin: 0 auto;
@@ -810,7 +840,7 @@
 	}
 
 	.flex-item {
-		width: 195.55rpx;
+		width: 95.55rpx;
 		height: 34.72rpx;
 		text-align: center;
 	}

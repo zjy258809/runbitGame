@@ -265,15 +265,15 @@ import {
 	RBCTAbi,
 	RBETAbi,
 	USDT, USDTAbi
-} from '../../../contract/address.js'
+} from '../../contract/address.js'
 import {
 	useContract,
 	getApproveState,
 	contractApprove
-} from '../../../contract/useContract.js'
+} from '../../contract/useContract.js'
 import {
 	big2num
-} from '../../../contract/ultis.js'
+} from '../../contract/ultis.js'
 
 export default {
 	data() {

@@ -34,10 +34,10 @@ export async function getMyCards(account,contract) {
     //cardLoading=true获取数据中
     var cardCollect=[]
 
-    return contract.balanceOf(account).then(num => {
+    return contract.balanceOf(account).then(async num => {
         for (let i = 0;i < num; i++) {
-            contract.tokenOfOwnerByIndex(account,i).then(cardId => {
-                    getCard(contract,cardId).then(card=>{
+           await contract.tokenOfOwnerByIndex(account,i).then(async cardId => {
+                  await  getCard(contract,cardId).then(card=>{
                     cardCollect[i] = card
                 })
             })
@@ -49,10 +49,10 @@ export async function getMyCards(account,contract) {
 export async function  getMyEquips(account,contract) {
     //获取装备数量numOfEquip和装备合集equipCollect
     var  equipCollect = []
-    return contract.balanceOf(account).then(num => {
+    return contract.balanceOf(account).then(async num => {
         for (let i = 0; i < num; i++) {
-            contract.tokenOfOwnerByIndex(account,i).then(equipId => {
-                    getEquip(contract,equipId).then(equip=>{
+           await contract.tokenOfOwnerByIndex(account,i).then(async equipId => {
+                   await getEquip(contract,equipId).then(equip=>{
                     equipCollect[i] = equip
                 })
             })

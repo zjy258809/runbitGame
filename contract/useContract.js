@@ -29,10 +29,11 @@ export async function contractApprove(tokenContract,spender) {
 
 }
 export async function useContract(address, abi) {
+	
 	var readContract, writeContract, accounts, balance, chainid, provider;
-	if (!isMetaMask()) {
-		openUrl("https://metamask.io/", "install metamsk");
-	}
+	// if (!isMetaMask()) {
+	// 	openUrl("https://metamask.io/", "install metamsk");
+	// }
 	if (window.ethereum) {
 		try {
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -49,3 +50,11 @@ export async function useContract(address, abi) {
 	}
 	return writeContract;
 }
+export  function  hideBankCards(value) {
+				if (value && value.length > 8) {
+					return `${value.substring(0, 4)} ${"*".repeat(value.length - 38).replace(/(.{4})/g, `
+					$1 `)}${value.length % 4 ? " " : ""}${value.slice(-4)}`;
+				}
+				return value;
+
+			}

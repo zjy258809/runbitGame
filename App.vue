@@ -10,7 +10,7 @@
 			console.log('App Hide')
 		},
 		globalData: { 
-		
+		userStep:0,
 		 text: 'text11',
 		 layerAbi: [{
 		 	"inputs": [{

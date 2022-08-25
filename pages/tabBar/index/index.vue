@@ -3,7 +3,7 @@
 
 		<view class="bg">
 
-			<view class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
+			<view  class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
 				<img src="../../../static/heard.png" style="width:3rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
 				<view class="currentbs">{{getSteps}}步</view>
@@ -227,7 +227,8 @@
 	import {
 		useContract,
 		getApproveState,
-		contractApprove
+		contractApprove,
+		hideBankCards
 	} from '../../../contract/useContract.js'
 	import {
 		setTrack,
@@ -260,6 +261,7 @@
 						img: '../../../static/chooseImg.png',
 					},
 				],
+				currentCard:'',
 				cardId: 0,
 				carIndex: 0,
 				cardsList: [],
@@ -318,7 +320,8 @@
 			}
 		},
 		onLoad() {
-			//      this.rpcaddr = getApp().globalData.rpcaddr;
+			     
+				//  console.log( getApp().globalData.userStep);
 			// this.layerAddress = getApp().globalData.layerAddress;
 			//  this.layerAbi = getApp().globalData.layerAbi;
 		},
@@ -330,14 +333,20 @@
 				const provider = new ethers.providers.Web3Provider(window.ethereum);
 				provider.send("eth_requestAccounts", []).then(accounts => {
 					this.myAccount = accounts[0];
+					
 					this.getStep();
-					this.userAccount = this.hideBankCards(accounts[0]);
+					this.userAccount = hideBankCards(accounts[0]);
+						
 					//判断是否需要填激活码		 
 					useContract(refStoreAddress, refAbi).then(refContract => {
+						this.contract =refContract;
 						refContract.referrer(this.myAccount).then(refer => {
+						
 							if (refer === '0x0000000000000000000000000000000000000000')
 								this.$refs.isopen.open();
+								
 						})
+						
 					})
 					useContract(RunbitAddress, RunbitAbi).then(async runContract => {
 						this.runContract = runContract
@@ -381,6 +390,7 @@ console.log("已经穿了"+equips[2].id);
 
 
 				});
+				//this.getMetamskConnect();
 				//测试
 				setTimeout(() => {
 					//点击装备获取卡槽情况
@@ -431,11 +441,24 @@ console.log("已经穿了"+equips[2].id);
 			},
 			//卡片确认选择
 			async choosecard() {
+				if(this.cardId==0)
+				{
+					uni.showToast({
+						title: "未选中属性卡",
+						icon: "error"
+					})
+					return
+				}
+				if(this.currentCard.card.level>this.currentequips.equip.level)
+				{
+					uni.showToast({
+						title: "卡片等级大于装备等级",
+						icon: "error"
+					})
+					return
+				}
 				console.log("当前装备ID:"+this.currentequips.id);
-				uni.showToast({
-					title: "开始绑定...",
-					icon: "none"
-				})
+				console.log("卡片ID:"+this.cardId);
 				uni.showLoading({
 					title: '绑定中...'
 				});
@@ -449,11 +472,11 @@ console.log("已经穿了"+equips[2].id);
 						title: "绑定成功",
 						icon: "success"
 					})
-					//兑换成功的一些操作，如关闭loading
 				})
 			},
 			//卡片点击事件
 			changeCard(item) {
+				this.currentCard =item;
 				this.cardId = parseInt(item.id);
 			},
 			// 获取装备图片绑定
@@ -533,13 +556,7 @@ console.log(index);
 				this.waistEquips = [];
 				this.getEquitCard(index);
 
-				if (this.myEquips.length <= 0) {
-					uni.showToast({
-						title: "没有装备",
-						icon: "error"
-					})
-					return
-				}
+				
 				for (var i = 0; i < this.myEquips.length; i++) {
 					if (this.myEquips[i].equip.equipType == 0) {
 						this.shoeEquips.push(this.myEquips[i]);
@@ -562,6 +579,13 @@ console.log(index);
 
 				if (this.equips[index] == 0) //
 				{
+					if (this.EquipsList.length <= 0) {
+						uni.showToast({
+							title: "改部位没有装备",
+							icon: "error"
+						})
+						return
+					}
 					this.$refs.chooseEquipDialog.open() //装备筛选
 				} else {
 					
@@ -574,14 +598,7 @@ console.log(index);
 
 
 			},
-			hideBankCards(value) {
-				if (value && value.length > 8) {
-					return `${value.substring(0, 4)} ${"*".repeat(value.length - 38).replace(/(.{4})/g, `
-					$1 `)}${value.length % 4 ? " " : ""}${value.slice(-4)}`;
-				}
-				return value;
-
-			},
+			
 
 			async approve() {
 
@@ -622,6 +639,7 @@ console.log(index);
 						
 						return 
 					}
+					debugger
 					let tx = await this.contract.addReferrerWithCheck(val)
 					console.log(tx.hash)
 					uni.showLoading({
@@ -629,6 +647,7 @@ console.log(index);
 					})
 					tx.wait().then(res => {
 						uni.hideLoading()
+						this.$refs.isopen.close();
 						uni.showToast({
 							title: "激活成功",
 							icon: "success"
@@ -684,6 +703,7 @@ console.log(index);
 						this.myAccount = await provider.send("eth_requestAccounts", []);
 						const signer = provider.getSigner();
 						var balance = await signer.getBalance();
+						debugger
 						let readercontract = new ethers.Contract(refStoreAddress, refAbi, provider);
 						this.contract = readercontract.connect(signer)
 						// console.log("accc",this.myAccount[0])
@@ -727,6 +747,7 @@ console.log(index);
 						success: res => {
 							if (res.data.code === 0) {
 								this.getSteps = res.data.data.steps
+								 getApp().globalData.userStep =this.getSteps;
 								this.check_sum = res.data.data.check_sum
 							}
 						}
@@ -918,7 +939,7 @@ console.log(index);
 		flex-direction: row;
 		font-weight: bold;
 		align-items: center;
-		width: 6.25rem;
+		width: 7.25rem;
 	}
 
 	.currentImg {
