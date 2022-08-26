@@ -135,7 +135,7 @@
 						</uni-card>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">cost</view>
-							<view v-if="currentPayType==0" class="idvalue3">{{currentprice0}} RB</view>
+							<view v-if="currentPayType==0" class="idvalue3">{{currentprice0/1000000000000000000}} RB</view>
 							<!-- 兑换 -->
 							<view v-if="currentPayType==1" class="idvalue3">{{currentprice1}} RB</view>
 							<!-- 购买 -->
@@ -379,7 +379,6 @@
 			redeemCardBtn() {
 				this.currentPayType = 0;
 				// this.$refs.inputDialogs.colse();
-				console.log(this.currentEquips.equip.price0);
 				if (this.balanceofRBET > this.currentEquips.equip.price0) {
 					this.redeemEquip(this.collectContract, this.collectionId);
 				} else {
@@ -429,7 +428,6 @@
 			//点击装备列表
 			onGoods(item) {
 				this.collectionId = item;
-				console.log("collectionId:", this.collectionId);
 				this.currentEquips = this.equipCollect[item];
 				this.currentprice0 = this.currentEquips.equip.price0;
 				this.currentprice1 = this.currentEquips.equip.price1;
@@ -547,12 +545,10 @@
 
 					success: function(res) {
 						if (res.data.code == 0) {
-							imgs = "http://192.168.1.201:8866/images/" + res.data.data;
+							imgs = "http://218.17.157.9:8866/images/" + res.data.data;
 
 						}
 						if (img_type == 1) {
-							console.log("price0:" + currentObj.price0);
-							console.log("price1:" + currentObj.price1);
 							var resultObj = {};
 							resultObj.balance = currentObj.sales / currentObj.stock * 100
 							resultObj.cover = imgs;
@@ -615,7 +611,6 @@
 			//购买装备
 			async buyEquip(contract, equipType, collectionid) {
 				try {
-					debugger
 					//判断是否授权
 
 					if (!this.approveState) {
@@ -814,7 +809,7 @@
 		display: block;
 		margin: 0 auto;
 		width: 350.33rpx;
-		height: 328.88rpx;
+		height: 350.88rpx;
 		padding: 6.94rpx;
 
 	}

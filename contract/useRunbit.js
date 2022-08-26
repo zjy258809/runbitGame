@@ -57,6 +57,7 @@ export async function getBindEquip(contract, account, equipType) {
 export async function getBindEquips(contract, account) {
     var equips = []
     return useContract(equipAddress, equipAbi).then(async equipContract => {
+		
         for (let equipType = 0; equipType < 3; equipType++) {
           await  contract.getBindEquip(account, equipType).then(async equipId => {
                 //equipId=0代表未配备,不去获取装备详情
@@ -96,6 +97,16 @@ export async function getBindCards(contract, equipId) {
         return cards
     })
 }
+
+//获取合成费用
+export async function getForgeFee(collectContract,equipType,level){
+    return collectContract.getForgeFee(equipType,level)
+    }
+	
+	//获取预计收益
+	export async function getReward(collectContract,userAddress,curDay){
+	    return collectContract.getUnclaimReward(userAddress,curDay)
+	    }
 
 
 

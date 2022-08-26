@@ -3,7 +3,7 @@
 
 		<view class="bg">
 
-			<view  class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
+			<view class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
 				<img src="../../../static/heard.png" style="width:3rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
 				<view class="currentbs">{{getSteps}}步</view>
@@ -34,16 +34,16 @@
 
 						<view class="curId uni-flex uni-row">
 							<view class="flex-item">功能性</view>
-							<view class="flex-item idvalue">103</view>
+							<view class="flex-item idvalue">{{specialty}}</view>
 						</view>
 
 						<view class="curId uni-flex uni-row">
 							<view class="flex-item ">美观性</view>
-							<view class="flex-item idvalue">351</view>
+							<view class="flex-item idvalue">{{aesthetic}}</view>
 						</view>
 						<view class="curId uni-flex uni-row">
 							<view class="flex-item ">舒适性</view>
-							<view class="flex-item idvalue">101</view>
+							<view class="flex-item idvalue">{{comfort}}</view>
 						</view>
 					</view>
 
@@ -59,7 +59,7 @@
 
 						<view class="curId uni-flex uni-row">
 							<view class="flex-item">预计收益</view>
-							<view class="flex-item idvalue2">10000</view>
+							<view class="flex-item idvalue2">{{reward}}</view>
 						</view>
 
 					</view>
@@ -237,7 +237,8 @@
 		bindEquip,
 		getBindCards,
 		bindCard,
-		unbindEquip
+		unbindEquip,
+		getReward
 	} from '../../../contract/useRunbit.js'
 	import {
 		getMyCards,
@@ -251,6 +252,10 @@
 	export default {
 		data() {
 			return {
+				reward:0,
+				specialty:0, //功能
+				aesthetic:0, //美观
+				comfort:0, //舒适
 				equipsImgs: [{
 						img: '../../../static/chooseImg.png',
 					},
@@ -261,7 +266,7 @@
 						img: '../../../static/chooseImg.png',
 					},
 				],
-				currentCard:'',
+				currentCard: '',
 				cardId: 0,
 				carIndex: 0,
 				cardsList: [],
@@ -320,8 +325,8 @@
 			}
 		},
 		onLoad() {
-			     
-				//  console.log( getApp().globalData.userStep);
+
+			//  console.log( getApp().globalData.userStep);
 			// this.layerAddress = getApp().globalData.layerAddress;
 			//  this.layerAbi = getApp().globalData.layerAbi;
 		},
@@ -329,24 +334,28 @@
 			this.scrrenHeight = uni.getSystemInfoSync().windowHeight;
 			// this.$refs.isopen.open();
 			try {
+				uni.showLoading({
+					title: '加载中...'
 
+				})
 				const provider = new ethers.providers.Web3Provider(window.ethereum);
 				provider.send("eth_requestAccounts", []).then(accounts => {
 					this.myAccount = accounts[0];
-					
+
 					this.getStep();
 					this.userAccount = hideBankCards(accounts[0]);
-						
+					this.getReward();
+
 					//判断是否需要填激活码		 
 					useContract(refStoreAddress, refAbi).then(refContract => {
-						this.contract =refContract;
+						this.contract = refContract;
 						refContract.referrer(this.myAccount).then(refer => {
-						
+
 							if (refer === '0x0000000000000000000000000000000000000000')
 								this.$refs.isopen.open();
-								
+
 						})
-						
+
 					})
 					useContract(RunbitAddress, RunbitAbi).then(async runContract => {
 						this.runContract = runContract
@@ -357,8 +366,18 @@
 						})
 						//获取装备,0代表没装备
 						getBindEquips(this.runContract, this.myAccount).then(async equips => {
-console.log("已经穿了"+equips[2].id);
+							console.log("已经穿了" + equips);
+							for(var i=0;i<equips.length;i++)
+							{
+								if(equips[i]!=0)
+								{
+									//穿了装备
+									this.getEquitCardValue(equips[i].id);
+								}
+								
+							}
 							this.getequipsImg(equips);
+							uni.hideLoading();
 						})
 
 
@@ -408,11 +427,22 @@ console.log("已经穿了"+equips[2].id);
 
 		},
 		methods: {
-			async unEquip()
+			// 计算收益
+			async getReward()
 			{
+				debugger
+				// var curDay = (ethers.utils.block.timestamp + 28800) / 86400;
+				
+				getReward(this.collectContract, this.myAccount,curDay).then(
+					ForgeFee => {
+						this.ForgeFee = ForgeFee
+						console.log(this.ForgeFee);
+					})
+			},
+			async unEquip() {
 				uni.showLoading({
 					title: '装备卸下中...'
-				
+
 				})
 				try {
 					let tx = await unbindEquip(this.runContract, this.curequipIndex)
@@ -424,7 +454,7 @@ console.log("已经穿了"+equips[2].id);
 					uni.hideLoading()
 					//获取装备,0代表没装备
 					getBindEquips(this.runContract, this.myAccount).then(async equips => {
-				
+
 						this.getequipsImg(equips);
 					})
 					uni.showToast({
@@ -441,24 +471,22 @@ console.log("已经穿了"+equips[2].id);
 			},
 			//卡片确认选择
 			async choosecard() {
-				if(this.cardId==0)
-				{
+				if (this.cardId == 0) {
 					uni.showToast({
 						title: "未选中属性卡",
 						icon: "error"
 					})
 					return
 				}
-				if(this.currentCard.card.level>this.currentequips.equip.level)
-				{
+				if (this.currentCard.card.level > this.currentequips.equip.level) {
 					uni.showToast({
 						title: "卡片等级大于装备等级",
 						icon: "error"
 					})
 					return
 				}
-				console.log("当前装备ID:"+this.currentequips.id);
-				console.log("卡片ID:"+this.cardId);
+				console.log("当前装备ID:" + this.currentequips.id);
+				console.log("卡片ID:" + this.cardId);
 				uni.showLoading({
 					title: '绑定中...'
 				});
@@ -476,7 +504,7 @@ console.log("已经穿了"+equips[2].id);
 			},
 			//卡片点击事件
 			changeCard(item) {
-				this.currentCard =item;
+				this.currentCard = item;
 				this.cardId = parseInt(item.id);
 			},
 			// 获取装备图片绑定
@@ -486,18 +514,18 @@ console.log("已经穿了"+equips[2].id);
 				if (equips.length > 0) {
 					if (equips[0].img) {
 						this.equipsImgs[0].img = equips[0].img;
-					}else{
-						this.equipsImgs[0].img ='../../../static/chooseImg.png';
+					} else {
+						this.equipsImgs[0].img = '../../../static/chooseImg.png';
 					}
 					if (equips[1].img) {
 						this.equipsImgs[1].img = equips[1].img;
-					}else{
-						this.equipsImgs[1].img ='../../../static/chooseImg.png';
+					} else {
+						this.equipsImgs[1].img = '../../../static/chooseImg.png';
 					}
 					if (equips[2].img) {
 						this.equipsImgs[2].img = equips[2].img;
-					}else{
-						this.equipsImgs[2].img ='../../../static/chooseImg.png';
+					} else {
+						this.equipsImgs[2].img = '../../../static/chooseImg.png';
 					}
 				}
 			},
@@ -532,31 +560,66 @@ console.log("已经穿了"+equips[2].id);
 			},
 			//获取绑定的卡片
 			async getEquitCard(index) {
-				console.log("装备id"+this.equipId);
+				console.log("装备id" + this.equipId);
 				getBindCards(this.runContract, this.equipId).then(async cards => {
 					if (cards[0].img) {
 						this.cards[0].img = cards[0].img;
+					} else {
+						this.cards[0].img = '../../../static/Group12032.png';
 					}
 					if (cards[1].img) {
 						this.cards[1].img = cards[1].img;
+					} else {
+						this.cards[1].img = '../../../static/Group12032.png';
 					}
 					if (cards[2].img) {
 						this.cards[2].img = cards[2].img;
+					} else {
+						this.cards[2].img = '../../../static/Group12032.png';
 					}
-					console.log("当前装备卡片:" + cards);
+					console.log("当前装备卡片:" + cards[0].id);
 				})
+			},
+			
+			//获取绑定的卡片值累加
+			async getEquitCardValue(index) {
+				uni.showLoading({
+					title: '获取数据中...'
+				
+				})
+				console.log("装备id" + index);
+				getBindCards(this.runContract, index).then(async cards => {
+					if (cards[0].img) {
+						console.log("装备值" + cards[0].card.specialty);
+						this.specialty =this.specialty+parseInt(cards[0].card.specialty);
+						this.aesthetic =this.aesthetic+parseInt(cards[0].card.aesthetic);
+						this.comfort =this.comfort+parseInt(cards[0].card.comfort);
+					} 
+					if (cards[1].img) {
+						this.specialty =this.specialty+parseInt(cards[1].card.specialty);
+						this.aesthetic =this.aesthetic+parseInt(cards[1].card.aesthetic);
+						this.comfort =this.comfort+parseInt(cards[1].card.comfort);
+					} 
+					if (cards[2].img) {
+						this.specialty =this.specialty+parseInt(cards[2].card.specialty);
+						this.aesthetic =this.aesthetic+parseInt(cards[2].card.aesthetic);
+						this.comfort =this.comfort+parseInt(cards[2].card.comfort);
+					} 
+					
+				})
+				uni.hideLoading();
 			},
 			//装备点击详情
 			async chooseEquipDia(index) {
-console.log(index);
+				console.log(index);
 				this.curequipIndex = index;
-				
+
 				this.shoeEquips = [];
 				this.pantEquips = [];
 				this.waistEquips = [];
-				this.getEquitCard(index);
 
-				
+
+
 				for (var i = 0; i < this.myEquips.length; i++) {
 					if (this.myEquips[i].equip.equipType == 0) {
 						this.shoeEquips.push(this.myEquips[i]);
@@ -588,17 +651,17 @@ console.log(index);
 					}
 					this.$refs.chooseEquipDialog.open() //装备筛选
 				} else {
-					
 					this.currentequips = this.equips[index];
-					this.equipId =this.equips[index].id;
-					console.log("装备ID:"+this.equipId);
+					this.equipId = this.equips[index].id;
+					console.log("装备ID:" + this.equipId);
+					this.getEquitCard(index);
 					this.$refs.equipInfo.open()
 					//打开装备详情
 				}
 
 
 			},
-			
+
 
 			async approve() {
 
@@ -630,16 +693,14 @@ console.log(index);
 				console.log(val)
 				var isAddress = ethers.utils.isAddress(val);
 				try {
-					if(!isAddress)
-					{
+					if (!isAddress) {
 						uni.showToast({
 							title: "激活码错误",
 							icon: "error"
 						})
-						
-						return 
+
+						return
 					}
-					debugger
 					let tx = await this.contract.addReferrerWithCheck(val)
 					console.log(tx.hash)
 					uni.showLoading({
@@ -703,7 +764,6 @@ console.log(index);
 						this.myAccount = await provider.send("eth_requestAccounts", []);
 						const signer = provider.getSigner();
 						var balance = await signer.getBalance();
-						debugger
 						let readercontract = new ethers.Contract(refStoreAddress, refAbi, provider);
 						this.contract = readercontract.connect(signer)
 						// console.log("accc",this.myAccount[0])
@@ -747,7 +807,7 @@ console.log(index);
 						success: res => {
 							if (res.data.code === 0) {
 								this.getSteps = res.data.data.steps
-								 getApp().globalData.userStep =this.getSteps;
+								getApp().globalData.userStep = this.getSteps;
 								this.check_sum = res.data.data.check_sum
 							}
 						}
@@ -1003,7 +1063,7 @@ console.log(index);
 	}
 
 	.idvalue {
-		margin-left: 8rem;
+		margin-left: 7.5rem;
 	}
 
 	.idvalue2 {
