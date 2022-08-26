@@ -27,9 +27,9 @@ export function getDay(day) {
 	var tDate = today.getDate();
 	tMonth = doHandleMonth(tMonth + 1);
 	tDate = doHandleMonth(tDate);
-	var time = today.toTimeString()
-	// return tYear + "" + tMonth + "" + tDate +time.substring;
-	return today.toLocaleString()
+	var time = today.toTimeString().substring(0,8)
+	return tYear + "-" + tMonth + "-" + tDate +" "+time;
+	// return today.toLocaleString()
 }
 export function doHandleMonth(month) {
 	var m = month;
