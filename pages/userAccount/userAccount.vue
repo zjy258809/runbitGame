@@ -49,7 +49,7 @@
 							<view @tap="recordList(1)" :class="curList == 1 ? 'recordList' : 'recordList2'">歷史記錄</view>
 						</view>
 						<view v-if="curList == 0">
-							<view style="" class="text" v-for="(item, index) in data" :key="index">
+							<view style="" class="text" v-for="(item, index) in pending" :key="index">
 								<uni-card title="" extra=""
 									style="width: 90%; border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
 
@@ -65,10 +65,10 @@
 
 								</uni-card>
 							</view>
-							<img class="nocard" v-show="data.length == 0" src="../../static/Group12015.png" />
+							<img class="nocard" v-show="pending.length == 0" src="../../static/Group12015.png" />
 						</view>
 						<view v-if="curList == 1">
-							<view style="" v-show="data2.length > 0" class="text" v-for="(item, index) in data2"
+							<view style="" v-show="history.length > 0" class="text" v-for="(item, index) in history"
 								:key="index">
 								<uni-card title="" extra=""
 									style="width: 90%; border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
@@ -85,7 +85,7 @@
 
 								</uni-card>
 							</view>
-							<img class="nocard" v-show="data2.length == 0" src="../../static/Group12015.png" />
+							<img class="nocard" v-show="history.length == 0" src="../../static/Group12015.png" />
 						</view>
 
 
@@ -99,7 +99,7 @@
 
 							<view class="curId uni-flex uni-row">
 								<view class="level ">未領取收益</view>
-								<view class="rare" style="color: #FF5C00;">{{ unclaimReward }} RB</view>
+								<view class="rare" style="color: #FF5C00;">{{ big2num(unclaimReward) }} RB</view>
 							</view>
 							<view
 								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -119,17 +119,19 @@
 						</uni-card>
 						<img class="gp5" @tap="claim" src="../../static/Group11571.png" />
 
-						<view @tap="recordList(0)" class="recordList">收益記錄</view>
-						<view style="" class="text" v-for="(item, index) in data" :key="index">
+						<view @tap="recordList(0)" class="recordList">收益記錄 <img class="leLogo"
+								src="../../static/Group15-1.png" @click="getHarvest(-1)" /></view>
+						<view style="" class="text" v-for="(item, index) in harvest" :key="index">
 							<uni-card title="" extra=""
 								style="width: 90%; border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
 
 
 								<view class="curId uni-flex uni-row">
-									<view class="level4">{{ item.time }}</view>
-									<view class="level3">{{ item.num }}</view>
+									<view class="level4">{{ block2date(index) }}</view>
+									<view class="level3">{{ item.amount }}RB </view>
 									<img class="leLogo"
-										:src="index % 2 == 0 ? '../../static/Group15-1.png' : '../../static/Group15.png'" />
+										:src="item.status == 0 ? '../../static/Group15-1.png' : '../../static/Group15.png'"
+										@click="getHarvest(index)" />
 								</view>
 
 
@@ -148,7 +150,7 @@
 							<view @tap="openRb" class="curId uni-flex uni-row">
 								<image class="smicon " src="../../static/Group120121.png"></image>
 								<view class="level ">RB</view>
-								<view class="rare">20000</view>
+								<view class="rare">{{ lottery.rb }}</view>
 							</view>
 							<view
 								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -157,7 +159,7 @@
 							<view class="curId uni-flex uni-row">
 								<image class="smicon " src="../../static/Group120122.png"></image>
 								<view class="level ">属性卡碎片</view>
-								<view class="rare">20</view>
+								<view class="rare">{{ lottery.rbct }}</view>
 							</view>
 							<view
 								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -166,38 +168,39 @@
 							<view class="curId uni-flex uni-row">
 								<image class="smicon " src="../../static/Group120671.png"></image>
 								<view class="level ">裝備碎片</view>
-								<view class="rare">20</view>
+								<view class="rare">{{ lottery.rbet }}</view>
 							</view>
 
 
 						</uni-card>
 
 						<view @tap="recordList(0)" class="recordList">獲獎記錄</view>
-						<view style="" class="text" v-for="(item, index) in data" @tap="winClick" :key="index">
+						<view style="" class="text" v-for="(item, index) in lotteryRec"  :key="index">
 							<uni-card title="" extra=""
 								style="width: 90%; border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
 
 
 								<view class="curId uni-flex uni-row">
-									<view class="level4">{{ item.time }}</view>
+									<view class="level4">{{ block2date(index) }}</view>
 
 									<img class="leLogo2"
-										:src="index % 2 == 0 ? '../../static/Group15-1.png' : '../../static/Group15.png'" />
+										:src="item.status == 0 ? '../../static/Group15-1.png' : '../../static/Group15.png'"
+										@click="winClick(item.status,index)" />
 								</view>
 
 								<view class="uni-flex uni-row">
 									<view class="level4 uni-flex uni-row">
 										<image class="smicon " src="../../static/Group120121.png"></image>
-										<view style="margin-left: 0.325rem;">3000</view>
+										<view style="margin-left: 0.325rem;">{{ item.rb }}</view>
 									</view>
 									<view class="level3-2 uni-flex uni-row">
 										<image class="smicon " src="../../static/Group120122.png"></image>
-										<view style="margin-left: 0.325rem;">3000</view>
+										<view style="margin-left: 0.325rem;">{{ item.rbct }}</view>
 									</view>
 
 									<view class="level4 uni-flex uni-row">
 										<image class="smicon " src="../../static/Group120671.png"></image>
-										<view style="margin-left: 0.325rem;">3000</view>
+										<view style="margin-left: 0.325rem;">{{ item.rbet }}</view>
 									</view>
 								</view>
 
@@ -219,24 +222,24 @@
 
 
 				<uni-popup-dialog ref="inputClose" mode="base" :mask-click="true" cancelText="取消" confirmText="領取"
-					title="通知" value="对话框预置提示内容!" placeholder="請輸入內容" @confirm="dialogInputConfirm2">
+					title="通知" value="对话框预置提示内容!" placeholder="請輸入內容" @confirm="getLottery(lotindex)">
 					<view>
 
 
-						<view style="width: 100%; margin: 10px auto;">
+						<view v-if="lotindex" style="width: 100%; margin: 10px auto;" >
 							<view class="id4">恭喜中獎！本次獲得</view>
-							<view class="uni-flex uni-row">
+							<view class="uni-flex uni-row" >
 								<view class="win1 ">
 									<image class="smicon win1Logo" src="../../static/Group120121.png"></image>
-									<view style="margin-left: 0.325rem;">3000</view>
+									<view style="margin-left: 0.325rem;">{{lotteryRec[lotindex].rb}}</view>
 								</view>
 								<view class="win1 ">
 									<image class="smicon win1Logo" src="../../static/Group120122.png"></image>
-									<view style="margin-left: 0.325rem;">3000</view>
+									<view style="margin-left: 0.325rem;">{{lotteryRec[lotindex].rbct}}</view>
 								</view>
 								<view class="win1 ">
 									<image class="smicon win1Logo" src="../../static/Group120671.png"></image>
-									<view style="margin-left: 0.325rem;">3000</view>
+									<view style="margin-left: 0.325rem;">{{lotteryRec[lotindex].rbet}}</view>
 								</view>
 							</view>
 							<view class="id4">將直接方法至您的帳戶!</view>
@@ -262,62 +265,26 @@ import {
 	RBCTAddress,
 	RBETAddress,
 	RBCTAbi,
-	RBETAbi,
-	USDT, USDTAbi
+	RBETAbi, RunbitAddress, RunbitAbi
 } from '../../contract/address.js'
 import {
 	useContract,
-	getApproveState,
-	contractApprove
 } from '../../contract/useContract.js'
 import {
-	big2num
+	big2num, displayDate, getDay
 } from '../../contract/ultis.js'
+import { myRequest } from '../../utils/api.js'
 
 export default {
 	data() {
 		return {
 			curList: 0,
 			curNow: 0,
-			data: [{
-				lable: '0x14..SD12',
-				num: '1000 RB',
-				time: '2022-08-17'
-			},
-			{
-				lable: '0x14..SD14',
-				num: '2000 RB',
-				time: '2022-08-17'
-			},
-			{
-				lable: '0x14..7D14',
-				num: '1000 RB',
-				time: '2022-08-17'
-			},
-			{
-				lable: '0x14..SD24',
-				num: '5000 RB',
-				time: '2022-08-17'
-			},
-			],
+			pending: [],
+			history: [],
+			harvest: {},
 
-			data2: [{
-				lable: '0x14..SD12',
-				num: '1000 RB',
-				time: '2022-08-17'
-			},
-			{
-				lable: '0x14..SD14',
-				num: '2000 RB',
-				time: '2022-08-17'
-			},
-			{
-				lable: '0x14..7D14',
-				num: '1000 RB',
-				time: '2022-08-17'
-			},
-
-			],
+			lotteryRec: {},
 
 			list: ['錢包', '收益', '抽獎'],
 			balanceOfRB: 0,
@@ -325,62 +292,216 @@ export default {
 			balanceofRBET: 0,
 			balanceofUSDT: 0,
 			unclaimReward: 0,
-			claimedReward: 0
+			claimedReward: 0,
+			startDate: '2022-08-25 21:00:00',
+			endDate: '2022-08-25 22:00:00',
+			lottery: {
+				rb: 10,
+				rbct: 20,
+				rbet: 30
+			},
+			lotindex:''
+
 		}
 	},
 
 	onLoad() {
 		var that = this;
 		try {
+			//按小时算，默认查询近7个小时数据，包含当前小时
+			this.endDate = getDay(0)
+			this.startDate = getDay(-20)
 
+
+			var start = this.date2block(this.startDate)
+			var end = this.date2block(this.endDate)
+			// console.log("block------", start, "end--", end)
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 			provider.send("eth_requestAccounts", []).then(accounts => {
 				this.myAccount = accounts[0]
+				//获取已收获记录
+				// myRequest({
+				// 	url: 'game/getRBClaim',
+				// 	data: {
+				// 		addr: this.myAccount,
+				// 		// start: start,
+				// 		// end: end
+				// 	}
+				// }).then(data => {
+				// 	for (let re of data.list) {
+				// 		var item = {}
+				// 		item.amount = re.amount
+				// 		item.status = 1
+				// 		console.log("-------", re)
+				// 		this.harvest[this.date2block(re.create_time)] = item
+				// 	}
+				// 					console.log('luck', this.harvest)
+				// })
+
 				useContract(RunbitAddress, RunbitAbi).then(runContract => {
 					this.runContract = runContract
-// this.runContract.isLucky(this.myAccount,(1661097600+28800)/86400)
-				});
-				useContract(RBAddress, RBAbi).then(RBContract => {
-					//获取rb余额
-					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
-						this.balanceOfRB = big2num(balanceOfRB)
-					})
+					for (let day = end; day >= start; day--) {
+						this.runContract.getUserState(this.myAccount, day).then(res => {
 
-				});
-				//获取属性卡碎片
-				useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
-					this.RBCTContract = RBCTContract
-					RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
-						this.balanceofRBCT = parseInt(balanceofRBCT)
-					})
-				});
-				//获取装备碎片
-				useContract(RBETAddress, RBETAbi).then(RBETContract => {
-					this.RBETContract = RBETContract
-					RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
-						this.balanceofRBET = parseInt(balanceofRBET)
-					})
+							//未收获
+								this.runContract.getUnharvestReward(this.myAccount, day).then(rew => {
+									if (big2num(rew)) {
+										var data = {}
+										data.amount = big2num(rew)
+										data.status = res.status
+										this.harvest[day] = data
+									}
+								})
+							
+							//有步数查询是否中奖，抽奖状态
+							if (!res.lastSteps.eq(0)) {
+								this.runContract.isLucky(this.myAccount, day).then(lott => {								
+									if (!lott[0].eq(0) && !lott[1].eq(0) && !lott[2].eq(0)) {
+									//中奖
+									var data = {}
+									data.rb = big2num(lott[0])
+									data.rbct = lott[1]
+									data.rbet = lott[2]
+									data.status = res.lottery
+
+							console.log("state------", lott)
+									this.lotteryRec[day] = data
+
+									}
+								})
+							}
+						})
+
+					}
 				})
-				//获取USDT余额
-				useContract(USDT, USDTAbi).then(USDTContract => {
-					USDTContract.balanceOf(this.myAccount).then(balanceofUSDT => {
-						this.balanceofUSDT = parseInt(balanceofUSDT)
-					})
+			});
+			useContract(RBAddress, RBAbi).then(RBContract => {
+				//获取rb余额
+				RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
+					this.balanceOfRB = big2num(balanceOfRB)
 				})
-				//获取交易记录
+
+			});
+			//获取属性卡碎片
+			useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
+				this.RBCTContract = RBCTContract
+				RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
+					this.balanceofRBCT = parseInt(balanceofRBCT)
+				})
+			});
+			//获取装备碎片
+			useContract(RBETAddress, RBETAbi).then(RBETContract => {
+				this.RBETContract = RBETContract
+				RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
+					this.balanceofRBET = parseInt(balanceofRBET)
+				})
 			})
+			//获取USDT余额
+			// useContract(USDT, USDTAbi).then(USDTContract => {
+			// 	USDTContract.balanceOf(this.myAccount).then(balanceofUSDT => {
+			// 		this.balanceofUSDT = parseInt(balanceofUSDT)
+			// 	})
+			// })
+			//获取交易记录
+			// provider.getBlock().then(block => {
+			// 	// console.log("------time", (block.timestamp + 28800) / 3600)
+
+			// })
+			setTimeout(() => {
+
+			}, 5000);
 		} catch (e) {
 			console.error(e);
 		}
 	},
-	methods: {
+	methods:
+	{
+		big2num,
+		async getLottery(index) {
+			uni.showLoading({
+				title: '正在收获...',
+				mask: true
+			})
+			try {
+				this.runContract.lottery(index).then(res => {
+					uni.hideLoading()
+					uni.showToast({
+						title: '获取成功',
+						mask: true,
+						icon: 'success'
+					})
+				})
+
+			} catch (e) { } finally { uni.hideLoading() }
+		},
+		async getLotterySum() {
+			await myRequest({
+				url: 'game/getLotteryTotal',
+				data: {
+					addr: this.myAccount,
+					// start: start,
+					// end: end
+				}
+			}).then(data => {
+				this.lottery.rb = data.rb ? data.rb : 0
+				this.lottery.rbct = data.rbct ? data.rbct : 0
+				this.lottery.rbet = data.rbet ? data.rbet : 0
+
+			})
+		},
+		async getHarvest(index) {
+			//一键收获
+			if (index == -1) {
+				//提示框，是否继续
+				uni.showLoading({
+					title: '一键收获...',
+					mask: true
+				})
+				var start = this.date2block(this.startDate)
+				var end = this.date2block(this.endDate) + 1
+			} else {
+				var start = index
+				var end = index + 1
+
+			}
+			uni.showLoading({
+				title: '正在收获...',
+				mask: true
+			})
+			try {
+				this.runContract.harvest(start, end).then(res => {
+					uni.hideLoading()
+					uni.showToast({
+						title: '获取成功',
+						mask: true,
+						icon: 'success'
+					})
+				})
+
+			} catch (e) { } finally { uni.hideLoading() }
+
+		},
+		block2date(block) {
+			let date = new Date((block * 3600 - 28800) * 1000)
+			let month = date.getMonth() + 1
+			return date.getFullYear() + '-' + month + '-' + date.getDate()
+		},
+		date2block(date) {
+			return Math.trunc((new Date(date).getTime() / 1000 + 28800) / 3600)
+		},
+
 		//切换tab
 		sectionChange(index) {
 			this.curNow = index;
 			//加载收益
 			if (index === 1) {
 				this.getUnclaimReward()
+				this.getClaimedReward()
+			}
+			if (index == 2) {
+
+				this.getLotterySum()
 			}
 
 		},
@@ -402,8 +523,9 @@ export default {
 				url: '../userSetting/userSetting'
 			});
 		},
-		winClick() {
-			this.$refs.inputDialog2.open()
+		winClick(status,index) {
+			if(!status)this.$refs.inputDialog2.open()
+			this.lotindex = index
 		},
 		/**钱包相关 */
 
@@ -416,10 +538,26 @@ export default {
 
 		},
 		//已领取记录
-
+		async getClaimedReward() {
+			await myRequest({
+				url: 'game/getEarningsTotal',
+				data: {
+					addr: this.myAccount
+				}
+			}).then(res => {
+				this.claimedReward = res
+			})
+		},
 		//领取收益
 		async claim() {
-			let tx = await this.runContract.claim(this.unclaimReward,this.myAccount)
+			if (this.unclaimReward == 0) {
+				uni.showToast({
+					title: "无可领取收益",
+					icon: "none"
+				})
+				return
+			}
+			let tx = await this.runContract.claim(this.unclaimReward, this.myAccount)
 			try {
 				tx.wait().then(res => {
 					uni.showToast({
@@ -437,11 +575,7 @@ export default {
 		},
 		//收益记录
 
-		/**抽奖 */
-		//查看是否获奖，获奖内容
-		isLucky(){
-			this.runContract.isLucky()
-		},
+
 
 
 
@@ -624,7 +758,6 @@ export default {
 
 .rare {
 	color: #000;
-	width: 180.55rpx;
 	height: 50.72rpx;
 	text-align: center;
 	position: absolute;
