@@ -28,7 +28,7 @@
 
 						</view>
 						<oct-goods v-if="equipCollect.length>0" :lists="equipCollect" price-type="$" @onGoods="onGoods" />
-						<img v-if="equipCollect.length==0" class="nocard"  src="../../../static/Group12015.png" />
+						<img v-if="equipCollect.length==0" class="nocard"  src="../../../static/Group120151.png" />
 					</view>
 					<view v-if="curNow === 1" style="background:#FFFDEC">
 						<view class="uni-flex uni-row"
@@ -39,7 +39,7 @@
 
 						</view>
 						<cardItem v-if="cardCollect.length>0" :lists="cardCollect" price-type="$" @onGoods="onGoods2" />
-						<img v-if="cardCollect.length==0" class="nocard"  src="../../../static/Group12015.png" />
+						<img v-if="cardCollect.length==0" class="nocard"  src="../../../static/Group120151.png" />
 
 					</view>
 				</view>

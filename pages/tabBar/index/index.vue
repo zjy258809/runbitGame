@@ -381,13 +381,12 @@
 						console.log("myAccount ",this.myAccount)
 						console.log("curDay ",this.curDay)
 						getUserState(this.runContract,this.myAccount,this.curDay).then(date => {
-							alert(date.lastSteps);
 							this.steps =parseInt(date.lastSteps);
 							
 						})
 						getUnharvestReward(this.runContract, this.myAccount,this.curDay).then(
 							ForgeFee => {
-								this.reward = ForgeFee
+								this.reward = ForgeFee/1000000000000000000
 								console.log(this.reward);
 							})
 						//获取装备,0代表没装备

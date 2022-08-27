@@ -29,7 +29,7 @@
 
 						</view>
 						<mineEquip v-if="myEquips.length>0" :lists="myEquips" price-type="$" @onGoods="Clickequip" />
-						<img v-if="myEquips.length==0" class="nocard"  src="../../../static/Group12015.png" />
+						<img v-if="myEquips.length==0" class="nocard"  src="../../../static/Group120151.png" />
 					</view>
 					<view v-if="curNow === 1">
 						<view class="uni-flex uni-row"
@@ -42,7 +42,7 @@
 
 						</view>
 						<mineEquip  v-if="myCards.length>0" :lists="myCards" price-type="$" @onGoods="clickCard" />
-						<img v-if="myCards.length==0" class="nocard"  src="../../../static/Group12015.png" />
+						<img v-if="myCards.length==0" class="nocard"  src="../../../static/Group120151.png" />
 						<!-- <oct-goods :lists="goodsArr" price-type="$" @onGoods="onGoods2" /> -->
 
 					</view>
