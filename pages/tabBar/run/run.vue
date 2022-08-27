@@ -28,7 +28,6 @@
 
 						</view>
 						<oct-goods v-if="equipCollect.length>0" :lists="equipCollect" price-type="$" @onGoods="onGoods" />
-						<img v-if="equipCollect.length==0" class="nocard"  src="../../../static/Group120151.png" />
 					</view>
 					<view v-if="curNow === 1" style="background:#FFFDEC">
 						<view class="uni-flex uni-row"
@@ -39,7 +38,6 @@
 
 						</view>
 						<cardItem v-if="cardCollect.length>0" :lists="cardCollect" price-type="$" @onGoods="onGoods2" />
-						<img v-if="cardCollect.length==0" class="nocard"  src="../../../static/Group120151.png" />
 
 					</view>
 				</view>
@@ -150,6 +148,15 @@
 			</uni-popup>
 
 		</view>
+		
+		<!-- 激活码弹框 -->
+		<view>
+			<!-- 输入框示例 -->
+			<uni-popup ref="isopen" type="dialog">
+				<uni-popup-dialog ref="inputClose" mode="input" :before-close="true" title="通知" placeholder="请输入激活码"
+					@confirm="isopenDialog"></uni-popup-dialog>
+			</uni-popup>
+		</view>
 
 		<!-- 购买卡片弹框 -->
 		<view>
@@ -168,11 +175,11 @@
 						</view>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">购买价格(RB)</view>
-							<view class="idvalue3">{{currentCard.card.price1/100000000000000000}}</view>
+							<view class="idvalue3">{{currentCard.card.price0}}</view>
 						</view>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
-							<view class="flex-item id3">兑换价格(RB)</view>
-							<view class="idvalue3">{{currentCard.card.price0}}</view>
+							<view class="flex-item id3" style="width: 438.88rpx;">兑换价格(RBCT)</view>
+							<view class="idvalue3">{{currentCard.card.price1/1000000000000000000}}</view>
 						</view>
 
 					</view>
@@ -256,7 +263,7 @@
 				equipCollect: [],
 				equipCollectImgs: [],
 				buttonRect: {},
-				baseurl: 'http://192.168.1.201:8866/api/v1/',
+				baseurl: 'https://gapi.runbit.org/api/v1/',
 				value: 10,
 				carvalue:10,
 				carRange: [{
@@ -311,7 +318,8 @@
 				contract: null,
 				RBETContract: null,
 				RBCTContract: null,
-				RBContract: null
+				RBContract: null,
+				refContract:null
 			}
 		},
 		mounted() {
@@ -328,6 +336,20 @@
 				provider.send("eth_requestAccounts", []).then(accounts => {
 					this.myAccount = accounts[0]
 					this.userAccount = hideBankCards(accounts[0]);
+					
+					//判断是否需要填激活码
+					useContract(refStoreAddress, refAbi).then(refContract => {
+						this.refContract =refContract;
+						refContract.referrer(this.myAccount).then(refer => {
+					
+							if (refer === '0x0000000000000000000000000000000000000000') {
+								this.$refs.isopen.open();
+							} 
+					
+						})
+					
+					})
+					
 					//加载属性卡和装备库
 					useContract(RunbitCollectionAddress, RunbitCollectionAbi).then(collectContract => {
 						this.collectContract = collectContract
@@ -396,6 +418,37 @@
 			}
 		},
 		methods: {
+			// 激活码激活
+			async isopenDialog(val) {
+				console.log(val)
+				var isAddress = ethers.utils.isAddress(val);
+				try {
+					if (!isAddress) {
+						uni.showToast({
+							title: "激活码错误",
+							icon: "error"
+						})
+			
+						return
+					}
+					let tx = await this.refContract.addReferrerWithCheck(val)
+					console.log(tx.hash)
+					uni.showLoading({
+						title: '请稍等...'
+					})
+					tx.wait().then(res => {
+						uni.hideLoading()
+						this.$refs.isopen.close();
+						uni.showToast({
+							title: "激活成功",
+							icon: "success"
+						})
+					})
+				} catch (e) {
+					console.error(e)
+				}
+			
+			},
 			openUser() {
 				uni.navigateTo({
 					url: '../../userAccount/userAccount'
@@ -501,7 +554,7 @@
 				this.collectionId = index;
 				this.currentCard = this.cardCollect[index];
 				this.currentprice0 = this.currentCard.card.price0;
-				this.currentprice1 = this.currentCard.card.price1 / 100000000000000000;
+				this.currentprice1 = this.currentCard.card.price1 / 1000000000000000000;
 				this.currentcover = this.currentCard.cover;
 				this.$refs.inputDialog3.open()
 			},
@@ -593,7 +646,7 @@
 
 					success: function(res) {
 						if (res.data.code == 0) {
-							imgs = "http://218.17.157.9:8866/images/" + res.data.data;
+							imgs = "https://gapi.runbit.org/images/" + res.data.data;
 
 						}
 						if (img_type == 1) {
@@ -715,12 +768,17 @@
 						await contractApprove(this.RBCTContract, RunbitCollectionAddress)
 						this.approveRBCT = true
 						console.log("approveRBCT", this.approveRBCT)
+						uni.showLoading({
+							title: '开始授权...'
+						});
 						uni.showToast({
-							title: "授权中,授权后重新兑换",
-							icon: "none"
+							title: "授权成功,重新兑换",
+							icon: "success"
 						})
-						return;
+						return
 					}
+					uni.hideLoading();
+					
 					this.$refs.inputDialog2.open()
 					//已授权
 					let tx = await contract.redeemCard(cardId)
@@ -743,6 +801,9 @@
 			async redeemEquip(contract, collectionId) {
 				try {
 					if (!this.approveRBET) {
+						uni.showLoading({
+							title: '开始授权...'
+						});
 						console.log("开始授权----" + collectionId);
 
 						await contractApprove(this.RBETContract, RunbitCollectionAddress)
@@ -753,8 +814,9 @@
 							title: "授权中",
 							icon: "none"
 						})
-						return
+						
 					}
+					uni.hideLoading();
 					console.log("装备兑换开始----" + collectionId);
 
 					this.$refs.inputDialog2.open()
@@ -763,11 +825,12 @@
 					console.log(tx.hash)
 					tx.wait().then(res => {
 						console.log("装备兑换成功----" + collectionId);
+						
+						this.$refs.inputDialog2.close()
 						uni.showToast({
 							title: "兑换成功",
 							icon: "success"
 						})
-						this.$refs.inputDialog2.close()
 						//兑换成功的一些操作，如关闭loading
 					})
 

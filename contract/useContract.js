@@ -22,7 +22,7 @@ return tokenContract.allowance(account, spender)
 }
 export async function contractApprove(tokenContract,spender) {
 
-			let tx = tokenContract.approve(spender, '100000000000000000000000000000')
+			 let tx = tokenContract.approve(spender, '100000000000000000000000000000')
 			//设置授权时的loading
 			return tx
 

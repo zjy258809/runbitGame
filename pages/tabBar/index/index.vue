@@ -3,7 +3,7 @@
 
 		<view class="bg">
 
-			<view class="uni-flex uni-row"  @tap="openUser"  style="margin: 1.425rem; height: 89.44rpx; ">
+			<view class="uni-flex uni-row" @tap="openUser" style="margin: 1.425rem; height: 89.44rpx; ">
 				<img src="../../../static/heard.png" style="width:3rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
 				<view class="currentbs">{{getSteps}}步</view>
@@ -17,7 +17,7 @@
 
 			<view class="person">
 				<img class="user_person" src="../../../static/grounp-5-2.png"></img>
-				<view @tap="inputDialogToggle()" class="userlogo" >{{stack}}</view>
+				<view @tap="inputDialogToggle()" class="userlogo">{{stack}}</view>
 				<view class="user_person_item uni-flex uni-column">
 					<img class="gp11 " @tap="chooseEquipDia(2)" :src="equipsImgs[2].img" />
 					<img class="gp12" @tap="chooseEquipDia(1)" :src="equipsImgs[1].img" />
@@ -26,7 +26,7 @@
 			</view>
 
 
-			<uni-card title="" extra="" style="width: 70%; margin: 1rem auto;">
+			<uni-card title="" extra="" style="width: 70%; margin: 50rpx auto;">
 				<view class="uni-flex uni-row">
 					<img class="currentImg2" src="../../../static/Vector14.png" />
 
@@ -51,7 +51,7 @@
 
 			</uni-card>
 
-			<uni-card title="" extra="" style="width: 70%; margin: 0.225rem auto;">
+			<uni-card title="" extra="" style="width: 70%; margin: 0rem auto;">
 				<view class="uni-flex uni-row">
 					<img class="currentImg2" src="../../../static/Frame 11972.png" />
 
@@ -83,9 +83,12 @@
 					@confirm="dialogInputConfirm">
 					<view>
 
-						<image :class="setTrackId==0?'ondialogimg':'dialogimg'" src="../../../static/Group11595.png" @click="chooseTrack(0)"></image>
-						<image :class="setTrackId==1?'ondialogimg':'dialogimg'" src="../../../static/Group12072.png" @click="chooseTrack(1)"></image>
-						<image :class="setTrackId==2?'ondialogimg':'dialogimg'" src="../../../static/Group12073.png" @click="chooseTrack(2)"></image>
+						<image :class="setTrackId==0?'ondialogimg':'dialogimg'" src="../../../static/Group11595.png"
+							@click="chooseTrack(0)"></image>
+						<image :class="setTrackId==1?'ondialogimg':'dialogimg'" src="../../../static/Group12072.png"
+							@click="chooseTrack(1)"></image>
+						<image :class="setTrackId==2?'ondialogimg':'dialogimg'" src="../../../static/Group12073.png"
+							@click="chooseTrack(2)"></image>
 					</view>
 				</uni-popup-dialog>
 
@@ -132,7 +135,7 @@
 		<view>
 			<uni-popup ref="equipInfo" type="dialog">
 				<uni-popup-dialog ref="inputClose" :mask-click="true" cancelText="卸下" confirmText="确认" title="裝備信息"
-					value="對話框預置提示內容!" placeholder="請輸入內容" @close="unEquip" >
+					value="對話框預置提示內容!" placeholder="請輸入內容" @close="unEquip">
 					<view>
 
 						<img class="cards2" :src="currentequips.img" />
@@ -253,11 +256,11 @@
 	export default {
 		data() {
 			return {
-				stack:'烈日沙滩',
-				reward:0,
-				specialty:0, //功能
-				aesthetic:0, //美观
-				comfort:0, //舒适
+				stack: '烈日沙滩',
+				reward: 0,
+				specialty: 0, //功能
+				aesthetic: 0, //美观
+				comfort: 0, //舒适
 				equipsImgs: [{
 						img: '../../../static/chooseImg.png',
 					},
@@ -319,13 +322,14 @@
 				rpcaddr: '',
 				myAccount: '',
 				layerAbi: '',
-				curDay:'',
+				curDay: '',
 				collectContract: null,
 				approveState: true,
 				steps: 0,
 				equipContract: null,
 				cardContract: null,
-				setTrackId:0,
+				setTrackId: 0,
+				gasPriceString: ''
 			}
 		},
 		onLoad() {
@@ -343,34 +347,44 @@
 
 				})
 				const provider = new ethers.providers.Web3Provider(window.ethereum);
-				             provider.getBlock().then(block => {
-					this.curDay = parseInt((block.timestamp + 28800) / 3600);
+				provider.getBlock().then(block => {
+					this.curDay = parseInt((block.timestamp + 28800) / 86400);
 					this.lastStep
-					});
-				          
+				});
+
+				provider.getGasPrice().then((gasPrice) => {
+					// gasPrice is a BigNumber; convert it to a decimal string
+					this.gasPriceString = gasPrice.toString();
+
+
+
+				});
+
+
+
 				provider.send("eth_requestAccounts", []).then(accounts => {
 					this.myAccount = accounts[0];
 					uni.setStorageSync('myAccount', this.myAccount);
 
 					this.getStep();
 					this.userAccount = hideBankCards(accounts[0]);
-					
+
 
 					//判断是否需要填激活码		 
 					useContract(refStoreAddress, refAbi).then(refContract => {
 						this.contract = refContract;
 						refContract.referrer(this.myAccount).then(refer => {
 
-							if (refer === '0x0000000000000000000000000000000000000000'){
+							if (refer === '0x0000000000000000000000000000000000000000') {
 								this.$refs.isopen.open();
-								}else{
-									uni.setStorageSync('inviter', refer);
-								}
+							} else {
+								uni.setStorageSync('inviter', refer);
+							}
 
 						})
 
 					})
-					
+
 					useContract(RunbitAddress, RunbitAbi).then(async runContract => {
 						this.runContract = runContract
 						//获取赛道
@@ -378,28 +392,27 @@
 							this.trackId = id.toNumber()
 							console.log("trackid ", this.trackId)
 						})
-						console.log("myAccount ",this.myAccount)
-						console.log("curDay ",this.curDay)
-						getUserState(this.runContract,this.myAccount,this.curDay).then(date => {
-							this.steps =parseInt(date.lastSteps);
-							
+						console.log("myAccount ", this.myAccount)
+						console.log("curDay ", this.curDay)
+						getUserState(this.runContract, this.myAccount, this.curDay).then(date => {
+							this.steps = parseInt(date.lastSteps);
+
 						})
-						getUnharvestReward(this.runContract, this.myAccount,this.curDay).then(
+						console.log(this.curDay);
+						getUnharvestReward(this.runContract, this.myAccount, this.curDay).then(
 							ForgeFee => {
-								this.reward = ForgeFee/1000000000000000000
+								this.reward = (ForgeFee / 1000000000000000000).toFixed(2)
 								console.log(this.reward);
 							})
 						//获取装备,0代表没装备
 						getBindEquips(this.runContract, this.myAccount).then(async equips => {
 							console.log("已经穿了" + equips);
-							for(var i=0;i<equips.length;i++)
-							{
-								if(equips[i]!=0)
-								{
+							for (var i = 0; i < equips.length; i++) {
+								if (equips[i] != 0) {
 									//穿了装备
 									this.getEquitCardValue(equips[i].id);
 								}
-								
+
 							}
 							this.getequipsImg(equips);
 							uni.hideLoading();
@@ -436,11 +449,7 @@
 				});
 				//this.getMetamskConnect();
 				//测试
-				setTimeout(() => {
-					//点击装备获取卡槽情况
-					// var equipType =0 //上衣
 
-				}, 3000)
 
 
 			} catch (e) {
@@ -457,7 +466,7 @@
 					url: '../../userAccount/userAccount'
 				});
 			},
-			
+
 			async unEquip() {
 				uni.showLoading({
 					title: '装备卸下中...'
@@ -465,15 +474,16 @@
 				})
 				try {
 					let tx = await unbindEquip(this.runContract, this.curequipIndex)
+
 					await tx.wait()
+
 				} catch (e) {
 					console.error(e)
 					//todo 错误提示
 				} finally {
-					uni.hideLoading()
 					//获取装备,0代表没装备
 					getBindEquips(this.runContract, this.myAccount).then(async equips => {
-
+						console.log(equips);
 						this.getequipsImg(equips);
 					})
 					uni.showToast({
@@ -550,31 +560,34 @@
 			},
 			//装备筛选点击装备事件
 			onGoods(item) {
+
 				this.equipId = parseInt(item.id);
 			},
 			// 装备筛选确认选中绑定装备
 			async chooseEquip() {
+				var that = this;
 				uni.showLoading({
 					title: '装备绑定中...'
 
 				})
 				try {
+					console.log(this.equipId);
 					let tx = await bindEquip(this.runContract, this.equipId)
 					await tx.wait()
 				} catch (e) {
 					console.error(e)
 					//todo 错误提示
 				} finally {
-					uni.hideLoading()
 					//获取装备,0代表没装备
 					getBindEquips(this.runContract, this.myAccount).then(async equips => {
-
+						console.log(equips);
 						this.getequipsImg(equips);
 					})
 					uni.showToast({
-						title: "装备更新成功",
+						title: "装备绑定成功",
 						icon: "success"
 					})
+
 				}
 			},
 			//获取绑定的卡片
@@ -596,35 +609,35 @@
 					} else {
 						this.cards[2].img = '../../../static/Group12032.png';
 					}
-					console.log("当前装备卡片:" + cards[0].id);
+					
 				})
 			},
-			
+
 			//获取绑定的卡片值累加
 			async getEquitCardValue(index) {
 				uni.showLoading({
 					title: '获取数据中...'
-				
+
 				})
 				console.log("装备id" + index);
-				getBindCards(this.runContract, index).then(async cards => {
+				await getBindCards(this.runContract, index).then(async cards => {
 					if (cards[0].img) {
 						console.log("装备值" + cards[0].card.specialty);
-						this.specialty =this.specialty+parseInt(cards[0].card.specialty);
-						this.aesthetic =this.aesthetic+parseInt(cards[0].card.aesthetic);
-						this.comfort =this.comfort+parseInt(cards[0].card.comfort);
-					} 
+						this.specialty = this.specialty + parseInt(cards[0].card.specialty);
+						this.aesthetic = this.aesthetic + parseInt(cards[0].card.aesthetic);
+						this.comfort = this.comfort + parseInt(cards[0].card.comfort);
+					}
 					if (cards[1].img) {
-						this.specialty =this.specialty+parseInt(cards[1].card.specialty);
-						this.aesthetic =this.aesthetic+parseInt(cards[1].card.aesthetic);
-						this.comfort =this.comfort+parseInt(cards[1].card.comfort);
-					} 
+						this.specialty = this.specialty + parseInt(cards[1].card.specialty);
+						this.aesthetic = this.aesthetic + parseInt(cards[1].card.aesthetic);
+						this.comfort = this.comfort + parseInt(cards[1].card.comfort);
+					}
 					if (cards[2].img) {
-						this.specialty =this.specialty+parseInt(cards[2].card.specialty);
-						this.aesthetic =this.aesthetic+parseInt(cards[2].card.aesthetic);
-						this.comfort =this.comfort+parseInt(cards[2].card.comfort);
-					} 
-					
+						this.specialty = this.specialty + parseInt(cards[2].card.specialty);
+						this.aesthetic = this.aesthetic + parseInt(cards[2].card.aesthetic);
+						this.comfort = this.comfort + parseInt(cards[2].card.comfort);
+					}
+
 				})
 				uni.hideLoading();
 			},
@@ -663,7 +676,7 @@
 				{
 					if (this.EquipsList.length <= 0) {
 						uni.showToast({
-							title: "改部位没有装备",
+							title: "该部位没有装备",
 							icon: "error"
 						})
 						return
@@ -741,13 +754,6 @@
 					console.error(e)
 				}
 
-				// setTimeout(() => {
-				// 	uni.hideLoading()
-				// 	console.log(val)
-				// 	this.value = val
-				// 	// 关闭窗口后，恢复默认内容
-				// 	this.$refs.isopen.close()
-				// }, 3000)
 			},
 			// get() {
 			// 	if (window.ethereum) {
@@ -801,12 +807,12 @@
 			//选中赛道
 			chooseTrack(id) {
 				//更新选中的赛道
-				if(id==0)
-				this.stack="烈日沙滩"
-				if(id==1)
-				this.stack="芳草地"
-				if(id==2)
-				this.stack="石子路"
+				if (id == 0)
+					this.stack = "烈日沙滩"
+				if (id == 1)
+					this.stack = "芳草地"
+				if (id == 2)
+					this.stack = "石子路"
 				this.setTrackId = id
 				//todo 选中的赛道更新样式
 			},
@@ -826,7 +832,7 @@
 				//从接口获取最新步数
 				return new Promise((resolve, reject) => {
 					//todo 设置baseurl
-					this.baseurl = 'http://218.17.157.9:8866/api/v1/'
+					this.baseurl = 'https://gapi.runbit.org/api/v1/'
 					uni.request({
 						url: this.baseurl + 'game/getUserLastSteps',
 						data: {
@@ -926,7 +932,7 @@
 		margin: 0 auto;
 		display: inline-block;
 		margin: 1.25rem auto;
-
+		height: 120rpx;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -947,8 +953,8 @@
 		background: #FFEB34;
 		border: 1px solid #000000;
 		border-radius: 100px 0px 0px 100px;
-		
-		
+
+
 	}
 
 	.input_edi {
@@ -1069,7 +1075,7 @@
 
 	.person {
 		width: 30%;
-		height: 21rem;
+		height: 645.83rpx;
 		margin: 0 auto;
 	}
 
@@ -1145,14 +1151,14 @@
 		height: 248.88rpx;
 		padding: 6.94rpx;
 	}
-	
+
 	.ondialogimg {
 		display: block;
 		margin: 0 auto;
 		width: 408.33rpx;
 		height: 248.88rpx;
 		padding: 6.94rpx;
-			border: 2px solid red !important;
-			border-radius: 33.88rpx;
+		border: 2px solid red !important;
+		border-radius: 33.88rpx;
 	}
 </style>

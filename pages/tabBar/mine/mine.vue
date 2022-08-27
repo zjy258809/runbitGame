@@ -77,13 +77,6 @@
 								</view>
 							</view>
 
-
-
-
-
-
-
-
 						</uni-card>
 						<view class="curId2 uni-flex uni-row">
 							<view class="flex-item3">合成費用共計</view>
@@ -250,6 +243,15 @@
 			</uni-popup>
 
 		</view>
+		
+		<!-- 激活码弹框 -->
+		<view>
+			<!-- 输入框示例 -->
+			<uni-popup ref="isopen" type="dialog">
+				<uni-popup-dialog ref="inputClose" mode="input" :before-close="true" title="通知" placeholder="请输入激活码"
+					@confirm="isopenDialog"></uni-popup-dialog>
+			</uni-popup>
+		</view>
 
 	</view>
 </template>
@@ -377,6 +379,7 @@
 				RBContract: null,
 				balanceOfRB: 0,
 				bindCardIndex:0,
+				type:'',
 				card1: {
 					equip: {
 						level: 0,
@@ -396,7 +399,8 @@
 					img: '../../../static/Group12032.png'
 				},
 				cardIndex: 0,
-				approveState: false
+				approveState: false,
+				refContract:null
 			}
 		},
 		mounted() {
@@ -412,6 +416,19 @@
 					uni.showLoading({
 						title: '加载中'
 					});
+					//判断是否需要填激活码
+					useContract(refStoreAddress, refAbi).then(refContract => {
+						
+						
+						refContract.referrer(this.myAccount).then(refer => {
+					this.refContract = refContract;
+							if (refer === '0x0000000000000000000000000000000000000000') {
+								this.$refs.isopen.open();
+							} 
+					
+						})
+					
+					})
 					//加载我的属性卡和装备库 
 					useContract(equipAddress, equipAbi).then(contract => {
 						this.equipContract = contract
@@ -491,6 +508,37 @@
 
 		},
 		methods: {
+			// 激活码激活
+			async isopenDialog(val) {
+				console.log(val)
+				var isAddress = ethers.utils.isAddress(val);
+				try {
+					if (!isAddress) {
+						uni.showToast({
+							title: "激活码错误",
+							icon: "error"
+						})
+			
+						return
+					}
+					let tx = await this.refContract.addReferrerWithCheck(val)
+					console.log(tx.hash)
+					uni.showLoading({
+						title: '请稍等...'
+					})
+					tx.wait().then(res => {
+						uni.hideLoading()
+						this.$refs.isopen.close();
+						uni.showToast({
+							title: "激活成功",
+							icon: "success"
+						})
+					})
+				} catch (e) {
+					console.error(e)
+				}
+			
+			},
 			transferNFTCard(val) {
 				var isAddress = ethers.utils.isAddress(val);
 				if (!isAddress) {
@@ -557,6 +605,11 @@
 			},
 			//筛选点击事件合成筛选
 			getClick(item) {
+				if (this.cardIndex == 0) {
+					this.currentCard = item;
+				}
+				
+				if(this.type=="foge"){
 				if (item.equip.level >= 5) {
 					uni.showToast({
 						title: "等级已达最高级",
@@ -573,9 +626,7 @@
 					})
 
 
-				if (this.cardIndex == 0) {
-					this.currentCard = item;
-				}
+				
 				if (this.cardIndex == 1) {
 
 					this.card1 = item;
@@ -601,6 +652,7 @@
 						})
 					}
 
+				}
 				}
 			},
 			//获取当前装备绑定的卡片
@@ -633,10 +685,12 @@
 			},
 			//装备合成弹框
 			synthetic() {
+				this.type="foge" //合成
 				this.$refs.inputDialog.open()
 			},
 			//装备合成确认
 			forgeEquipDialog() {
+				
 				if (this.card2.id && this.card1.id) {
 					this.forgeEquip(this.collectContract, this.card1.id, this.card2.id);
 				} else {
@@ -669,6 +723,7 @@
 			},
 			//装备列表点击
 			Clickequip(item) {
+				this.type="equip";
 				this.cardIndex = 0;
 				this.curEquip = item
 				this.title = "属性卡选择";
@@ -699,7 +754,6 @@
 			},
 			// 卡片列表点击
 			clickCard(item) {
-				debugger
 				console.log("卡片ID:"+item.id);
 				this.$refs.inputDialog3.open();
 				this.curCard = item;
@@ -754,16 +808,6 @@
 					})
 					return
 				}
-				//判断是否穿戴
-				if (this.onEquips[item.equip.equipType].id) {
-					if (parseInt(this.onEquips[item.equip.equipType].id) == parseInt(item.id)) {
-						uni.showToast({
-							title: "已穿戴装备不可合成",
-							icon: "error"
-						})
-						return
-					}
-				}
 				if (this.currentCard.card.level > this.curEquip.equip.level) {
 					uni.showToast({
 						title: "卡片等级大于装备等级",
@@ -771,6 +815,7 @@
 					})
 					return
 				}
+			
 				console.log("装备id:" + this.curEquip.id);
 				console.log("卡片id:" + this.currentCard.id);
 				console.log("孔:" + this.carIndex);
@@ -783,7 +828,7 @@
 						title: "绑定成功",
 						icon: "success"
 					})
-					this.$refs.inputDialog5.open()
+					//this.$refs.inputDialog5.open()
 				})
 
 
@@ -871,6 +916,24 @@
 					that.approveEquip = true
 					return
 				}
+				//判断是否穿戴
+				debugger
+				console.log(this.onEquips);
+				console.log(this.card1.equip.equipType);
+				console.log(this.onEquips[this.card1.equip.equipType].id);
+				
+				if (this.onEquips[this.card1.equip.equipType].id) {
+					if (parseInt(this.onEquips[this.card1.equip.equipType].id) == parseInt(this.card1.id)) {
+						uni.showToast({
+							title: "已穿戴装备不可合成",
+							icon: "error"
+						})
+						return
+					}
+					
+				}
+				
+				
 				if (!this.approveState) {
 					//未授权，弹窗提示授权？
 					//用户点击确认授权后，调用授权代码，如下						
@@ -886,12 +949,23 @@
 
 				that.$refs.inputDialog2.open();
 
-				let tx = collectContract.forgeEquip(equipId1, equipId2)
+				let tx = await collectContract.forgeEquip(equipId1, equipId2)
+				tx.wait().then(res => {
+				
 				console.log("合成成功")
 				getMyEquips(that.myAccount, that.equipContract).then(myEquips => {
+					uni.showToast({
+						title: "合成成功",
+						icon: "success"
+					})
 					that.myEquips = myEquips;
+					that.$refs.inputDialog2.close();
 					console.log("合成后的装备列表", myEquips)
 				})
+					
+				
+				})
+				
 			},
 			async bind() {
 
@@ -1003,7 +1077,7 @@
 
 	.curId {
 		width: 13.25rem;
-		margin: 0.225rem;
+		margin: 0rem;
 	}
 
 	.curId2 {
@@ -1142,6 +1216,7 @@
 		margin: 0 auto;
 		display: inline-block;
 		margin: 1.25rem auto;
+		height: 120rpx;
 
 		display: flex;
 		flex-direction: column;

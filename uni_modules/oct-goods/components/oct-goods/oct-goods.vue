@@ -4,11 +4,11 @@
 			<view class="goods--item" v-for="(item, index) in lists" :key="index" @click="$emit('onGoods', index)">
 				<view class="imgtop uni-flex uni-row">
 					<view class="flex-item">
-						<image class="smicon " src="http://218.17.157.9:8866/images/star.png"></image>
-						<image v-if="item.equip.level>=2" class="smicon " src="http://218.17.157.9:8866/images/star.png"></image>
-						<image v-if="item.equip.level>=3" class="smicon " src="http://218.17.157.9:8866/images/star.png"></image>
-						<image v-if="item.equip.level>=4" class="smicon " src="http://218.17.157.9:8866/images/star.png"></image>
-						<image v-if="item.equip.level>=5" class="smicon " src="http://218.17.157.9:8866/images/star.png"></image>
+						<image class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
+						<image v-if="item.equip.level>=2" class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
+						<image v-if="item.equip.level>=3" class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
+						<image v-if="item.equip.level>=4" class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
+						<image v-if="item.equip.level>=5" class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
 					</view>
 					<view class="smtxt" v-if="item.equip.equipType==0">鞋子</view>
 					<view class="smtxt" v-if="item.equip.equipType==1">裤子</view>
@@ -17,14 +17,14 @@
 
 
 				<image class="logo" :src="item.cover" />
-				<view class="itemDesc">{{item.equip.stock}}mint</view>
+				<view class="itemDesc">{{item.equip.sales}}mint</view>
 				<view class="progress-box">
 					<progress :percent="item.balance" activeColor="#10AEFF" stroke-width="8" />
 				</view>
 				<view class="uni-flex uni-row itemdesc-box">
-					<image class="itemprice1" src="http://218.17.157.9:8866/images/runbit.png" />
+					<image class="itemprice1" src="https://gapi.runbit.org/images/runbit.png" />
 					<view class="itemdesc-boxtxt">{{item.equip.price1/1000000000000000000}}</view>
-					<image class="itemprice1" src="http://218.17.157.9:8866/images/chip.png" />
+					<image class="itemprice1" src="https://gapi.runbit.org/images/chip.png" />
 					<view class="itemdesc-boxtxt">{{item.equip.price0}}</view>
 				</view>
 				<!-- <view class="item--content">
@@ -79,7 +79,7 @@
 	.itemdesc-boxtxt {
 		padding-left: 5.94rpx;
 		width: 100.44rpx;
-		font-size: 12rpx;
+		font-size: 24rpx;
 		margin: auto 0;
 	}
 

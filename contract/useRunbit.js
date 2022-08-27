@@ -65,7 +65,7 @@ export async function getBindEquips(contract, account) {
                 equips[equipType] = 0
                 //equipId不为0代表已配备,获取装备详情
                 //进一步获取equip详情
-                else await getEquip(equipContract, equipId).then(equip => {
+                else await getEquip(equipContract, equipId).then(async equip => {
                         equips[equipType] = equip
                     })
 
@@ -88,7 +88,7 @@ export async function getBindCards(contract, equipId) {
                 //cardId=0代表未配备,不去获取装备详情
                 //cardId不为0代表已配备,获取装备详情
                 //进一步获取card详情
-                else await getCard(cardContract, cardId).then(card => {
+                else await getCard(cardContract, cardId).then(async card => {
                         cards[index] = card
                     })
 
@@ -115,6 +115,7 @@ export async function getForgeFee(collectContract,equipType,level){
 export async function bindCard(contract, equipId, cardId, index) {
 
     let tx = await contract.bindCard(equipId, cardId, index)
+	
     //交易hash
     return tx
 }

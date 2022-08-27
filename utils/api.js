@@ -1,6 +1,6 @@
 //功能：暴露接口
 
-const BASE_URL = 'http://218.17.157.9:8866/api/v1/' //域名或选取所有接口不变的那一部分
+const BASE_URL = 'https://gapi.runbit.org/api/v1/' //域名或选取所有接口不变的那一部分
 export const myRequest = (options) => { //暴露一个function：myRequest，使用options接收页面传过来的参数
         return new Promise((resolve, reject) => { //异步封装接口，使用Promise处理异步请求
             uni.request({ //发送请求

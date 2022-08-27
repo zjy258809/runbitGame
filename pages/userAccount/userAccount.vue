@@ -324,7 +324,7 @@ export default {
 						this.runContract.getUserState(this.myAccount, day).then(res => {
 
 							//未收获
-								this.runContract.getUnharvestReward('0x39BbEf9fcFA566727874BFc3597B41D04A72FfF9', day).then(rew => {
+								this.runContract.getUnharvestReward(this.myAccount, day).then(rew => {
 									console.log("---"+day+"----"+big2num(rew))
 									if (!rew.eq(0)) {
 										var data = {}

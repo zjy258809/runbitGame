@@ -103,7 +103,7 @@
 			getLevel() {
 				//从接口获取最新步数
 					//todo 设置baseurl
-					this.baseurl = 'http://218.17.157.9:8866/api/v1/'
+					this.baseurl = 'https://gapi.runbit.org/api/v1/'
 					uni.request({
 						url: this.baseurl + 'game/getClassLevel',
 						data: {

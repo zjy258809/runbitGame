@@ -161,6 +161,7 @@ export default {
 					trans_type: type
 				}
 			}).then(data => {
+				debugger
 				if (type == 1)
 					this.data = data.list
 				else this.data2 = data.list
