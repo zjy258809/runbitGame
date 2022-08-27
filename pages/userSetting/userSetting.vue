@@ -10,23 +10,46 @@
 					<view class="userName">runbiter</view>
 					<view class="useremail">runbiter@email.com</view>
 				</view>
-				<img class="backIcon" src="../../static/Group11596.png" />
 			</view>
-			
+
 			<view class="uni-flex uni-row linheigh" @tap="openInivter">
-				<view class="lin1" >推薦人</view>
-				<view class="lin2">0451***1231</view>
+				<view class="lin1">推薦人</view>
+				<view class="lin2">{{inviter}}</view>
 				<img class="backIcon" src="../../static/Group11596.png" />
 			</view>
-			
+
+
+
 			<view class="uni-flex uni-row linheigh" style="margin-top: 0.625rem;">
-				<view class="lin1" >區塊鏈</view>
+				<view class="lin1">总距离</view>
+				<view class="lin2">{{distance}}km</view>
+				<img class="backIcon" src="../../static/Group11596.png" />
+			</view>
+
+			<view class="uni-flex uni-row linheigh" style="margin-top: 0.625rem;">
+				<view class="lin1">级别</view>
+				
+				<img style="margin-left: 55%;" class="star" :src="level>0?'../../static/Star140.png':'../../static/Star136.png'" />
+				<img class="star" :src="level>1?'../../static/Star140.png':'../../static/Star136.png'" />
+				<img class="star" :src="level>2?'../../static/Star140.png':'../../static/Star136.png'" />
+				<img class="star" :src="level>3?'../../static/Star140.png':'../../static/Star136.png'" />
+				<img class="star" :src="level>4?'../../static/Star140.png':'../../static/Star136.png'" />
+				<img class="star" :src="level>5?'../../static/Star140.png':'../../static/Star136.png'" />
+			</view>
+
+			<view class="uni-flex uni-row linheigh" style="margin-top: 0.625rem;">
+				<view class="lin1">區塊鏈</view>
 				<view class="lin2">solana</view>
 				<img class="backIcon" src="../../static/Group11596.png" />
 			</view>
 			<view class="uni-flex uni-row linheigh" style="margin-top: 0.625rem;">
-				<view class="lin1" >版本號</view>
+				<view class="lin1">版本號</view>
 				<view class="lin2">1.0</view>
+			</view>
+			<view class="uni-flex uni-row linheigh" @click="openHelp" style="margin-top: 0.625rem;">
+				
+				<view class="lin1">帮助</view>
+				<view class="lin2"></view>
 				<img class="backIcon" src="../../static/Group11596.png" />
 			</view>
 
@@ -36,23 +59,64 @@
 </template>
 
 <script>
+	import {
+		hideBankCards
+	} from '../../contract/useContract.js'
 	export default {
 		data() {
 			return {
-
+				inviter: 0,
+				distance:0,
+				level:0,
 			}
 		},
+		onLoad() {
+			this.getLevel();
+			var values =uni.getStorageSync('inviter');
+			var setp =uni.getStorageSync('Steps');
+			
+			if(values)
+				this.inviter=hideBankCards(values);
+				if(setp)
+				this.distance=setp*0.7/1000;
+			
+			
+		},
 		methods: {
+			openHelp()
+			{
+				uni.navigateTo({
+					url: '../userHelp/userHelp'
+				});
+			},
 			back() {
 				uni.navigateBack({
 					delta: 1
 				});
 			},
-			openInivter()
-			{
+			openInivter() {
 				uni.navigateTo({
 					url: '../invite/invite'
 				});
+			},
+			//获取最新等级
+			getLevel() {
+				//从接口获取最新步数
+					//todo 设置baseurl
+					this.baseurl = 'http://218.17.157.9:8866/api/v1/'
+					uni.request({
+						url: this.baseurl + 'game/getClassLevel',
+						data: {
+							addr: uni.getStorageSync('myAccount')
+						},
+						method: "GET",
+						success: res => {
+							if (res.data.code === 0) {
+								this.level =res.data.data;
+								console.log(res.data.data);
+							}
+						}
+					})
 			},
 		}
 	}
@@ -65,32 +129,42 @@
 		align-items: center;
 		justify-content: center;
 		height: 100%;
-	
+
 	}
-	.lin1{
-		height:  3.25rem;
+
+	.lin1 {
+		height: 3.25rem;
 		line-height: 3.2rem;
 		margin-left: 1.625rem;
 		color: #8B8B8B;
 	}
-	.lin2{
-		height:  3.25rem;
+
+	.lin2 {
+		height: 3.25rem;
 		line-height: 3.2rem;
 		margin-left: 1.625rem;
 		position: absolute;
-		 right: 3.5rem;
-		 font-weight: bold;
+		right: 2.5rem;
+		font-weight: bold;
 
 	}
-	.linheigh{
+
+	.linheigh {
 		margin-top: 2.25rem;
 		height: 3.25rem;
 	}
+
 	.backIcon {
-		width: 1rem;
-		height: 0.5rem;
+		width: 0.5rem;
+		height: 1rem;
 		position: absolute;
 		right: 1.625rem;
+		margin-top: 1.3rem;
+	}
+	.star {
+		margin-left: 6.94rpx;
+		width: 1rem;
+		height: 1rem;
 		margin-top: 1.3rem;
 	}
 

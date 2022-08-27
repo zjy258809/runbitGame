@@ -3,7 +3,7 @@
 
 		<view class="bg">
 
-			<view class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
+			<view class="uni-flex uni-row"  @tap="openUser"  style="margin: 1.425rem; height: 89.44rpx; ">
 				<img src="../../../static/heard.png" style="width:3rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
 				<view class="currentbs">{{getSteps}}步</view>
@@ -17,7 +17,7 @@
 
 			<view class="person">
 				<img class="user_person" src="../../../static/grounp-5-2.png"></img>
-				<img @tap="inputDialogToggle()" class="userlogo" src="../../../static/group-5-2.png"></img>
+				<view @tap="inputDialogToggle()" class="userlogo" >{{stack}}</view>
 				<view class="user_person_item uni-flex uni-column">
 					<img class="gp11 " @tap="chooseEquipDia(2)" :src="equipsImgs[2].img" />
 					<img class="gp12" @tap="chooseEquipDia(1)" :src="equipsImgs[1].img" />
@@ -59,7 +59,7 @@
 
 						<view class="curId uni-flex uni-row">
 							<view class="flex-item">预计收益</view>
-							<view class="flex-item idvalue2">{{reward}}</view>
+							<view class="flex-item idvalue2">{{reward}} RB</view>
 						</view>
 
 					</view>
@@ -83,9 +83,9 @@
 					@confirm="dialogInputConfirm">
 					<view>
 
-						<image class="dialogimg" src="../../../static/Group11595.png" @click="chooseTrack(0)"></image>
-						<image class="dialogimg" src="../../../static/Group12072.png" @click="chooseTrack(1)"></image>
-						<image class="dialogimg" src="../../../static/Group12073.png" @click="chooseTrack(2)"></image>
+						<image :class="setTrackId==0?'ondialogimg':'dialogimg'" src="../../../static/Group11595.png" @click="chooseTrack(0)"></image>
+						<image :class="setTrackId==1?'ondialogimg':'dialogimg'" src="../../../static/Group12072.png" @click="chooseTrack(1)"></image>
+						<image :class="setTrackId==2?'ondialogimg':'dialogimg'" src="../../../static/Group12073.png" @click="chooseTrack(2)"></image>
 					</view>
 				</uni-popup-dialog>
 
@@ -132,7 +132,7 @@
 		<view>
 			<uni-popup ref="equipInfo" type="dialog">
 				<uni-popup-dialog ref="inputClose" :mask-click="true" cancelText="卸下" confirmText="确认" title="裝備信息"
-					value="對話框預置提示內容!" placeholder="請輸入內容" @close="unEquip" @confirm="dialogInputConfirm">
+					value="對話框預置提示內容!" placeholder="請輸入內容" @close="unEquip" >
 					<view>
 
 						<img class="cards2" :src="currentequips.img" />
@@ -238,7 +238,8 @@
 		getBindCards,
 		bindCard,
 		unbindEquip,
-		getReward
+		getUnharvestReward,
+		getUserState
 	} from '../../../contract/useRunbit.js'
 	import {
 		getMyCards,
@@ -252,6 +253,7 @@
 	export default {
 		data() {
 			return {
+				stack:'烈日沙滩',
 				reward:0,
 				specialty:0, //功能
 				aesthetic:0, //美观
@@ -317,11 +319,13 @@
 				rpcaddr: '',
 				myAccount: '',
 				layerAbi: '',
+				curDay:'',
 				collectContract: null,
 				approveState: true,
 				steps: 0,
 				equipContract: null,
-				cardContract: null
+				cardContract: null,
+				setTrackId:0,
 			}
 		},
 		onLoad() {
@@ -339,24 +343,34 @@
 
 				})
 				const provider = new ethers.providers.Web3Provider(window.ethereum);
+				             provider.getBlock().then(block => {
+					this.curDay = parseInt((block.timestamp + 28800) / 3600);
+					this.lastStep
+					});
+				          
 				provider.send("eth_requestAccounts", []).then(accounts => {
 					this.myAccount = accounts[0];
+					uni.setStorageSync('myAccount', this.myAccount);
 
 					this.getStep();
 					this.userAccount = hideBankCards(accounts[0]);
-					this.getReward();
+					
 
 					//判断是否需要填激活码		 
 					useContract(refStoreAddress, refAbi).then(refContract => {
 						this.contract = refContract;
 						refContract.referrer(this.myAccount).then(refer => {
 
-							if (refer === '0x0000000000000000000000000000000000000000')
+							if (refer === '0x0000000000000000000000000000000000000000'){
 								this.$refs.isopen.open();
+								}else{
+									uni.setStorageSync('inviter', refer);
+								}
 
 						})
 
 					})
+					
 					useContract(RunbitAddress, RunbitAbi).then(async runContract => {
 						this.runContract = runContract
 						//获取赛道
@@ -364,6 +378,18 @@
 							this.trackId = id.toNumber()
 							console.log("trackid ", this.trackId)
 						})
+						console.log("myAccount ",this.myAccount)
+						console.log("curDay ",this.curDay)
+						getUserState(this.runContract,this.myAccount,this.curDay).then(date => {
+							alert(date.lastSteps);
+							this.steps =parseInt(date.lastSteps);
+							
+						})
+						getUnharvestReward(this.runContract, this.myAccount,this.curDay).then(
+							ForgeFee => {
+								this.reward = ForgeFee
+								console.log(this.reward);
+							})
 						//获取装备,0代表没装备
 						getBindEquips(this.runContract, this.myAccount).then(async equips => {
 							console.log("已经穿了" + equips);
@@ -427,18 +453,12 @@
 
 		},
 		methods: {
-			// 计算收益
-			async getReward()
-			{
-				debugger
-				// var curDay = (ethers.utils.block.timestamp + 28800) / 86400;
-				
-				getReward(this.collectContract, this.myAccount,curDay).then(
-					ForgeFee => {
-						this.ForgeFee = ForgeFee
-						console.log(this.ForgeFee);
-					})
+			openUser() {
+				uni.navigateTo({
+					url: '../../userAccount/userAccount'
+				});
 			},
+			
 			async unEquip() {
 				uni.showLoading({
 					title: '装备卸下中...'
@@ -686,6 +706,10 @@
 					//todo 错误提示
 				} finally {
 					uni.hideLoading()
+					uni.showToast({
+						title: "更换成功",
+						icon: "success"
+					})
 				}
 			},
 			// 激活码激活
@@ -778,6 +802,12 @@
 			//选中赛道
 			chooseTrack(id) {
 				//更新选中的赛道
+				if(id==0)
+				this.stack="烈日沙滩"
+				if(id==1)
+				this.stack="芳草地"
+				if(id==2)
+				this.stack="石子路"
 				this.setTrackId = id
 				//todo 选中的赛道更新样式
 			},
@@ -807,6 +837,7 @@
 						success: res => {
 							if (res.data.code === 0) {
 								this.getSteps = res.data.data.steps
+								uni.setStorageSync('Steps', res.data.data.steps);
 								getApp().globalData.userStep = this.getSteps;
 								this.check_sum = res.data.data.check_sum
 							}
@@ -904,10 +935,21 @@
 	}
 
 	.userlogo {
+		box-sizing: border-box;
+		text-align: center;
 		position: absolute;
-		right: 0rpx;
-		top: 300.88rpx;
-		width: 180.83rpx;
+		width: 169.44rpx;
+		height: 60.83rpx;
+		line-height: 53.83rpx;
+		font-weight: bold;
+		font-size: 25.41rpx;
+		right: 0;
+		top: 200.11rpx;
+		background: #FFEB34;
+		border: 1px solid #000000;
+		border-radius: 100px 0px 0px 100px;
+		
+		
 	}
 
 	.input_edi {
@@ -1103,6 +1145,15 @@
 		width: 408.33rpx;
 		height: 248.88rpx;
 		padding: 6.94rpx;
-
+	}
+	
+	.ondialogimg {
+		display: block;
+		margin: 0 auto;
+		width: 408.33rpx;
+		height: 248.88rpx;
+		padding: 6.94rpx;
+			border: 2px solid red !important;
+			border-radius: 33.88rpx;
 	}
 </style>

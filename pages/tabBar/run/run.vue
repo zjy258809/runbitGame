@@ -2,7 +2,7 @@
 	<view class="content">
 		<view class="bg">
 
-			<view class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
+			<view class="uni-flex uni-row" @tap="openUser" style="margin: 1.425rem; height: 89.44rpx; ">
 				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:3.125rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
 				<view class="currentbs">{{getSteps}}步</view>
@@ -27,17 +27,19 @@
 							<!-- <image @click="actionSheetTap" class="filltericon" src="../../../static/Frame3.png"></image> -->
 
 						</view>
-						<oct-goods :lists="equipCollect" price-type="$" @onGoods="onGoods" />
+						<oct-goods v-if="equipCollect.length>0" :lists="equipCollect" price-type="$" @onGoods="onGoods" />
+						<img v-if="equipCollect.length==0" class="nocard"  src="../../../static/Group12015.png" />
 					</view>
 					<view v-if="curNow === 1" style="background:#FFFDEC">
 						<view class="uni-flex uni-row"
 							style="display: flex; margin:1rem 0px; height: 85.55rpx;margin-left: 5%; width: 90%; ">
 							<view style="width: 50%; margin: auto 0; ">
-								<uni-data-select v-model="value" :localdata="range" @change="change"></uni-data-select>
+								<uni-data-select v-model="carvalue" :localdata="carRange" @change="carChange"></uni-data-select>
 							</view>
 
 						</view>
-						<cardItem :lists="cardCollect" price-type="$" @onGoods="onGoods2" />
+						<cardItem v-if="cardCollect.length>0" :lists="cardCollect" price-type="$" @onGoods="onGoods2" />
+						<img v-if="cardCollect.length==0" class="nocard"  src="../../../static/Group12015.png" />
 
 					</view>
 				</view>
@@ -135,7 +137,8 @@
 						</uni-card>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">cost</view>
-							<view v-if="currentPayType==0" class="idvalue3">{{currentprice0/1000000000000000000}} RB</view>
+							<view v-if="currentPayType==0" class="idvalue3">{{currentprice0}} RB
+							</view>
 							<!-- 兑换 -->
 							<view v-if="currentPayType==1" class="idvalue3">{{currentprice1}} RB</view>
 							<!-- 购买 -->
@@ -211,7 +214,8 @@
 	export default {
 		data() {
 			return {
-				getSteps:'',
+				changeType: 10,
+				getSteps: '',
 				userAccount: '',
 				currentcover: '',
 				currentprice0: 0,
@@ -253,8 +257,38 @@
 				equipCollectImgs: [],
 				buttonRect: {},
 				baseurl: 'http://192.168.1.201:8866/api/v1/',
-				value: "请选择",
+				value: 10,
+				carvalue:10,
+				carRange: [{
+						value: 10,
+						text: "全部"
+					},
+					{
+						value: 1,
+						text: "等于1"
+					},
+					{
+						value: 2,
+						text: "等于2"
+					},
+					{
+						value: 3,
+						text: "等于3"
+					},
+					{
+						value: 4,
+						text: "等于4"
+					},
+					{
+						value: 5,
+						text: "等于5"
+					},
+				],
 				range: [{
+						value: 10,
+						text: "全部"
+					},
+					{
 						value: 0,
 						text: "鞋子"
 					},
@@ -286,7 +320,7 @@
 		},
 		onLoad() {
 			var that = this;
-			that.getSteps =getApp().globalData.userStep
+			that.getSteps = getApp().globalData.userStep
 			try {
 
 				const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -362,6 +396,11 @@
 			}
 		},
 		methods: {
+			openUser() {
+				uni.navigateTo({
+					url: '../../userAccount/userAccount'
+				});
+			},
 			//兑换卡片确认按钮
 			redmCardBtn() {
 				this.currentPayType = 0;
@@ -392,8 +431,8 @@
 			//装备购买确认按钮
 			dialogInputConfirm(val) {
 
-
 				this.currentPayType = 1;
+				console.log(this.currentprice1);
 				this.$refs.inputDialogs.close();
 				if (this.balanceOfRB > this.currentEquips.equip.price1 / 1000000000000000000) {
 					this.buyEquip(this.collectContract, this.currentEquips.equip.equipType, this.collectionId);
@@ -430,7 +469,7 @@
 				this.collectionId = item;
 				this.currentEquips = this.equipCollect[item];
 				this.currentprice0 = this.currentEquips.equip.price0;
-				this.currentprice1 = this.currentEquips.equip.price1;
+				this.currentprice1 = this.currentEquips.equip.price1 / 1000000000000000000;;
 				this.currentcover = this.currentEquips.cover;
 				this.isOpen = true;
 				if (this.isOpen) {
@@ -480,8 +519,16 @@
 				//this.$refs.inputDialog2.close()
 
 			},
-			change() {
+			change(item) {
+				this.changeType = item;
+				this.getEquips(this.collectContract)
 
+			},
+			carChange(item)
+			{
+				this.carvalue =item;
+				this.getCards(this.collectContract);
+				
 			},
 			async getCards(contract) {
 				var that = this;
@@ -523,7 +570,8 @@
 
 							await that.getImg(1, i, equip);
 							equipLoading = false;
-							uni.hideLoading();
+
+
 						})
 
 					}
@@ -553,16 +601,26 @@
 							resultObj.balance = currentObj.sales / currentObj.stock * 100
 							resultObj.cover = imgs;
 							resultObj.equip = currentObj;
-							that.equipCollect.push(resultObj); //获取内容
+							if (that.changeType == 10) { //默认加载全部
+								that.equipCollect.push(resultObj); //获取内容
+							} else if (that.changeType == currentObj.equipType) {
+								that.equipCollect.push(resultObj); //加载指定
+							}
+
 						} else {
 							var resultObj = {};
 
 							resultObj.balance = currentObj.sales / currentObj.stock * 100
 							resultObj.card = currentObj;
 							resultObj.cover = imgs;
+							if(that.carvalue==10){
 							that.cardCollect.push(resultObj); //获取内容
+							} else if (that.carvalue == currentObj.level) {
+								that.cardCollect.push(resultObj); //加载指定
+							}
 
 						}
+						uni.hideLoading()
 
 					},
 
@@ -785,7 +843,8 @@
 		padding-top: 18.94rpx;
 
 	}
-.input_edi {
+
+	.input_edi {
 		position: absolute;
 		width: 300.44rpx;
 	}
@@ -805,6 +864,18 @@
 		height: 70.72rpx;
 		line-height: 70.72rpx;
 	}
+	
+	.nocard {
+		display: inline-block;
+		margin: 0 auto;
+		margin-top: 6rem;
+		width: 35%;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+	}
+
 	.dialogimg {
 		display: block;
 		margin: 0 auto;

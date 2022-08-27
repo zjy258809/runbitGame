@@ -104,8 +104,8 @@ export async function getForgeFee(collectContract,equipType,level){
     }
 	
 	//获取预计收益
-	export async function getReward(collectContract,userAddress,curDay){
-	    return collectContract.getUnclaimReward(userAddress,curDay)
+	export async function getUnharvestReward(collectContract,userAddress,curDay){
+	    return collectContract.getUnharvestReward(userAddress,curDay)
 	    }
 
 
@@ -147,6 +147,10 @@ export async function setTrack(contract, trackId) {
 export function getTrackId(contract) {
     return contract.getTrackId()
 }
+export function getUserState(contract,address,day) {
+    return contract.getUserState(address,day)
+}
+
 // const checkSum = (uint256(keccak256(abi.encodePacked(steps, user, day, seed))) & 0xffffffffffffffffffffffffffffffffffffffffffffffff) | (steps << 192) 
 export function updateStep(contract,steps){
     return contract.updateSteps(steps)

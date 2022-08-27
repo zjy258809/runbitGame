@@ -65,6 +65,15 @@
             }
             
         }
+        ,{
+            "path" : "pages/userHelp/userHelp",
+            "style" :                                                                                    
+            {
+                "navigationBarTitleText": "",
+                "enablePullDownRefresh": false
+            }
+            
+        }
     ],
 	
 	"tabBar": { 
@@ -74,19 +83,19 @@
 		"backgroundColor": "#F8F8F8",
 		"list": [{
 				"pagePath": "pages/tabBar/index/index",
-				"iconPath": "static/Group11576.png",
+				"iconPath": "static/Group-11576.png",
 				"selectedIconPath": "static/Group11576.png",
 				"text": "首页"
 			},
 			{
 				"pagePath": "pages/tabBar/run/run",
 				"iconPath": "static/Group6.png",
-				"selectedIconPath": "static/Group6.png",
+				"selectedIconPath": "static/Group11577.png",
 				"text": "商店"
 			}, {
 				"pagePath": "pages/tabBar/mine/mine",
 				"iconPath": "static/Group%2011578.png",
-				"selectedIconPath": "static/Group%2011578.png",
+				"selectedIconPath": "static/Group11578.png",
 				"text": "背包"
 			}
 		]

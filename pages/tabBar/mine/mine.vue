@@ -2,8 +2,8 @@
 	<view class="content">
 		<view class="bg">
 
-			<view class="uni-flex uni-row" style="margin: 1.425rem; height: 89.44rpx; ">
-				<img class="flex-itemLogo" @tap="openUser" src="../../../static/heard.png" style="width:3.125rem;" />
+			<view class="uni-flex uni-row"  @tap="openUser" style="margin: 1.425rem; height: 89.44rpx; ">
+				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:3.125rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
 				<view class="currentbs">{{getSteps}}步</view>
 				<view class="userName">
@@ -20,27 +20,29 @@
 					<view v-if="curNow === 0">
 						<view class="uni-flex uni-row"
 							style="display: flex; margin:1rem 0px; height: 85.55rpx; width: 100%; ">
-							<view style="width: 50%; margin: auto 0; ">
+						<!-- 	<view style="width: 50%; margin: auto 0; ">
 								<uni-data-select v-model="value" :localdata="range" @change="change"></uni-data-select>
-							</view>
+							</view> -->
 							<!-- <view @click="actionSheetTap" class="fillter">Fillter(0)</view> -->
 							<image @click="synthetic" class="filltericon2" src="../../../static/Group11599.png">
 							</image>
 
 						</view>
-						<mineEquip :lists="myEquips" price-type="$" @onGoods="Clickequip" />
+						<mineEquip v-if="myEquips.length>0" :lists="myEquips" price-type="$" @onGoods="Clickequip" />
+						<img v-if="myEquips.length==0" class="nocard"  src="../../../static/Group12015.png" />
 					</view>
 					<view v-if="curNow === 1">
 						<view class="uni-flex uni-row"
 							style="display: flex; margin:1rem 0px; height: 85.55rpx; width: 100%; ">
-							<view style="width: 50%; margin: auto 0; ">
+							<!-- <view style="width: 50%; margin: auto 0; ">
 								<uni-data-select v-model="value" :localdata="range" @change="change"></uni-data-select>
-							</view>
-							<view @click="actionSheetTap" class="fillter">篩選</view>
-							<image @click="actionSheetTap" class="filltericon" src="../../../static/Frame3.png"></image>
+							</view> -->
+							<!-- <view @click="actionSheetTap" class="fillter">篩選</view> -->
+							<!-- <image @click="actionSheetTap" class="filltericon" src="../../../static/Frame3.png"></image> -->
 
 						</view>
-						<mineEquip :lists="myCards" price-type="$" @onGoods="clickCard" />
+						<mineEquip  v-if="myCards.length>0" :lists="myCards" price-type="$" @onGoods="clickCard" />
+						<img v-if="myCards.length==0" class="nocard"  src="../../../static/Group12015.png" />
 						<!-- <oct-goods :lists="goodsArr" price-type="$" @onGoods="onGoods2" /> -->
 
 					</view>
@@ -330,7 +332,7 @@
 						durability: ''
 					}
 				},
-				value: "請選擇",
+				value: 10,
 				cards: [{
 						img: '../../../static/Group12032.png'
 					},
@@ -344,16 +346,20 @@
 				goodsArr: [],
 				ForgeFee: '',
 				range: [{
+						value: 10,
+						text: "全部"
+					},
+					{
 						value: 0,
-						text: "美观性"
+						text: "鞋子"
 					},
 					{
 						value: 1,
-						text: "舒适性"
+						text: "裤子"
 					},
 					{
 						value: 2,
-						text: "功能性"
+						text: "衣服"
 					},
 				],
 				currentCard: 0,
@@ -800,8 +806,16 @@
 					this.$refs.inputDialog6.open();
 				}
 			},
-			change() {
-
+			change(item) {
+				this.changeType = item;
+				this.myEquips=[];
+				// getMyEquips(this.myAccount, contract).then(myEquips => {
+				// 	this.myEquips = myEquips;
+				// 	console.log("myEquips--------", myEquips)
+				// 	uni.hideLoading();
+				// })
+				
+			
 			},
 			//键入地址时校验地址是否有效，无效输入框提示，转让按钮置灰
 			isVaildAddress(address) {
@@ -955,12 +969,24 @@
 
 	.filltericon2 {
 
-		width: 140.83rpx;
+		width: 180.83rpx;
 		height: 55.83rpx;
 		text-align: right;
-		margin-left: 186.94rpx;
+		/* margin-left: 56.94rpx; */
+		position: absolute;
+		right: 80.83rpx;
 		padding-top: 18.94rpx;
 
+	}
+	.nocard {
+		display: inline-block;
+		margin: 0 auto;
+		margin-top: 6rem;
+		width: 35%;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
 	}
 
 	.dialogimg {
