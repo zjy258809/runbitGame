@@ -109,9 +109,6 @@
 								<view class="level ">已領取收益</view>
 								<view class="rare">{{ claimedReward }} RB</view>
 							</view>
-							<view
-								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
-							</view>
 
 
 
@@ -310,34 +307,16 @@ export default {
 		try {
 			//按小时算，默认查询近7个小时数据，包含当前小时
 			this.endDate = getDay(0)
-			this.startDate = getDay(-20)
+			this.startDate = getDay(-7)
 
 
 			var start = this.date2block(this.startDate)
 			var end = this.date2block(this.endDate)
-			// console.log("block------", start, "end--", end)
+			console.log("block------", this.startDate, "end--", this.endDate)
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 			provider.send("eth_requestAccounts", []).then(accounts => {
 				this.myAccount = accounts[0]
-				//获取已收获记录
-				// myRequest({
-				// 	url: 'game/getRBClaim',
-				// 	data: {
-				// 		addr: this.myAccount,
-				// 		// start: start,
-				// 		// end: end
-				// 	}
-				// }).then(data => {
-				// 	for (let re of data.list) {
-				// 		var item = {}
-				// 		item.amount = re.amount
-				// 		item.status = 1
-				// 		console.log("-------", re)
-				// 		this.harvest[this.date2block(re.create_time)] = item
-				// 	}
-				// 					console.log('luck', this.harvest)
-				// })
 
 				useContract(RunbitAddress, RunbitAbi).then(runContract => {
 					this.runContract = runContract
@@ -346,7 +325,7 @@ export default {
 
 							//未收获
 								this.runContract.getUnharvestReward(this.myAccount, day).then(rew => {
-									if (big2num(rew)) {
+									if (big2num(rew)!=0.0) {
 										var data = {}
 										data.amount = big2num(rew)
 										data.status = res.status
@@ -357,7 +336,7 @@ export default {
 							//有步数查询是否中奖，抽奖状态
 							if (!res.lastSteps.eq(0)) {
 								this.runContract.isLucky(this.myAccount, day).then(lott => {								
-									if (!lott[0].eq(0) && !lott[1].eq(0) && !lott[2].eq(0)) {
+									if (!lott[0].eq(0) || !lott[1].eq(0) || !lott[2].eq(0)) {
 									//中奖
 									var data = {}
 									data.rb = big2num(lott[0])
@@ -397,17 +376,6 @@ export default {
 					this.balanceofRBET = parseInt(balanceofRBET)
 				})
 			})
-			//获取USDT余额
-			// useContract(USDT, USDTAbi).then(USDTContract => {
-			// 	USDTContract.balanceOf(this.myAccount).then(balanceofUSDT => {
-			// 		this.balanceofUSDT = parseInt(balanceofUSDT)
-			// 	})
-			// })
-			//获取交易记录
-			// provider.getBlock().then(block => {
-			// 	// console.log("------time", (block.timestamp + 28800) / 3600)
-
-			// })
 			setTimeout(() => {
 
 			}, 5000);
