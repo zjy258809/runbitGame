@@ -307,7 +307,7 @@ export default {
 		try {
 			//按小时算，默认查询近7个小时数据，包含当前小时
 			this.endDate = getDay(0)
-			this.startDate = getDay(-7)
+			this.startDate = getDay(-45)
 
 
 			var start = this.date2block(this.startDate)
@@ -324,8 +324,9 @@ export default {
 						this.runContract.getUserState(this.myAccount, day).then(res => {
 
 							//未收获
-								this.runContract.getUnharvestReward(this.myAccount, day).then(rew => {
-									if (big2num(rew)!=0.0) {
+								this.runContract.getUnharvestReward('0x39BbEf9fcFA566727874BFc3597B41D04A72FfF9', day).then(rew => {
+									console.log("---"+day+"----"+big2num(rew))
+									if (!rew.eq(0)) {
 										var data = {}
 										data.amount = big2num(rew)
 										data.status = res.status
