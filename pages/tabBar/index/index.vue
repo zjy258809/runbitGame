@@ -157,7 +157,7 @@
 
 
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item">
+								<view class="level flex-itemValue">
 									<image class="smicon " src="../../../static/Group115861.png"></image>
 									<image v-if="currentequips.equip.level>=2" class="smicon "
 										src="../../../static/Group115861.png"></image>
@@ -168,7 +168,7 @@
 									<image v-if="currentequips.equip.level>=5" class="smicon "
 										src="../../../static/Group115861.png"></image>
 								</view>
-								<view class="rare">{{currentequips.equip.quality}}</view>
+								<view class="flex-item flex-itemValue rare">{{currentequips.equip.quality}}</view>
 							</view>
 
 							<view class="curId uni-flex uni-row" style="margin-top: 0.8rem;">
@@ -177,7 +177,7 @@
 							</view>
 
 							<view class="curId uni-flex uni-row">
-								<view class="level flex-itemValue">{{currentequips.equip.capacity}}/3</view>
+								<view class="level flex-itemValue">{{currentequips.equip.capacity}}</view>
 								<view v-if="currentequips.equip.upgradeable==0" class="flex-item flex-itemValue rare">否
 								</view>
 								<view v-if="currentequips.equip.upgradeable==1" class="flex-item flex-itemValue rare">是
@@ -932,7 +932,7 @@
 		margin: 0 auto;
 		display: inline-block;
 		margin: 1.25rem auto;
-		height: 120rpx;
+		height: 200rpx;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;
@@ -1021,7 +1021,7 @@
 		width: 40%;
 		margin: 0 auto;
 		display: inline-block;
-		margin: 1.25rem auto;
+		margin: 0rem auto;
 
 		display: flex;
 		flex-direction: column;

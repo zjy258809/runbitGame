@@ -2,6 +2,7 @@
 	<view class="uni-popup-dialog">
 		<view class="uni-dialog-title">
 			<text class="uni-dialog-title-text" :class="['uni-popup__'+dialogType]">{{titleText}}</text>
+			<uni-icons class="closeIcon" @click="closeDialogImg" type="clear" size="30"></uni-icons>
 		</view>
 		<view v-if="mode === 'base'" class="uni-dialog-content">
 			<slot>
@@ -13,7 +14,7 @@
 				<input class="uni-dialog-input" v-model="val" type="text" :placeholder="placeholderText" :focus="focus" >
 			</slot>
 		</view>
-		<view class="uni-dialog-button-group">
+		<view v-if="title!='支出账户中'" class="uni-dialog-button-group">
 			<view class="uni-dialog-button" @click="closeDialog">
 				<text class="uni-dialog-button-text">{{closeText}}</text>
 			</view>
@@ -98,7 +99,8 @@
 			return {
 				dialogType: 'error',
 				focus: false,
-				val: ""
+				val: "",
+				isShow:true
 			}
 		},
 		computed: {
@@ -163,6 +165,12 @@
 				if(this.beforeClose) return
 				this.popup.close()
 			},
+			/**
+			 * 点击取消按钮
+			 */
+			closeDialogImg() {
+				this.popup.close()
+			},
 			close(){
 				this.popup.close()
 			}
@@ -171,6 +179,12 @@
 </script>
 
 <style lang="scss" >
+	
+	.closeIcon{
+		position: absolute;
+		right: 23.88rpx;
+		top: 23.88rpx;
+	}
 	.uni-popup-dialog {
 		width: 300px;
 		border-radius: 11px;

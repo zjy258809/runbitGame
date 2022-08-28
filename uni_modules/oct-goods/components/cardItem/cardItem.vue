@@ -89,7 +89,7 @@
 	}
 
 	.itemDesc {
-		color: #CACACA;
+		color: #989898;
 		font-size: 14upx;
 		text-align: center;
 	}

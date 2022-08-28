@@ -146,12 +146,12 @@
 								<view class="flex-item idvalue2">累計收益</view>
 							</view>
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item flex-itemValue">{{curCard.card.durability}}/100</view>
+								<view class="flex-item flex-itemValue">{{curCard.card.durability}}</view>
 								<view class="flex-item flex-itemValue idvalue2">0</view>
 							</view>
 						</uni-card>
 						<view class="uni-flex uni-row" style="width: 60%; text-align: center; margin: 10px auto;">
-							<view class="id4">{{cardStatus}}</view>
+							<view class="id4">{{cardStatus}}于#{{cardequipId}}</view>
 						</view>
 
 					</view>
@@ -187,7 +187,7 @@
 
 
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item">
+								<view class="level flex-item">
 									<image class="smicon " src="../../../static/Group115861.png"></image>
 									<image v-if="curEquip.equip.level>=2" class="smicon "
 										src="../../../static/Group115861.png"></image>
@@ -198,7 +198,7 @@
 									<image v-if="curEquip.equip.level>=5" class="smicon "
 										src="../../../static/Group115861.png"></image>
 								</view>
-								<view class="rare">{{curEquip.equip.quality}}</view>
+								<view class="flex-item flex-itemValue rare">{{curEquip.equip.quality}}</view>
 							</view>
 
 							<view class="curId uni-flex uni-row" style="margin-top: 0.8rem;">
@@ -207,7 +207,7 @@
 							</view>
 
 							<view class="curId uni-flex uni-row">
-								<view class="level flex-itemValue">{{curEquip.equip.capacity}}/3</view>
+								<view class="level flex-itemValue">{{curEquip.equip.capacity}}</view>
 								<view v-if="curEquip.equip.upgradeable==0" class="flex-item flex-itemValue rare">否
 								</view>
 								<view v-if="curEquip.equip.upgradeable==1" class="flex-item flex-itemValue rare">是
@@ -376,6 +376,7 @@
 				myCards: [],
 				myEquips: [],
 				onEquips: [],
+				cardequipId:'',
 				RBContract: null,
 				balanceOfRB: 0,
 				bindCardIndex:0,
@@ -767,6 +768,7 @@
 							this.cardStatus = "已装备"
 							this.cardconfirm = "确认"
 							this.cardCancle = "卸载"
+							this.cardequipId=card.equipId;
 							this.bindCardId =card[0];
 							this.bindCardIndex=card[1];
 						}
@@ -1202,7 +1204,7 @@
 		width: 40%;
 		margin: 0 auto;
 		display: inline-block;
-		margin: 1.25rem auto;
+		margin: 0rem auto;
 
 		display: flex;
 		flex-direction: column;
@@ -1212,12 +1214,11 @@
 
 	/* 图片居中 */
 	.addcards {
-		width: 28%;
+		width: 30%;
 		margin: 0 auto;
 		display: inline-block;
 		margin: 1.25rem auto;
-		height: 120rpx;
-
+		height: 220rpx;
 		display: flex;
 		flex-direction: column;
 		justify-content: center;

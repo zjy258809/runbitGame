@@ -2,19 +2,6 @@
 	<view>
 		<view class="goods--box">
 			<view class="goods--item" v-for="(item, index) in lists" :key="index" @click="$emit('onGoods', index)">
-				<view class="imgtop uni-flex uni-row">
-					<view class="flex-item">
-						<image class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
-						<image v-if="item.equip.level>=2" class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
-						<image v-if="item.equip.level>=3" class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
-						<image v-if="item.equip.level>=4" class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
-						<image v-if="item.equip.level>=5" class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
-					</view>
-					<view class="smtxt" v-if="item.equip.equipType==0">鞋子</view>
-					<view class="smtxt" v-if="item.equip.equipType==1">裤子</view>
-					<view class="smtxt" v-if="item.equip.equipType==2">衣服</view>
-				</view>
-
 
 				<image class="logo" :src="item.cover" />
 				<view class="itemDesc">{{item.equip.sales}}mint</view>
@@ -100,7 +87,7 @@
 	}
 
 	.itemDesc {
-		color: #CACACA;
+		color: #989898;
 		font-size: 14upx;
 		text-align: center;
 	}
@@ -143,12 +130,11 @@
 	}
 
 	.logo {
-		width: 80px;
-		height: 80px;
+		width: 85%;
+		height: 300.5rpx;
 		text-align: true;
-		margin: 15 auto;
 		display: inline-block;
-		margin: 1.25rem auto;
+		margin: 0.5rem auto;
 
 		display: flex;
 		flex-direction: column;
