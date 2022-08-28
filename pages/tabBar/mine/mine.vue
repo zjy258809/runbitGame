@@ -151,7 +151,7 @@
 							</view>
 						</uni-card>
 						<view class="uni-flex uni-row" style="width: 60%; text-align: center; margin: 10px auto;">
-							<view class="id4">{{cardStatus}}于#{{cardequipId}}</view>
+							<view class="id4">{{cardStatus}}{{cardequipId}}</view>
 						</view>
 
 					</view>
@@ -764,11 +764,12 @@
 							this.cardStatus = "未装备"
 							this.cardconfirm = "转让"
 							this.cardCancle = "取消"
+							this.cardequipId='';
 						} else {
 							this.cardStatus = "已装备"
 							this.cardconfirm = "确认"
 							this.cardCancle = "卸载"
-							this.cardequipId=card.equipId;
+							this.cardequipId="于#"+card.equipId;
 							this.bindCardId =card[0];
 							this.bindCardIndex=card[1];
 						}
