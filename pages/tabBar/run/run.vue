@@ -27,15 +27,13 @@
 							<!-- <image @click="actionSheetTap" class="filltericon" src="../../../static/Frame3.png"></image> -->
 
 						</view>
-						<oct-goods v-if="equipCollect.length>0" :lists="equipCollect" price-type="$"
-							@onGoods="onGoods" />
+						<oct-goods v-if="equipCollect.length>0" :lists="equipCollect" price-type="$" @onGoods="onGoods" />
 					</view>
 					<view v-if="curNow === 1" style="background:#FFFDEC">
 						<view class="uni-flex uni-row"
 							style="display: flex; margin:1rem 0px; height: 85.55rpx;margin-left: 5%; width: 90%; ">
 							<view style="width: 50%; margin: auto 0; ">
-								<uni-data-select v-model="carvalue" :localdata="carRange" @change="carChange">
-								</uni-data-select>
+								<uni-data-select v-model="carvalue" :localdata="carRange" @change="carChange"></uni-data-select>
 							</view>
 
 						</view>
@@ -86,7 +84,7 @@
 							</view>
 
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item flex-itemValue">{{currentEquips.equip.capacity}}</view>
+								<view class="flex-item flex-itemValue">{{currentEquips.equip.capacity}}/3</view>
 								<view v-if="currentEquips.equip.upgradeable==0"
 									class="flex-item flex-itemValue idvalue2">否</view>
 								<view v-if="currentEquips.equip.upgradeable==1"
@@ -101,10 +99,10 @@
 						</view>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">购买价格(RB)</view>
-							<view class="idvalue3">{{currentEquips.equip.price1/1000000000000000000}}</view>
+							<view class="idvalue3">{{ big2num(currentEquips.equip.price1) }}</view>
 						</view>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
-							<view class="flex-item id3" style="width: 438.88rpx;" >兑换价格(RBET)</view>
+							<view class="flex-item id3">兑换价格(RB)</view>
 							<view class="idvalue3">{{currentEquips.equip.price0}}</view>
 						</view>
 
@@ -136,10 +134,10 @@
 						</uni-card>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">cost</view>
-							<view v-if="currentPayType==0" class="idvalue3">{{currentprice0}} {{currentUnit}}
+							<view v-if="currentPayType==0" class="idvalue3">{{currentprice0}} RB
 							</view>
 							<!-- 兑换 -->
-							<view v-if="currentPayType==1" class="idvalue3">{{currentprice1}} RB</view>
+							<view v-if="currentPayType == 1" class="idvalue3">{{ currentprice1 }} RB</view>
 							<!-- 购买 -->
 						</view>
 
@@ -176,11 +174,11 @@
 						</view>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">购买价格(RB)</view>
-							<view class="idvalue3">{{currentCard.card.price0}}</view>
+							<view class="idvalue3">{{ big2num(currentCard.card.price1) }}</view>
 						</view>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3" style="width: 438.88rpx;">兑换价格(RBCT)</view>
-							<view class="idvalue3">{{currentCard.card.price1/1000000000000000000}}</view>
+							<view class="idvalue3">{{ currentCard.card.price0 }}</view>
 						</view>
 
 					</view>
@@ -219,6 +217,9 @@
 	import {
 		big2num
 	} from '../../../contract/ultis.js'
+		import {
+		myRequest
+	} from '../../../utils/api.js'
 	export default {
 		data() {
 			return {
@@ -227,7 +228,6 @@
 				userAccount: '',
 				currentcover: '',
 				currentprice0: 0,
-				currnetDesc: '',
 				currentprice1: 0,
 				currentCard: {
 					cover: "",
@@ -237,95 +237,96 @@
 						sales: '',
 						stock: ''
 
-					}
+				}
+			},
+			cards: {},
+			cardCollect: [],
+			approveRBET: '',
+			gasPriceString: '',
+			currentPayType: 0,
+			isOpen: true,
+			equips: {},
+			collectionId: 0,
+			currnetDesc :"",
+			currentEquips: {
+				equip: {
+					capacity: '',
+					equipType: '',
+					price0: '',
+					price1: '',
+					quality: '',
+					sales: '',
+					startId: '',
+					status: '',
+					stock: '',
+					upgradeable: '',
 				},
-				cards: {},
-				cardCollect: [],
-				approveRBET: '',
-				gasPriceString: '',
-				currentPayType: 0,
-				isOpen: true,
-				equips: {},
-				collectionId: 0,
-				currentEquips: {
-					equip: {
-						capacity: '',
-						equipType: '',
-						price0: '',
-						price1: '',
-						quality: '',
-						sales: '',
-						startId: '',
-						status: '',
-						stock: '',
-						upgradeable: '',
-					},
-					cover: "",
-				},
-				equipCollect: [],
-				equipCollectImgs: [],
-				buttonRect: {},
-				baseurl: 'https://gapi.runbit.org/api/v1/',
+				cover: "",
+			},
+			equipCollect: [],
+			equipCollectImgs: [],
+			buttonRect: {},
+			baseurl: 'https://gapi.runbit.org/api/v1/',
+			value: 10,
+			carvalue:  10,
+			carRange: [{
 				value: 10,
-				carvalue: 10,
-				carRange: [{
-						value: 10,
-						text: "全部"
-					},
-					{
-						value: 1,
-						text: "等于1"
-					},
-					{
-						value: 2,
-						text: "等于2"
-					},
-					{
-						value: 3,
-						text: "等于3"
-					},
-					{
-						value: 4,
-						text: "等于4"
-					},
-					{
-						value: 5,
-						text: "等于5"
-					},
-				],
-				range: [{
-						value: 10,
-						text: "全部"
-					},
-					{
-						value: 0,
-						text: "鞋子"
-					},
-					{
-						value: 1,
-						text: "裤子"
-					},
-					{
-						value: 2,
-						text: "衣服"
-					},
-				],
-				curNow: 0,
-				list: ['运动装备', '属性卡'],
-				current: 0,
-				colorIndex: 0,
-				items: ['选项卡1', '选项卡2'],
-				styleType: 'button',
-				activeColor: '#FFEB34',
+				text: "全部"
+			},
+			{
+				value: 1,
+				text: "等于1"
+			},
+			{
+				value: 2,
+				text: "等于2"
+			},
+			{
+				value: 3,
+				text: "等于3"
+			},
+			{
+				value: 4,
+				text: "等于4"
+			},
+			{
+				value: 5,
+				text: "等于5"
+			},
+			],
+			range: [{
+				value: 10,
+				text: "全部"
+			},
+			{
+				value: 0,
+				text: "鞋子"
+			},
+			{
+				value: 1,
+				text: "裤子"
+			},
+			{
+				value: 2,
+				text: "衣服"
+			},
+			],
+			curNow: 0,
+			list: ['运动装备', '属性卡'],
+			current: 0,
+			colorIndex: 0,
+			items: ['选项卡1', '选项卡2'],
+			styleType: 'button',
+			activeColor: '#FFEB34',
 				currentUnit:'',
-				contract: null,
-				RBETContract: null,
-				RBCTContract: null,
-				RBContract: null,
-				refContract: null
-			}
-		},
-		mounted() {
+			contract: null,
+			RBETContract: null,
+			RBCTContract: null,
+			RBContract: null,
+			refContract:  null
+		}
+	},
+	mounted() {
 
 
 		},
@@ -336,535 +337,485 @@
 
 				const provider = new ethers.providers.Web3Provider(window.ethereum);
 
-				provider.send("eth_requestAccounts", []).then(accounts => {
-					this.myAccount = accounts[0]
-					this.userAccount = hideBankCards(accounts[0]);
+			provider.send("eth_requestAccounts", []).then(accounts => {
+				this.myAccount = accounts[0]
+				this.userAccount = hideBankCards(accounts[0]);
 
-					//判断是否需要填激活码
-					useContract(refStoreAddress, refAbi).then(refContract => {
-						this.refContract = refContract;
-						refContract.referrer(this.myAccount).then(refer => {
-
-							if (refer === '0x0000000000000000000000000000000000000000') {
-								this.$refs.isopen.open();
-							}
-
-						})
-
+				//加载属性卡和装备库
+				useContract(RunbitCollectionAddress, RunbitCollectionAbi).then(collectContract => {
+					this.collectContract = collectContract
+					this.getCards(collectContract)
+					this.getEquips(collectContract)
+				});
+				//查询商店合约授权情况，授权后才能购买和兑换
+				useContract(RBAddress, RBAbi).then(RBContract => {
+					//获取rb余额 本页面RB不进行换算，显示时换算
+					this.RBContract = RBContract;
+					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
+						this.balanceOfRB = balanceOfRB
+						console.log("balanceOfRB", this.balanceOfRB);
 					})
-
-					//加载属性卡和装备库
-					useContract(RunbitCollectionAddress, RunbitCollectionAbi).then(collectContract => {
-						this.collectContract = collectContract
-						this.getCards(collectContract)
-						this.getEquips(collectContract)
-					});
-					//查询商店合约授权情况，授权后才能购买和兑换
-					useContract(RBAddress, RBAbi).then(RBContract => {
-						//获取rb余额
-						this.RBContract = RBContract;
-						RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
-							this.balanceOfRB = balanceOfRB
-							console.log("balanceOfRB", this.balanceOfRB);
-						})
-						//获取RB对商品合约的授权情况
-						RBContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
-							if (data.eq(BigNumber.from(0))) {
-								this.approveState = false
-							} else {
-								this.approveState = true
-							}
-						})
-					});
-					//获取属性卡碎片
-					useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
-						this.RBCTContract = RBCTContract
-						RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
-							this.balanceofRBCT = parseInt(balanceofRBCT)
-							console.log("balanceofRBCT", this.balanceofRBCT)
-						})
-						//获取RBCT属性卡碎片对商品合约的授权情况
-						RBCTContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
-							if (data.eq(BigNumber.from(0))) {
-								this.approveRBCT = false
-							} else {
-								this.approveRBCT = true
-							}
-							console.log("approveRBCT", this.approveRBCT)
-						})
-					});
-					//获取装备碎片
-					useContract(RBETAddress, RBETAbi).then(RBETContract => {
-						this.RBETContract = RBETContract
-						RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
-							this.balanceofRBET = parseInt(balanceofRBET)
-							console.log("balanceofRBET", this.balanceofRBET)
-						})
-						//获取RBET装备碎片对商品合约的授权情况
-						RBETContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
-							if (data.eq(BigNumber.from(0))) {
-								this.approveRBET = false
-							} else {
-								this.approveRBET = true
-							}
-							console.log("approveRBET", this.approveRBET)
-						})
-					});
-
-
+					//获取RB对商品合约的授权情况
+					RBContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
+						if (data.eq(BigNumber.from(0))) {
+							this.approveState = false
+						} else {
+							this.approveState = true
+						}
+					})
+				});
+				//获取属性卡碎片
+				useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
+					this.RBCTContract = RBCTContract
+					RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
+						this.balanceofRBCT = parseInt(balanceofRBCT)
+						console.log("balanceofRBCT", this.balanceofRBCT)
+					})
+					//获取RBCT属性卡碎片对商品合约的授权情况
+					RBCTContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
+						if (data.eq(BigNumber.from(0))) {
+							this.approveRBCT = false
+						} else {
+							this.approveRBCT = true
+						}
+						console.log("approveRBCT", this.approveRBCT)
+					})
+				});
+				//获取装备碎片
+				useContract(RBETAddress, RBETAbi).then(RBETContract => {
+					this.RBETContract = RBETContract
+					RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
+						this.balanceofRBET = parseInt(balanceofRBET)
+						console.log("balanceofRBET", this.balanceofRBET)
+					})
+					//获取RBET装备碎片对商品合约的授权情况
+					RBETContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
+						if (data.eq(BigNumber.from(0))) {
+							this.approveRBET = false
+						} else {
+							this.approveRBET = true
+						}
+						console.log("approveRBET", this.approveRBET)
+					})
 				});
 
 
+			});
 
-			} catch (e) {
-				console.error(e);
+
+		} catch (e) {
+			console.error(e);
+			let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+			uni.showToast({
+				title: "加载失败" + ":" + reason,
+				icon: "none"
+			})
+		}
+	},
+	methods: {
+		big2num,
+		openUser() {
+			uni.navigateTo({
+				url: '../../userAccount/userAccount'
+			});
+		},
+		//兑换卡片确认按钮
+		redmCardBtn() {
+			this.currentPayType = 0;
+			if (this.balanceofRBCT > this.currentCard.card.price0) {
+				this.redeemCard(this.collectContract, this.collectionId);
+			} else {
+				uni.showToast({
+					title: "属性卡碎片不足",
+					icon: "error"
+				})
+			}
+
+		},
+		//兑换装备确认按钮
+		redeemCardBtn() {
+			this.currentPayType = 0;
+			// this.$refs.inputDialogs.colse();
+			if (this.balanceofRBET > this.currentEquips.equip.price0) {
+				this.redeemEquip(this.collectContract, this.collectionId);
+			} else {
+				uni.showToast({
+					title: "装备碎片不足",
+					icon: "error"
+				})
+			}
+
+		},
+		//装备购买确认按钮
+		dialogInputConfirm(val) {
+
+			this.currentPayType = 1;
+			console.log(this.currentprice1);
+			this.$refs.inputDialogs.close();
+			if (this.balanceOfRB > this.currentEquips.equip.price1) {
+				this.buyEquip(this.collectContract, this.currentEquips.equip.equipType, this.collectionId);
+			} else {
+				uni.showToast({
+					title: "余额不足",
+					icon: "error"
+				})
+			}
+
+			// this.$refs.inputDialog.close()
+			// setTimeout(() => {
+			// 	uni.hideLoading()
+			// 	console.log(val)
+			// 	this.value = val
+			// 	// 关闭窗口后，恢复默认内容
+			// 	this.$refs.inputDialog2.open()
+			// }, 3000)
+		},
+		buyCardBtn() {
+			this.currentPayType = 1;
+			if (this.balanceOfRB > this.currentCard.card.price1) {
+				this.buyCard(this.collectContract, this.collectionId);
+			} else {
+				uni.showToast({
+					title: "余额不足",
+					icon: "error"
+				})
+			}
+
+		},
+		//点击装备列表
+		onGoods(item) {
+			this.collectionId = item;
+			this.currentEquips = this.equipCollect[item];
+			this.currentprice0 = this.currentEquips.equip.price0;
+			
+				this.currnetDesc = "mint中,您将很快收到您的装备";
+			this.currentprice1 = ethers.utils.formatEther(this.currentEquips.equip.price1);
+			this.currentcover = this.currentEquips.cover;
+			this.isOpen = true;
+			if (this.isOpen) {
+				this.$refs.inputDialogs.open();
+			}
+
+		},
+		actionSheetTap() {
+			const that = this
+			uni.showActionSheet({
+				title: '装备筛选',
+				itemList: ['鞋子', '裤子', '上衣'],
+				popover: {
+					// 104: navbar + topwindow 高度，暂时 fix createSelectorQuery 在 pc 上获取 top 不准确的 bug
+					top: that.buttonRect.top + 104 + that.buttonRect.height,
+					left: that.buttonRect.left + that.buttonRect.width / 2
+				},
+				success: (e) => {
+					uni.showToast({
+						title: "点击了第" + e.tapIndex + "个选项",
+						icon: "none"
+					})
+				}
+			})
+		},
+
+		// 点击卡片列表
+		onGoods2(index) {
+			this.collectionId = index;
+			this.currentCard = this.cardCollect[index];
+			this.currentprice0 = this.currentCard.card.price0;
+				this.currnetDesc = "mint中,您将很快收到您的装备";
+			this.currentprice1 = ethers.utils.formatEther(this.currentCard.card.price1);
+			this.currentcover = this.currentCard.cover;
+			this.$refs.inputDialog3.open()
+		},
+		sectionChange(index) {
+			this.curNow = index;
+
+		},
+		onClickItem(e) {
+			if (this.current !== e.currentIndex) {
+				this.current = e.currentIndex
 			}
 		},
-		methods: {
-			// 激活码激活
-			async isopenDialog(val) {
-				console.log(val)
-				var isAddress = ethers.utils.isAddress(val);
-				try {
-					if (!isAddress) {
-						uni.showToast({
-							title: "激活码错误",
-							icon: "error"
-						})
 
-						return
+		dialogInputConfirm2(val) {
+			//this.$refs.inputDialog2.close()
+
+		},
+		change(item) {
+			this.changeType = item;
+			this.getEquips(this.collectContract)
+
+		},
+		carChange(item) {
+			this.carvalue = item;
+			this.getCards(this.collectContract);
+
+		},
+		async getCards(contract) {
+			var that = this;
+			//获取属性卡数量numOfCard和属性卡合集cardCollect
+			//cardLoading=true获取数据中
+			uni.showLoading({
+				title: '加载中'
+			});
+			that.cardCollect = [];
+			contract.getCardCollectCount().then(async num => {
+				for (let i = 0; num && i < num; i++) {
+					await contract.getCardCollection(i).then(async card => {
+						await that.getImg(2, i, card);
+						uni.hideLoading();
+					})
+
+				}
+			});
+		},
+		//获取装备集合
+		async getEquips(contract) {
+			var that = this;
+			//获取装备数量numOfEquip和装备合集equipCollect
+			uni.showLoading({
+				title: '加载中'
+			});
+			that.equipCollect = [];
+
+			contract.getEquipCollectCount().then(async num => {
+				for (var i = 0; i < num; i++) {
+					await contract.getEquipCollection(i).then(async equip => {
+						await that.getImg(1, i, equip);
+						uni.hideLoading();
+					})
+				}
+			});
+
+		},
+
+		getImg(img_type, collection_id, currentObj) {
+
+			var imgs = "";
+			var that = this;
+			myRequest({
+				url: 'game/getCover',
+				data: {
+					img_type: img_type,
+					collection_id: collection_id, //每一页12个数据
+				},
+			}).then(res => {
+				imgs = "https://gapi.runbit.org/images/" + res;
+				if (img_type == 1) {
+					var resultObj = {};
+					resultObj.balance = currentObj.sales / currentObj.stock * 100
+					resultObj.cover = imgs;
+					resultObj.equip = currentObj;
+					if (that.changeType == 10) { //默认加载全部
+						that.equipCollect.push(resultObj); //获取内容
+					} else if (that.changeType == currentObj.equipType) {
+						that.equipCollect.push(resultObj); //加载指定
 					}
-					let tx = await this.refContract.addReferrerWithCheck(val)
-					console.log(tx.hash)
-					uni.showLoading({
-						title: '请稍等...'
-					})
-					tx.wait().then(res => {
-						uni.hideLoading()
-						this.$refs.isopen.close();
-						uni.showToast({
-							title: "激活成功",
-							icon: "success"
-						})
-					})
-				} catch (e) {
-					console.error(e)
-				}
 
-			},
-			openUser() {
-				uni.navigateTo({
-					url: '../../userAccount/userAccount'
-				});
-			},
-			//兑换卡片确认按钮
-			redmCardBtn() {
-				this.currentPayType = 0;
-				if (this.balanceofRBCT > this.currentCard.card.price0) {
-					this.redeemCard(this.collectContract, this.collectionId);
 				} else {
-					uni.showToast({
-						title: "属性卡碎片不足",
-						icon: "error"
-					})
-				}
+					var resultObj = {};
 
-			},
-			//兑换装备确认按钮
-			redeemCardBtn() {
-				this.currentPayType = 0;
-				// this.$refs.inputDialogs.colse();
-				if (this.balanceofRBET > this.currentEquips.equip.price0) {
-					this.redeemEquip(this.collectContract, this.collectionId);
-				} else {
-					uni.showToast({
-						title: "装备碎片不足",
-						icon: "error"
-					})
-				}
-
-			},
-			//装备购买确认按钮
-			dialogInputConfirm(val) {
-
-				this.currentPayType = 1;
-				console.log(this.currentprice1);
-				this.$refs.inputDialogs.close();
-				if (this.balanceOfRB > this.currentEquips.equip.price1 / 1000000000000000000) {
-					this.buyEquip(this.collectContract, this.currentEquips.equip.equipType, this.collectionId);
-				} else {
-					uni.showToast({
-						title: "余额不足",
-						icon: "error"
-					})
-				}
-
-				// this.$refs.inputDialog.close()
-				// setTimeout(() => {
-				// 	uni.hideLoading()
-				// 	console.log(val)
-				// 	this.value = val
-				// 	// 关闭窗口后，恢复默认内容
-				// 	this.$refs.inputDialog2.open()
-				// }, 3000)
-			},
-			buyCardBtn() {
-				this.currentPayType = 1;
-				if (this.balanceOfRB > this.currentCard.card.price1 / 1000000000000000000) {
-					this.buyCard(this.collectContract, this.collectionId);
-				} else {
-					uni.showToast({
-						title: "余额不足",
-						icon: "error"
-					})
-				}
-
-			},
-			//点击装备列表
-			onGoods(item) {
-				this.collectionId = item;
-				this.currentEquips = this.equipCollect[item];
-				this.currentprice0 = this.currentEquips.equip.price0;
-				this.currnetDesc = "mint中,您将很快收到您的装备";
-				this.currentUnit="RBET";
-				this.currentprice1 = this.currentEquips.equip.price1 / 1000000000000000000;;
-				this.currentcover = this.currentEquips.cover;
-				this.isOpen = true;
-				if (this.isOpen) {
-					this.$refs.inputDialogs.open();
-				}
-
-			},
-			actionSheetTap() {
-				const that = this
-				uni.showActionSheet({
-					title: '装备筛选',
-					itemList: ['鞋子', '裤子', '上衣'],
-					popover: {
-						// 104: navbar + topwindow 高度，暂时 fix createSelectorQuery 在 pc 上获取 top 不准确的 bug
-						top: that.buttonRect.top + 104 + that.buttonRect.height,
-						left: that.buttonRect.left + that.buttonRect.width / 2
-					},
-					success: (e) => {
-						uni.showToast({
-							title: "点击了第" + e.tapIndex + "个选项",
-							icon: "none"
-						})
+					resultObj.balance = currentObj.sales / currentObj.stock * 100
+					resultObj.card = currentObj;
+					resultObj.cover = imgs;
+					if (that.carvalue == 10) {
+						that.cardCollect.push(resultObj); //获取内容
+					} else if (that.carvalue == currentObj.level) {
+						that.cardCollect.push(resultObj); //加载指定
 					}
+
+				}
+				uni.hideLoading()
+			})
+			return imgs;
+		},
+
+
+
+		//购买卡片
+		async buyCard(contract, cardId) {
+			try {
+				//判断是否授权
+				if (!this.approveState) {
+					//未授权，弹窗提示授权？
+					//用户点击确认授权后，调用授权代码，如下						
+					await contractApprove(this.RBContract, RunbitCollectionAddress)
+					this.approveState = true
+					console.log("approveState2", this.approveState)
+					uni.showToast({
+						title: "授权中,授权成功后重新点击购买",
+						icon: "none"
+					})
+					return
+
+				}
+				this.$refs.inputDialog2.open()
+				//已授权
+				let tx = await contract.buyCard(cardId)
+				//交易hash
+				await tx.wait()
+				uni.showToast({
+					title: "购买成功,请稍后到背包中查看",
+					icon: "success"
 				})
-			},
+				//购买成功的一些操作，如关闭loading
 
-			// 点击卡片列表
-			onGoods2(index) {
-				this.collectionId = index;
-				this.currentCard = this.cardCollect[index];
-				this.currnetDesc = "mint中,您将很快收到您的属性卡";
-				this.currentprice0 = this.currentCard.card.price0;
-				this.currentUnit="RBCT";
-				this.currentprice1 = this.currentCard.card.price1 / 1000000000000000000;
-				this.currentcover = this.currentCard.cover;
-				this.$refs.inputDialog3.open()
-			},
-			sectionChange(index) {
-				this.curNow = index;
+			} catch (e) {
+				//出错的一些操作
 
-			},
-			onClickItem(e) {
-				if (this.current !== e.currentIndex) {
-					this.current = e.currentIndex
-				}
-			},
-
-			dialogInputConfirm2(val) {
-				//this.$refs.inputDialog2.close()
-
-			},
-			change(item) {
-				this.changeType = item;
-				this.getEquips(this.collectContract)
-
-			},
-			carChange(item) {
-				this.carvalue = item;
-				this.getCards(this.collectContract);
-
-			},
-			async getCards(contract) {
-				var that = this;
-				//获取属性卡数量numOfCard和属性卡合集cardCollect
-				//cardLoading=true获取数据中
-				var numOfCard;
-				uni.showLoading({
-					title: '加载中'
-				});
-				that.cardCollect = [];
-				contract.getCardCollectCount().then(async num => {
-					for (let i = 0; num && i < num; i++) {
-						await contract.getCardCollection(i).then(async card => {
-							await that.getImg(2, i, card);
-							uni.hideLoading();
-						})
-
-					}
-				});
-			},
-			//获取装备集合
-			async getEquips(contract) {
-				var that = this;
-				//获取装备数量numOfEquip和装备合集equipCollect
-				var numOfEquip;
-				var equipLoading = true;
-				uni.showLoading({
-					title: '加载中'
-				});
-				that.equipCollect = [];
-
-				contract.getEquipCollectCount().then(async num => {
-					for (var i = 0; i < num; i++) {
-
-
-						await contract.getEquipCollection(i).then(async equip => {
-
-							// that.equips.equip = equip;
-console.log(parseInt(equip.sales));
-							await that.getImg(1, i, equip);
-							equipLoading = false;
-
-
-						})
-
-					}
-				});
-
-			},
-
-			getImg(img_type, collection_id, currentObj) {
-
-				var imgs = "";
-				var that = this;
-				uni.request({
-					url: this.baseurl + 'game/getCover',
-					method: "GET",
-					data: {
-						img_type: img_type,
-						collection_id: collection_id, //每一页12个数据
-					},
-
-					success: function(res) {
-						if (res.data.code == 0) {
-							imgs = "https://gapi.runbit.org/images/" + res.data.data;
-
-						}
-						if (img_type == 1) {
-							var resultObj = {};
-							resultObj.balance = currentObj.sales / currentObj.stock * 100
-							resultObj.cover = imgs;
-							resultObj.equip = currentObj;
-							if (that.changeType == 10) { //默认加载全部
-								that.equipCollect.push(resultObj); //获取内容
-							} else if (that.changeType == currentObj.equipType) {
-								that.equipCollect.push(resultObj); //加载指定
-							}
-
-						} else {
-							var resultObj = {};
-
-							resultObj.balance = currentObj.sales / currentObj.stock * 100
-							resultObj.card = currentObj;
-							resultObj.cover = imgs;
-							if (that.carvalue == 10) {
-								that.cardCollect.push(resultObj); //获取内容
-							} else if (that.carvalue == currentObj.level) {
-								that.cardCollect.push(resultObj); //加载指定
-							}
-
-						}
-						uni.hideLoading()
-
-					},
-
+				console.error(e)
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "购买失败" + ":" + reason,
+					icon: "none"
 				})
-				return imgs;
-			},
+			} finally {
 
-
-
-			//购买卡片
-			async buyCard(contract, cardId) {
-				try {
-					uni.showLoading({
-						title: '正在购买...'
-					});
-					//判断是否授权
-					if (!this.approveState) {
-						//未授权，弹窗提示授权？
-						//用户点击确认授权后，调用授权代码，如下						
-						await contractApprove(this.RBContract, RunbitCollectionAddress)
-						this.approveState = true
-						console.log("approveState2", this.approveState)
-						uni.showToast({
-							title: "授权中,授权成功后重新点击购买",
-							icon: "none"
-						})
-						return
-
-					}
-					this.$refs.inputDialog2.open()
-					//已授权
-					let tx = await contract.buyCard(cardId)
-					//交易hash
-					tx.wait().then(res => {
-						this.getCards(collectContract)
-						uni.hideLoading();
-						this.$refs.inputDialog2.close()
-						
-						uni.showToast({
-							title: "购买成功",
-							icon: "success"
-						})
-						//购买成功的一些操作，如关闭loading
-					})
-
-				} catch (e) {
-					//出错的一些操作
-
-					console.error(e)
-				}
-			},
-			//购买装备
-			async buyEquip(contract, equipType, collectionid) {
-				try {
-					//判断是否授权
-					uni.showLoading({
-						title: '正在购买...'
-					});
-					if (!this.approveState) {
-						//未授权，弹窗提示授权？
-						//用户点击确认授权后，调用授权代码，如下						
-						await contractApprove(this.RBContract, RunbitCollectionAddress)
-						this.approveState = true
-						console.log("approveState2", this.approveState)
-
-						uni.showToast({
-							title: "授权中,授权后重新点击购买",
-							icon: "none"
-						})
-					}
-					//已授权
-
-					this.$refs.inputDialog2.open()
-
-					let tx = await contract.buyEquip(collectionid)
-					//交易hash
-					console.log(tx.hash)
-					tx.wait().then(res => {
-						this.getEquips(this.collectContract)
-						uni.hideLoading();
-						this.$refs.inputDialog2.close()
-						uni.showToast({
-							title: "购买成功",
-							icon: "success"
-						})
-						//购买成功的一些操作，如关闭loading
-					})
-
-				} catch (e) {
-					//出错的一些操作
-					
-					console.error(e)
-				}
-			},
-			//兑换属性卡
-			async redeemCard(contract, cardId) {
-				try {
-					uni.showLoading({
-						title: '兑换中...'
-					});
-					//判断是否授权
-					if (!this.approveRBCT) {
-						//未授权，弹窗提示授权？
-						//用户点击确认授权后，调用授权代码，如下						
-						await contractApprove(this.RBCTContract, RunbitCollectionAddress)
-						this.approveRBCT = true
-						console.log("approveRBCT", this.approveRBCT)
-						
-						uni.showToast({
-							title: "授权成功,重新兑换",
-							icon: "success"
-						})
-						return
-					}
-					
-
-					this.$refs.inputDialog2.open()
-					//已授权
-					let tx = await contract.redeemCard(cardId)
-					tx.wait().then(res => {
-						this.$refs.inputDialog2.close()
-						uni.hideLoading();
-						uni.showToast({
-							title: "兑换成功",
-							icon: "success"
-						})
-						//兑换成功的一些操作，如关闭loading
-					})
-
-				} catch (e) {
-					//出错的一些操作
-
-					console.error(e)
-				}
-			},
-			//兑换装备
-			async redeemEquip(contract, collectionId) {
-				try {
-					uni.showLoading({
-						title: '兑换中...'
-					});
-					if (!this.approveRBET) {
-						
-						console.log("开始授权----" + collectionId);
-
-						await contractApprove(this.RBETContract, RunbitCollectionAddress)
-						console.log(contractApprove);
-						console.log(RunbitCollectionAddress);
-						this.approveRBET = true
-						uni.showToast({
-							title: "授权中",
-							icon: "none"
-						})
-
-					}
-				
-					console.log("装备兑换开始----" + collectionId);
-
-					this.$refs.inputDialog2.open()
-
-					let tx = await contract.redeemEquip(collectionId)
-					console.log(tx.hash)
-					tx.wait().then(res => {
-							uni.hideLoading();
-						console.log("装备兑换成功----" + collectionId);
-
-						this.$refs.inputDialog2.close()
-						uni.showToast({
-							title: "兑换成功",
-							icon: "success"
-						})
-						//兑换成功的一些操作，如关闭loading
-					})
-
-				} catch (e) {
-					//出错的一些操作
-
-					console.error(e)
-				}
+				this.$refs.inputDialog2.close()
 			}
+		},
+		//购买装备
+		async buyEquip(contract, equipType, collectionid) {
+			try {
+				//判断是否授权
 
+				if (!this.approveState) {
+					//未授权，弹窗提示授权？
+					//用户点击确认授权后，调用授权代码，如下						
+					await contractApprove(this.RBContract, RunbitCollectionAddress)
+					this.approveState = true
+					console.log("approveState2", this.approveState)
+
+					uni.showToast({
+						title: "授权中,授权后重新点击购买",
+						icon: "none"
+					})
+				}
+				//已授权
+
+				this.$refs.inputDialog2.open()
+
+				let tx = await contract.buyEquip(collectionid)
+				//交易hash
+				console.log(tx.hash)
+				tx.wait().then(res => {
+					uni.showToast({
+						title: "购买成功,请稍后到背包中查看",
+						icon: "success"
+					})
+					//购买成功的一些操作，如关闭loading
+				})
+
+			} catch (e) {
+				//出错的一些操作
+
+				console.error(e)
+
+				console.error(e)
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "购买失败" + ":" + reason,
+					icon: "none"
+				})
+			} finally {
+				this.$refs.inputDialog2.close()
+
+			}
+		},
+		//兑换属性卡
+		async redeemCard(contract, cardId) {
+			try {
+				//判断是否授权
+				if (!this.approveRBCT) {
+					//未授权，弹窗提示授权？
+					//用户点击确认授权后，调用授权代码，如下						
+					await contractApprove(this.RBCTContract, RunbitCollectionAddress)
+					this.approveRBCT = true
+					console.log("approveRBCT", this.approveRBCT)
+					uni.showLoading({
+						title: '开始授权...'
+					});
+					uni.showToast({
+						title: "授权成功,重新兑换",
+						icon: "success"
+					})
+					return
+				}
+				uni.hideLoading();
+
+				this.$refs.inputDialog2.open()
+				//已授权
+				let tx = await contract.redeemCard(cardId)
+				tx.wait().then(res => {
+					this.$refs.inputDialog2.close()
+					uni.showToast({
+						title: "兑换成功,请稍后到背包中查看",
+						icon: "success"
+					})
+					//兑换成功的一些操作，如关闭loading
+				})
+
+			} catch (e) {
+				//出错的一些操作
+				console.error(e)
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "兑换失败" + ":" + reason,
+					icon: "none"
+				})
+			}
+		},
+		//兑换装备
+		async redeemEquip(contract, collectionId) {
+			try {
+				if (!this.approveRBET) {
+					uni.showLoading({
+						title: '开始授权...'
+					});
+					console.log("开始授权----" + collectionId);
+
+					await contractApprove(this.RBETContract, RunbitCollectionAddress)
+					console.log(contractApprove);
+					console.log(RunbitCollectionAddress);
+					this.approveRBET = true
+					uni.showToast({
+						title: "授权中",
+						icon: "none"
+					})
+
+				}
+				uni.hideLoading();
+				console.log("装备兑换开始----" + collectionId);
+
+				this.$refs.inputDialog2.open()
+
+				let tx = await contract.redeemEquip(collectionId)
+				console.log(tx.hash)
+				tx.wait().then(res => {
+					console.log("装备兑换成功----" + collectionId);
+
+					this.$refs.inputDialog2.close()
+					uni.showToast({
+						title: "兑换成功,请稍后到背包中查看",
+						icon: "success"
+					})
+					//兑换成功的一些操作，如关闭loading
+				})
+
+			} catch (e) {
+				//出错的一些操作
+
+				console.error(e)
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "兑换失败" + ":" + reason,
+					icon: "none"
+				})
+			}
 		}
-	}
-</script>
 
+	}
+}
+</script>
 <style>
 	.content {
 
@@ -947,7 +898,7 @@ console.log(parseInt(equip.sales));
 		height: 70.72rpx;
 		line-height: 70.72rpx;
 	}
-
+	
 	.nocard {
 		display: inline-block;
 		margin: 0 auto;
@@ -962,8 +913,8 @@ console.log(parseInt(equip.sales));
 	.dialogimg {
 		display: block;
 		margin: 0 auto;
-		width: 250.33rpx;
-		height: 250.88rpx;
+		width: 350.33rpx;
+		height: 350.88rpx;
 		padding: 6.94rpx;
 
 	}
@@ -1017,7 +968,6 @@ console.log(parseInt(equip.sales));
 		margin: 0 auto;
 		display: inline-block;
 		margin: 1.25rem auto;
-		height: 360.88rpx;
 
 		display: flex;
 		flex-direction: column;

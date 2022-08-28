@@ -2,14 +2,14 @@
 	<view class="content">
 		<view class="bg">
 
-			<view class="uni-flex uni-row"  @tap="openUser" style="margin: 1.425rem; height: 89.44rpx; ">
+			<view class="uni-flex uni-row" @tap="openUser" style="margin: 1.425rem; height: 89.44rpx; ">
 				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:3.125rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
-				<view class="currentbs">{{getSteps}}步</view>
+				<view class="currentbs">{{ getSteps }}步</view>
 				<view class="userName">
 					<img class="input_edi" src="../../../static/input_edi.png"></img>
 					<img class="input_logo" src="../../../static/inputlogo.png"></img>
-					<view class="input_txt">{{userAccount}}</view>
+					<view class="input_txt">{{ userAccount }}</view>
 				</view>
 			</view>
 
@@ -20,7 +20,7 @@
 					<view v-if="curNow === 0">
 						<view class="uni-flex uni-row"
 							style="display: flex; margin:1rem 0px; height: 85.55rpx; width: 100%; ">
-						<!-- 	<view style="width: 50%; margin: auto 0; ">
+							<!-- 	<view style="width: 50%; margin: auto 0; ">
 								<uni-data-select v-model="value" :localdata="range" @change="change"></uni-data-select>
 							</view> -->
 							<!-- <view @click="actionSheetTap" class="fillter">Fillter(0)</view> -->
@@ -28,8 +28,8 @@
 							</image>
 
 						</view>
-						<mineEquip v-if="myEquips.length>0" :lists="myEquips" price-type="$" @onGoods="Clickequip" />
-						<img v-if="myEquips.length==0" class="nocard"  src="../../../static/Group120151.png" />
+						<mineEquip v-if="myEquips.length > 0" :lists="myEquips" price-type="$" @onGoods="Clickequip" />
+						<img v-if="myEquips.length == 0" class="nocard" src="../../../static/Group120151.png" />
 					</view>
 					<view v-if="curNow === 1">
 						<view class="uni-flex uni-row"
@@ -41,8 +41,8 @@
 							<!-- <image @click="actionSheetTap" class="filltericon" src="../../../static/Frame3.png"></image> -->
 
 						</view>
-						<mineEquip  v-if="myCards.length>0" :lists="myCards" price-type="$" @onGoods="clickCard" />
-						<img v-if="myCards.length==0" class="nocard"  src="../../../static/Group120151.png" />
+						<mineEquip v-if="myCards.length > 0" :lists="myCards" price-type="$" @onGoods="clickCard" />
+						<img v-if="myCards.length == 0" class="nocard" src="../../../static/Group120151.png" />
 						<!-- <oct-goods :lists="goodsArr" price-type="$" @onGoods="onGoods2" /> -->
 
 					</view>
@@ -71,16 +71,16 @@
 							</view>
 
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item">{{card1.equip.level}} & {{card2.equip.level}}</view>
+								<view class="flex-item">{{ card1.equip.level }} & {{ card2.equip.level }}</view>
 								<view class="flex-item" style="margin-left: 2.5rem; color: #FC823D;">
-									{{ parseInt(card1.equip.level)+1}}
+									{{ parseInt(card1.equip.level) + 1 }}
 								</view>
 							</view>
 
 						</uni-card>
 						<view class="curId2 uni-flex uni-row">
 							<view class="flex-item3">合成費用共計</view>
-							<view class="flex-item4">{{ForgeFee}} RB</view>
+							<view class="flex-item4">{{ ForgeFee }} RB</view>
 						</view>
 
 
@@ -146,12 +146,12 @@
 								<view class="flex-item idvalue2">累計收益</view>
 							</view>
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item flex-itemValue">{{curCard.card.durability}}</view>
+								<view class="flex-item flex-itemValue">{{curCard.card.durability}}/100</view>
 								<view class="flex-item flex-itemValue idvalue2">0</view>
 							</view>
 						</uni-card>
 						<view class="uni-flex uni-row" style="width: 60%; text-align: center; margin: 10px auto;">
-							<view class="id4">{{cardStatus}}{{cardequipId}}</view>
+							<view class="id4">{{cardStatus}}</view>
 						</view>
 
 					</view>
@@ -198,7 +198,7 @@
 									<image v-if="curEquip.equip.level>=5" class="smicon "
 										src="../../../static/Group115861.png"></image>
 								</view>
-								<view class="flex-item flex-itemValue rare">{{curEquip.equip.quality}}</view>
+								<view class="rare">{{curEquip.equip.quality}}</view>
 							</view>
 
 							<view class="curId uni-flex uni-row" style="margin-top: 0.8rem;">
@@ -207,16 +207,16 @@
 							</view>
 
 							<view class="curId uni-flex uni-row">
-								<view class="level flex-itemValue">{{curEquip.equip.capacity}}</view>
+								<view class="level flex-itemValue">{{curEquip.equip.capacity}}/3</view>
 								<view v-if="curEquip.equip.upgradeable==0" class="flex-item flex-itemValue rare">否
 								</view>
-								<view v-if="curEquip.equip.upgradeable==1" class="flex-item flex-itemValue rare">是
+								<view v-if="curEquip.equip.upgradeable == 1" class="flex-item flex-itemValue rare">是
 								</view>
 							</view>
 
 						</uni-card>
 						<view class="uni-flex uni-row" style="width: 60%; text-align: center; margin: 5px auto;">
-							<view class="id4">{{equipStatus}}</view>
+							<view class="id4">{{ equipStatus }}</view>
 
 						</view>
 
@@ -257,360 +257,349 @@
 </template>
 
 <script>
-	import {
-		ethers,
-		BigNumber
-	} from 'ethers'
-	import {
-		refStoreAddress,
-		refAbi,
-		RunbitCollectionAddress,
-		RunbitCollectionAbi,
-		RBAddress,
-		RunbitAddress,
-		RunbitAbi,
-		RBAbi,
-		cardAddress,
-		cardAbi,
-		equipAddress,
-		equipAbi
-	} from '../../../contract/address.js'
-	import {
-		useContract,
-		contractApprove,
-		getApproveState,
-		hideBankCards
-	} from '../../../contract/useContract.js'
-	import {
-		bindCard,
-		bindEquip,
-		unbindEquip,
-		unbindCard,
-		getBindEquip,
-		getBindEquips,
-		getBindCards,
-		getForgeFee,
-		transferNFT
-	} from '../../../contract/useRunbit.js'
-	import {
-		getMyCards,
-		getMyEquips,
-		getNFTApprove,
-		approveNFT
-	} from '../../../contract/useEquipCard.js'
-	export default {
-		data() {
-			return {
-				cardCancle: '',
-				cardconfirm: '',
-				cardStatus: '',
-				cancleText: '取消',
-				equipStatus: '未裝備',
-				bindCardId:'',
-				title: '',
-				userAccount: '',
-				getSteps: 0,
-				buttonRect: {},
-				curImg2: "../../../static/Group12032.png",
-				curImg1: "../../../static/Group12032.png",
-				curEquip: {
-					equip: {
-						capacity: '',
-						equipType: '',
-						price0: '',
-						price1: '',
-						quality: '',
-						sales: '',
-						startId: '',
-						status: '',
-						stock: '',
-						upgradeable: '',
-					},
-					img: "",
+import {
+	ethers,
+	BigNumber
+} from 'ethers'
+import {
+	refStoreAddress,
+	refAbi,
+	RunbitCollectionAddress,
+	RunbitCollectionAbi,
+	RBAddress,
+	RunbitAddress,
+	RunbitAbi,
+	RBAbi,
+	cardAddress,
+	cardAbi,
+	equipAddress,
+	equipAbi
+} from '../../../contract/address.js'
+import {
+	useContract,
+	contractApprove,
+	getApproveState,
+	hideBankCards
+} from '../../../contract/useContract.js'
+import {
+	bindCard,
+	bindEquip,
+	unbindEquip,
+	unbindCard,
+	getBindEquip,
+	getBindEquips,
+	getBindCards,
+	getForgeFee,
+	transferNFT
+} from '../../../contract/useRunbit.js'
+import {
+	getMyCards,
+	getMyEquips,
+	getNFTApprove,
+	approveNFT
+} from '../../../contract/useEquipCard.js'
+
+export default {
+	data() {
+		return {
+			cardCancle: '',
+			cardconfirm: '',
+			cardStatus: '',
+			cancleText: '取消',
+			equipStatus: '未裝備',
+			bindCardId: '',
+			title: '',
+			userAccount: '',
+			getSteps: 0,
+			buttonRect: {},
+			curImg2: "../../../static/Group12032.png",
+			curImg1: "../../../static/Group12032.png",
+			curEquip: {
+				equip: {
+					capacity: '',
+					equipType: '',
+					price0: '',
+					price1: '',
+					quality: '',
+					sales: '',
+					startId: '',
+					status: '',
+					stock: '',
+					upgradeable: '',
 				},
-				curCard: {
-					img: "",
-					card: {
-						durability: ''
-					}
-				},
+				img: "",
+			},
+			curCard: {
+				img: "",
+				card: {
+					durability: ''
+				}
+			},
+			value: 10,
+			cards: [{
+				img: '../../../static/Group12032.png'
+			},
+			{
+				img: '../../../static/Group12032.png'
+			},
+			{
+				img: '../../../static/Group12032.png'
+			},
+			],
+			goodsArr: [],
+			ForgeFee: '',
+			range: [{
 				value: 10,
-				cards: [{
-						img: '../../../static/Group12032.png'
-					},
-					{
-						img: '../../../static/Group12032.png'
-					},
-					{
-						img: '../../../static/Group12032.png'
-					},
-				],
-				goodsArr: [],
-				ForgeFee: '',
-				range: [{
-						value: 10,
-						text: "全部"
-					},
-					{
-						value: 0,
-						text: "鞋子"
-					},
-					{
-						value: 1,
-						text: "裤子"
-					},
-					{
-						value: 2,
-						text: "衣服"
-					},
-				],
-				currentCard: 0,
-				carIndex: 0,
-				curNow: 0,
-				list: ['运动装备', '属性卡'],
-				current: 0,
-				colorIndex: 0,
-				items: ['选项卡1', '选项卡2'],
-				styleType: 'button',
-				activeColor: '#FFEB34',
-				myCards: [],
-				myEquips: [],
-				onEquips: [],
-				cardequipId:'',
-				RBContract: null,
-				balanceOfRB: 0,
-				bindCardIndex:0,
-				type:'',
-				card1: {
-					equip: {
-						level: 0,
-					},
-					img: '../../../static/Group12032.png'
+				text: "全部"
+			},
+			{
+				value: 0,
+				text: "鞋子"
+			},
+			{
+				value: 1,
+				text: "裤子"
+			},
+			{
+				value: 2,
+				text: "衣服"
+			},
+			],
+			currentCard: 0,
+			carIndex: 0,
+			curNow: 0,
+			list: ['运动装备', '属性卡'],
+			current: 0,
+			colorIndex: 0,
+			items: ['选项卡1', '选项卡2'],
+			styleType: 'button',
+			activeColor: '#FFEB34',
+			myCards: [],
+			myEquips: [],
+			onEquips: [],
+			RBContract: null,
+			balanceOfRB: 0,
+			bindCardIndex: 0,
+			type: '',
+			card1: {
+				equip: {
+					level: 0,
 				},
-				card2: {
-					equip: {
-						level: 0,
-					},
-					img: '../../../static/Group12032.png'
+				img: '../../../static/Group12032.png'
+			},
+			card2: {
+				equip: {
+					level: 0,
 				},
-				card3: {
-					equip: {
-						level: 0,
-					},
-					img: '../../../static/Group12032.png'
+				img: '../../../static/Group12032.png'
+			},
+			card3: {
+				equip: {
+					level: 0,
 				},
-				cardIndex: 0,
-				approveState: false,
-				refContract:null
-			}
-		},
-		mounted() {
-			try {
+				img: '../../../static/Group12032.png'
+			},
+			cardIndex: 0,
+			approveState: false,
+			refContract: null
+		}
+	},
+	onLoad() {
+		try {
+			uni.showLoading({
+				title: '加载中'
+			});
+			this.getSteps = getApp().globalData.userStep
+			const provider = new ethers.providers.Web3Provider(window.ethereum);
+			provider.send("eth_requestAccounts", []).then(accounts => {
+				this.myAccount = accounts[0]
+				this.userAccount = hideBankCards(accounts[0]);
 				uni.showLoading({
 					title: '加载中'
 				});
-				this.getSteps = getApp().globalData.userStep
-				const provider = new ethers.providers.Web3Provider(window.ethereum);
-				provider.send("eth_requestAccounts", []).then(accounts => {
-					this.myAccount = accounts[0]
-					this.userAccount = hideBankCards(accounts[0]);
+				//加载我的属性卡和装备库 
+				useContract(equipAddress, equipAbi).then(contract => {
+					this.equipContract = contract
+					getMyEquips(this.myAccount, contract).then(myEquips => {
+						this.myEquips = myEquips;
+						console.log("myEquips--------", myEquips)
+						uni.hideLoading();
+					})
+					getNFTApprove(this.equipContract, this.myAccount, RunbitCollectionAddress).then(
+						state => {
+							this.approveEquip = state
+						})
+
+				});
+				uni.showLoading({
+					title: '加载中'
+				});
+				useContract(cardAddress, cardAbi).then(contract => {
+					this.cardContract = contract
+					getMyCards(this.myAccount, contract).then(myCards => {
+						this.myCards = myCards;
+						console.log("myCards--------", myCards)
+					})
+				});
+
+				//查询商店合约授权情况，授权后才能购买和兑换
+				useContract(RBAddress, RBAbi).then(RBContract => {
+					//获取rb余额
+					this.RBContract = RBContract;
+					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
+						this.balanceOfRB = balanceOfRB
+						console.log("balanceOfRB", this.balanceOfRB);
+					})
 					uni.showLoading({
 						title: '加载中'
 					});
-					//判断是否需要填激活码
-					useContract(refStoreAddress, refAbi).then(refContract => {
-						
-						
-						refContract.referrer(this.myAccount).then(refer => {
-					this.refContract = refContract;
-							if (refer === '0x0000000000000000000000000000000000000000') {
-								this.$refs.isopen.open();
-							} 
-					
-						})
-					
-					})
-					//加载我的属性卡和装备库 
-					useContract(equipAddress, equipAbi).then(contract => {
-						this.equipContract = contract
-						getMyEquips(this.myAccount, contract).then(myEquips => {
-							this.myEquips = myEquips;
-							console.log("myEquips--------", myEquips)
-							uni.hideLoading();
-						})
-						getNFTApprove(this.equipContract, this.myAccount, RunbitCollectionAddress).then(
-							state => {
-								this.approveEquip = state
-							})
-
-					});
-					uni.showLoading({
-						title: '加载中'
-					});
-					useContract(cardAddress, cardAbi).then(contract => {
-						this.cardContract = contract
-						getMyCards(this.myAccount, contract).then(myCards => {
-							this.myCards = myCards;
-							console.log("myCards--------", myCards)
-						})
-					});
-
-					//查询商店合约授权情况，授权后才能购买和兑换
-					useContract(RBAddress, RBAbi).then(RBContract => {
-						//获取rb余额
-						this.RBContract = RBContract;
-						RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
-							this.balanceOfRB = balanceOfRB
-							console.log("balanceOfRB", this.balanceOfRB);
-						})
-						uni.showLoading({
-							title: '加载中'
-						});
-						//获取RB对商品合约的授权情况
-						RBContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
-							if (data.eq(BigNumber.from(0))) {
-								this.approveState = false
-							} else {
-								this.approveState = true
-							}
-						})
-					});
-
-
-					useContract(RunbitAddress, RunbitAbi).then(contract => {
-						this.runContract = contract
-						//获取装备,0代表没装备
-						getBindEquips(contract, this.myAccount).then(async equips => {
-							console.log("已经穿了" + equips);
-							this.onEquips = equips;
-						})
+					//获取RB对商品合约的授权情况
+					RBContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
+						if (data.eq(BigNumber.from(0))) {
+							this.approveState = false
+						} else {
+							this.approveState = true
+						}
 					})
 				});
-				useContract(RunbitCollectionAddress, RunbitCollectionAbi).then(contract => {
-					this.collectContract = contract
-
-				});
-				setTimeout(() => {
-					//可在此测试
-					//  this.forgeEquip(this.collectContract, 0x4e2e, 0x4e2d)
-					// getBindCards(contract,20007)
-
-					// bindCard(contract,20007,20005,0)
-					// bindEquip(contract,20007)
-					// unbindEquip(contract,0)
-					// unbindCard(contract,20007,0)
-					//this.transfer(1, '0x042A52dFEcE28a7F451eC06f5Fb178F3b19aE485', 0x4e2e)
-				}, 5000)
 
 
+				useContract(RunbitAddress, RunbitAbi).then(contract => {
+					this.runContract = contract
+					//获取装备,0代表没装备
+					getBindEquips(contract, this.myAccount).then(async equips => {
+						console.log("已经穿了" + equips);
+						this.onEquips = equips;
+					})
+				})
+			});
+			useContract(RunbitCollectionAddress, RunbitCollectionAbi).then(contract => {
+				this.collectContract = contract
+
+			});
+			setTimeout(() => {
+				//可在此测试
+
+			}, 10000)
+
+
+		} catch (e) {
+			console.error(e);
+		}
+
+	},
+	methods: {
+		// 激活码激活
+		async isopenDialog(val) {
+			console.log(val)
+			var isAddress = ethers.utils.isAddress(val);
+			try {
+				if (!isAddress) {
+					uni.showToast({
+						title: "激活码错误",
+						icon: "error"
+					})
+
+					return
+				}
+				let tx = await this.refContract.addReferrerWithCheck(val)
+				console.log(tx.hash)
+				uni.showLoading({
+					title: '请稍等...'
+				})
+				tx.wait().then(res => {
+					uni.hideLoading()
+					this.$refs.isopen.close();
+					uni.showToast({
+						title: "激活成功",
+						icon: "success"
+					})
+				})
 			} catch (e) {
-				console.error(e);
+				console.error(e)
 			}
 
 		},
-		methods: {
-			// 激活码激活
-			async isopenDialog(val) {
-				console.log(val)
-				var isAddress = ethers.utils.isAddress(val);
+		transferNFTCard(val) {
+			var isAddress = ethers.utils.isAddress(val);
+			if (!isAddress) {
+				uni.showToast({
+					title: "地址异常",
+					icon: "error"
+				})
+				return
+			}
+			this.transfer(0, val, this.curCard.id);
+		},
+		//卸装
+		async cancleEquip() {
+			if (this.cancleText == "取消") {
+				this.$refs.inputDialog5.close()
+			} else {
+				uni.showLoading({
+					title: '装备卸下中...'
+				})
 				try {
-					if (!isAddress) {
-						uni.showToast({
-							title: "激活码错误",
-							icon: "error"
-						})
-			
-						return
-					}
-					let tx = await this.refContract.addReferrerWithCheck(val)
-					console.log(tx.hash)
-					uni.showLoading({
-						title: '请稍等...'
+					let tx = await unbindEquip(this.runContract, this.curEquip.equip.equipType)
+					await tx.wait()
+					uni.showToast({
+						title: "卸装成功",
+						icon: "success"
 					})
-					tx.wait().then(res => {
-						uni.hideLoading()
-						this.$refs.isopen.close();
-						uni.showToast({
-							title: "激活成功",
-							icon: "success"
-						})
+					//获取装备,0代表没装备
+					getBindEquips(this.runContract, this.myAccount).then(async equips => {
+						console.log("已经穿了" + equips);
+						this.onEquips = equips;
 					})
+					this.$refs.inputDialog5.close();
 				} catch (e) {
 					console.error(e)
-				}
-			
-			},
-			transferNFTCard(val) {
-				var isAddress = ethers.utils.isAddress(val);
-				if (!isAddress) {
+					let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
 					uni.showToast({
-						title: "地址异常",
-						icon: "error"
+						title: "购买失败" + ":" + reason,
+						icon: "none"
 					})
-					return
-				}
-				this.transfer(0, val, this.curCard.id);
-			},
-			//卸装
-			async cancleEquip() {
-				if (this.cancleText == "取消") {
-					this.$refs.inputDialog5.close()
-				} else {
-					uni.showLoading({
-						title: '装备卸下中...'
-					})
-					try {
-						let tx = await unbindEquip(this.runContract, this.curEquip.equip.equipType)
-						await tx.wait()
-					} catch (e) {
-						console.error(e)
-						//todo 错误提示
-					} finally {
-						uni.hideLoading()
-						//获取装备,0代表没装备
-						getBindEquips(this.runContract, this.myAccount).then(async equips => {
-							console.log("已经穿了" + equips);
-							this.onEquips = equips;
-						})
-						this.$refs.inputDialog5.close();
+				} finally {
+					uni.hideLoading()
 
-						uni.showToast({
-							title: "卸装成功",
-							icon: "success"
-						})
-					}
 				}
-			},
-			//卸卡
-			async cancleCards() {
-			
-					uni.showLoading({
-						title: '卸下中...'
-					})
-					try {
-						let tx = await unbindCard(this.runContract, this.bindCardId, this.bindCardIndex)
-						await tx.wait()
-					} catch (e) {
-						console.error(e)
-						//todo 错误提示
-					} finally {
-						uni.hideLoading()
-						uni.showToast({
-							title: "卸下成功",
-							icon: "success"
-						})
-				}
-			},
-			equipInfo() {
-				this.$refs.inputDialog5.close()
-			},
-			//筛选点击事件合成筛选
-			getClick(item) {
-				if (this.cardIndex == 0) {
-					this.currentCard = item;
-				}
-				
-				if(this.type=="foge"){
+			}
+		},
+		//卸卡
+		async cancleCards() {
+
+			uni.showLoading({
+				title: '卸下中...'
+			})
+			try {
+				let tx = await unbindCard(this.runContract, this.bindCardId, this.bindCardIndex)
+				await tx.wait()
+				uni.showToast({
+					title: "卸下成功",
+					icon: "success"
+				})
+			} catch (e) {
+				console.error(e)
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "购买失败" + ":" + reason,
+					icon: "none"
+				})
+				//todo 错误提示
+			} finally {
+				uni.hideLoading()
+			}
+		},
+		equipInfo() {
+			this.$refs.inputDialog5.close()
+		},
+		//筛选点击事件合成筛选
+		getClick(item) {
+			if (this.cardIndex == 0) {
+				this.currentCard = item;
+			}
+
+			if (this.type == "foge") {
 				if (item.equip.level >= 5) {
 					uni.showToast({
 						title: "等级已达最高级",
@@ -623,15 +612,16 @@
 				getForgeFee(this.collectContract, item.equip.equipType, item.equip.level).then(
 					ForgeFee => {
 						this.ForgeFee = ForgeFee
-						console.log(this.ForgeFee);
+						console.log("合成费用----------", this.ForgeFee);
 					})
 
 
-				
+				//选择卡槽1
 				if (this.cardIndex == 1) {
 
 					this.card1 = item;
 				}
+				//选择卡槽2
 				if (this.cardIndex == 2) {
 					this.card2 = item;
 				}
@@ -641,6 +631,14 @@
 						this.card2 = this.card3;
 						uni.showToast({
 							title: "装备等级必须一致",
+							icon: "error"
+						})
+					}
+					if (parseInt(this.card2.equip.equipType) != parseInt(this.card1.equip.equipType)) {
+						this.card1 = this.card3;
+						this.card2 = this.card3;
+						uni.showToast({
+							title: "装备类型必须一致",
 							icon: "error"
 						})
 					}
@@ -654,44 +652,44 @@
 					}
 
 				}
+			}
+		},
+		//获取当前装备绑定的卡片
+		async getEquitCard(equipId) {
+			console.log("装备id" + equipId);
+			getBindCards(this.runContract, equipId).then(async cards => {
+				if (cards[0].img) {
+					this.cards[0].img = cards[0].img;
+				} else {
+					this.cards[0].img = '../../../static/Group12032.png';
 				}
-			},
-			//获取当前装备绑定的卡片
-			async getEquitCard(equipId) {
-				console.log("装备id" + equipId);
-				getBindCards(this.runContract, equipId).then(async cards => {
-					if (cards[0].img) {
-						this.cards[0].img = cards[0].img;
-					} else {
-						this.cards[0].img = '../../../static/Group12032.png';
-					}
-					if (cards[1].img) {
-						this.cards[1].img = cards[1].img;
-					} else {
-						this.cards[1].img = '../../../static/Group12032.png';
-					}
-					if (cards[2].img) {
-						this.cards[2].img = cards[2].img;
-					} else {
-						this.cards[2].img = '../../../static/Group12032.png';
-					}
-					console.log("当前装备卡片:" + cards);
-				})
-			},
-			//打开卡片筛选
-			addCard(index) {
-				this.carIndex = index;
-				this.$refs.inputDialog5.close()
-				this.$refs.inputDialog4.open() //装备筛选
-			},
-			//装备合成弹框
-			synthetic() {
-				this.type="foge" //合成
-				this.$refs.inputDialog.open()
-			},
-			//装备合成确认
-			forgeEquipDialog() {
-				
+				if (cards[1].img) {
+					this.cards[1].img = cards[1].img;
+				} else {
+					this.cards[1].img = '../../../static/Group12032.png';
+				}
+				if (cards[2].img) {
+					this.cards[2].img = cards[2].img;
+				} else {
+					this.cards[2].img = '../../../static/Group12032.png';
+				}
+				console.log("当前装备卡片:" + cards);
+			})
+		},
+		//打开卡片筛选
+		addCard(index) {
+			this.carIndex = index;
+			this.$refs.inputDialog5.close()
+			this.$refs.inputDialog4.open() //装备筛选
+		},
+		//装备合成弹框
+		synthetic() {
+			this.type = "foge" //合成
+			this.$refs.inputDialog.open()
+		},
+		//装备合成确认
+		forgeEquipDialog() {
+			try {
 				if (this.card2.id && this.card1.id) {
 					this.forgeEquip(this.collectContract, this.card1.id, this.card2.id);
 				} else {
@@ -700,215 +698,255 @@
 						icon: "error"
 					})
 				}
-
-
-			},
-			actionSheetTap() {
-				const that = this
-				uni.showActionSheet({
-					title: '装备筛选',
-					itemList: ['鞋子', '裤子', '上衣'],
-					popover: {
-						// 104: navbar + topwindow 高度，暂时 fix createSelectorQuery 在 pc 上获取 top 不准确的 bug
-						top: that.buttonRect.top + 104 + that.buttonRect.height,
-						left: that.buttonRect.left + that.buttonRect.width / 2
-					},
-					success: (e) => {
-						console.log(e.tapIndex);
-						uni.showToast({
-							title: "点击了第" + e.tapIndex + "个选项",
-							icon: "none"
-						})
-					}
+			}
+				catch(e){
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "购买失败" + ":" + reason,
+					icon: "none"
 				})
-			},
-			//装备列表点击
-			Clickequip(item) {
-				this.type="equip";
-				this.cardIndex = 0;
-				this.curEquip = item
-				this.title = "属性卡选择";
-				this.goodsArr = this.myCards;
-				this.$refs.inputDialog5.open()
-				this.getEquitCard(item.id);
-				var index = item.equip.equipType;
-				this.equipStatus = "未裝備"
-				this.cancleText = "取消";
-				if (this.onEquips[index].id) {
-					if (parseInt(this.onEquips[index].id) == parseInt(item.id)) {
-						this.equipStatus = "已裝備"
-						this.cancleText = "卸下";
-					}
-				}
-			},
-			// 卡片详情取消按钮
-			cancleCard()
-			{
-				if(this.cardCancle == "取消")
-				{
-					this.$refs.inputDialog3.close();
-				}else{
-					//进入卡片卸载
-					this.cancleCards();
 					
 				}
-			},
-			// 卡片列表点击
-			clickCard(item) {
-				console.log("卡片ID:"+item.id);
-				this.$refs.inputDialog3.open();
-				this.curCard = item;
-				this.runContract.getCardInfo(item.id).then(
-					card => {
-						if (card[0] == 0) {
-							this.cardStatus = "未装备"
-							this.cardconfirm = "转让"
-							this.cardCancle = "取消"
-							this.cardequipId='';
-						} else {
-							this.cardStatus = "已装备"
-							this.cardconfirm = "确认"
-							this.cardCancle = "卸载"
-							this.cardequipId="于#"+card.equipId;
-							this.bindCardId =card[0];
-							this.bindCardIndex=card[1];
-						}
-					})
 
-			},
-			sectionChange(index) {
-				this.curNow = index;
+		},
+		actionSheetTap() {
+			const that = this
+			uni.showActionSheet({
+				title: '装备筛选',
+				itemList: ['鞋子', '裤子', '上衣'],
+				popover: {
+					// 104: navbar + topwindow 高度，暂时 fix createSelectorQuery 在 pc 上获取 top 不准确的 bug
+					top: that.buttonRect.top + 104 + that.buttonRect.height,
+					left: that.buttonRect.left + that.buttonRect.width / 2
+				},
+				success: (e) => {
+					console.log(e.tapIndex);
+					uni.showToast({
+						title: "点击了第" + e.tapIndex + "个选项",
+						icon: "none"
+					})
+				}
+			})
+		},
+		//装备列表点击
+		Clickequip(item) {
+			this.type = "equip";
+			this.cardIndex = 0;
+			this.curEquip = item
+			this.title = "属性卡选择";
+			this.goodsArr = this.myCards;
+			this.$refs.inputDialog5.open()
+			this.getEquitCard(item.id);
+			var index = item.equip.equipType;
+			this.equipStatus = "未裝備"
+			this.cancleText = "取消";
+			if (this.onEquips[index].id) {
+				if (parseInt(this.onEquips[index].id) == parseInt(item.id)) {
+					this.equipStatus = "已裝備"
+					this.cancleText = "卸下";
+				}
+			}
+		},
+		// 卡片详情取消按钮
+		cancleCard() {
+			if (this.cardCancle == "取消") {
+				this.$refs.inputDialog3.close();
+			} else {
+				//进入卡片卸载
+				this.cancleCards();
 
-			},
-			//装备合成中选择装备
-			changeShop(item) {
-				this.cardIndex = item;
-				this.goodsArr = this.myEquips;
-				this.$refs.inputDialog4.open()
-			},
-			openUser() {
-				uni.navigateTo({
-					url: '../../userAccount/userAccount'
-				});
-			},
-			onClickItem(e) {
-				if (this.current !== e.currentIndex) {
-					this.current = e.currentIndex
-				}
-			},
-			// 0表示卡片绑定
-			async dialogInputConfirm(val) {
-				if (this.cardIndex != 0) {
-					return
-				}
-				uni.showLoading({
-					title: '绑定中...'
-				});
-				if (this.curCard.id == 0) {
-					uni.showToast({
-						title: "未选中卡片",
-						icon: "error"
-					})
-					return
-				}
-				if (this.currentCard.card.level > this.curEquip.equip.level) {
-					uni.showToast({
-						title: "卡片等级大于装备等级",
-						icon: "error"
-					})
-					return
-				}
-			
-				console.log("装备id:" + this.curEquip.id);
-				console.log("卡片id:" + this.currentCard.id);
-				console.log("孔:" + this.carIndex);
-				this.$refs.inputDialog4.close()
-				let tx = await bindCard(this.runContract, this.curEquip.id, this.currentCard.id, this.carIndex);
+			}
+		},
+		// 卡片列表点击
+		clickCard(item) {
+			console.log("卡片ID:" + item.id);
+			this.$refs.inputDialog3.open();
+			this.curCard = item;
+			this.runContract.getCardInfo(item.id).then(
+				card => {
+					if (card[0] == 0) {
+						this.cardStatus = "未装备"
+						this.cardconfirm = "转让"
+						this.cardCancle = "取消"
+					} else {
+						this.cardStatus = "在" + card[0] + "装备的" + card[1].toString() + "卡槽使用"
+						this.cardconfirm = "确认"
+						this.cardCancle = "卸载"
+						this.bindCardId = card[0];
+						this.bindCardIndex = card[1];
+					}
+				})
+
+		},
+		sectionChange(index) {
+			this.curNow = index;
+
+		},
+		//装备合成中选择装备
+		changeShop(item) {
+			//如果已经选择了一个，另一个只展示同类型
+			console.log("--------装备合成---", this.card1, this.card2, this.card3)
+			this.cardIndex = item;
+			this.goodsArr = this.myEquips;
+			this.$refs.inputDialog4.open()
+		},
+		openUser() {
+			uni.navigateTo({
+				url: '../../userAccount/userAccount'
+			});
+		},
+		onClickItem(e) {
+			if (this.current !== e.currentIndex) {
+				this.current = e.currentIndex
+			}
+		},
+		// 0表示卡片绑定
+		async dialogInputConfirm(val) {
+			if (this.cardIndex != 0) {
+				return
+			}
+			uni.showLoading({
+				title: '绑定中...'
+			});
+			if (this.curCard.id == 0) {
+				uni.showToast({
+					title: "未选中卡片",
+					icon: "error"
+				})
+				return
+			}
+			if (this.currentCard.card.level > this.curEquip.equip.level) {
+				uni.showToast({
+					title: "卡片等级大于装备等级",
+					icon: "error"
+				})
+				return
+			}
+
+			console.log("装备id:" + this.curEquip.id);
+			console.log("卡片id:" + this.currentCard.id);
+			console.log("孔:" + this.carIndex);
+			this.$refs.inputDialog4.close()
+			try{
+			let tx = await bindCard(this.runContract, this.curEquip.id, this.currentCard.id, this.carIndex);
+			tx.wait().then(res => {
+				uni.hideLoading();
+				this.getEquitCard(this.curEquip.id);
+				uni.showToast({
+					title: "绑定成功",
+					icon: "success"
+				})
+				//this.$refs.inputDialog5.open()
+			})}catch(e){
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "绑定失败" + ":" + reason,
+					icon: "none"
+				})
+
+			}
+
+
+
+		},
+		// 点击去背包
+		dialogInputConfirm2(val) {
+			getMyEquips(this.myAccount, this.equipContract).then(myEquips => {
+				this.myEquips = myEquips;
+				console.log("合成后的装备列表2", myEquips)
+			})
+
+			this.$refs.inputDialog2.close()
+
+		},
+		// 转让属性卡
+		dialogInputConfirm4() {
+			this.$refs.inputDialog3.close();
+			if (this.cardconfirm == "转让") {
+				this.$refs.inputDialog6.open();
+			}
+		},
+		change(item) {
+			this.changeType = item;
+			this.myEquips = [];
+			// getMyEquips(this.myAccount, contract).then(myEquips => {
+			// 	this.myEquips = myEquips;
+			// 	console.log("myEquips--------", myEquips)
+			// 	uni.hideLoading();
+			// })
+
+
+		},
+		//键入地址时校验地址是否有效，无效输入框提示，转让按钮置灰
+		isVaildAddress(address) {
+			return ethers.utils.isAddress(address)
+		},
+		//转账 type 0-属性卡，1-装备，address转让地址,nftId-装备或者属性卡id
+		async transfer(type, address, nftId) {
+			//转让前判断授权状态
+
+			uni.showLoading({
+				title: '转让中...'
+			});
+			this.transferLoading = true
+			var nftContract = type === 0 ? this.cardContract : this.equipContract
+			try {
+				let tx = await nftContract["safeTransferFrom(address,address,uint256)"](this.myAccount, address,
+					nftId)
 				tx.wait().then(res => {
+
+
+					getMyCards(this.myAccount, this.cardContract).then(myCards => {
+						this.myCards = myCards;
+						console.log("更新后的卡片:" + this.myCards);
+
+					})
 					uni.hideLoading();
-					this.getEquitCard(this.curEquip.id);
+					this.$refs.inputDialog6.close();
 					uni.showToast({
-						title: "绑定成功",
+						title: "转让成功",
 						icon: "success"
 					})
-					//this.$refs.inputDialog5.open()
+
 				})
 
-
-
-			},
-			// 点击去背包
-			dialogInputConfirm2(val) {
-				getMyEquips(this.myAccount, this.equipContract).then(myEquips => {
-					this.myEquips = myEquips;
-					console.log("合成后的装备列表2", myEquips)
+			} catch (e) {
+				console.error(e)
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "转让失败" + ":" + reason,
+					icon: "none"
 				})
-
-				this.$refs.inputDialog2.close()
-
-			},
-			// 转让属性卡
-			dialogInputConfirm4() {
-				this.$refs.inputDialog3.close();
-				if (this.cardconfirm == "转让") {
-					this.$refs.inputDialog6.open();
-				}
-			},
-			change(item) {
-				this.changeType = item;
-				this.myEquips=[];
-				// getMyEquips(this.myAccount, contract).then(myEquips => {
-				// 	this.myEquips = myEquips;
-				// 	console.log("myEquips--------", myEquips)
-				// 	uni.hideLoading();
-				// })
-				
-			
-			},
-			//键入地址时校验地址是否有效，无效输入框提示，转让按钮置灰
-			isVaildAddress(address) {
-				return ethers.utils.isAddress(address)
-			},
-			//转账 type 0-属性卡，1-装备，address转让地址,nftId-装备或者属性卡id
-			async transfer(type, address, nftId) {
-				uni.showLoading({
-					title: '转让中...'
-				});
+				//提示错误
+			} finally {
 				this.transferLoading = true
-				var nftContract = type === 0 ? this.cardContract : this.equipContract
-				try {
-					let tx = await nftContract["safeTransferFrom(address,address,uint256)"](this.myAccount, address,
-						nftId)
-					tx.wait().then(res => {
-
-
-						getMyCards(this.myAccount, this.cardContract).then(myCards => {
-							this.myCards = myCards;
-							console.log("更新后的卡片:" + this.myCards);
-
-						})
-						uni.hideLoading();
-						this.$refs.inputDialog6.close();
-						uni.showToast({
-							title: "转让成功",
-							icon: "success"
-						})
-
-					})
-
-				} catch (e) {
-					console.error(e)
-					//提示错误
-				} finally {
-					this.transferLoading = true
-				}
-			},
-			//合成装备,
-			//只能同级别，同类型的进行合成
-			//需要equip合约给collect授权
-			async forgeEquip(collectContract, equipId1, equipId2) {
+			}
+		},
+		//合成装备,
+		//只能同级别，同类型的进行合成
+		//需要equip合约给collect授权
+		async forgeEquip(collectContract, equipId1, equipId2) {
+			try {
 				var that = this;
-				//查询equip对collect授权情况
+
+				//1.先判断是否穿戴
+				console.log(this.onEquips);
+				console.log(this.card1.equip.equipType);
+				console.log(this.onEquips[this.card1.equip.equipType].id);
+
+				if (this.onEquips[this.card1.equip.equipType].id) {
+					if (parseInt(this.onEquips[this.card1.equip.equipType].id) == parseInt(this.card1.id)) {
+						uni.showToast({
+							title: "已穿戴装备不可合成",
+							icon: "error"
+						})
+						return
+					}
+
+				}
+
+
+				//2.再查询equip对collect授权情况
 				if (!that.approveEquip) {
 					uni.showToast({
 						title: "授权中",
@@ -919,63 +957,64 @@
 					that.approveEquip = true
 					return
 				}
-				//判断是否穿戴
-				debugger
-				console.log(this.onEquips);
-				console.log(this.card1.equip.equipType);
-				console.log(this.onEquips[this.card1.equip.equipType].id);
-				
-				if (this.onEquips[this.card1.equip.equipType].id) {
-					if (parseInt(this.onEquips[this.card1.equip.equipType].id) == parseInt(this.card1.id)) {
+
+				//3.如果合成需要费用，则判断RB是否授权
+				if (this.ForgeFee) {
+					//3.1判断RB余额
+					if (this.balanceOfRB < this.ForgeFee) {
 						uni.showToast({
-							title: "已穿戴装备不可合成",
+							title: "RB余额不足支付合成费用!",
 							icon: "error"
 						})
 						return
 					}
-					
-				}
-				
-				
-				if (!this.approveState) {
-					//未授权，弹窗提示授权？
-					//用户点击确认授权后，调用授权代码，如下						
-					await contractApprove(this.RBContract, RunbitCollectionAddress)
-					this.approveState = true
-					console.log("approveState2", this.approveState)
+					if (!this.approveState) {
+						//3.2 余额充足，判断RB授权情况
+						//用户点击确认授权后，调用授权代码，如下						
+						await contractApprove(this.RBContract, RunbitCollectionAddress)
+						this.approveState = true
+						console.log("approveState2", this.approveState)
 
-					uni.showToast({
-						title: "授权中,授权后重新点击购买",
-						icon: "none"
-					})
+						uni.showToast({
+							title: "授权中,授权后重新点击购买",
+							icon: "none"
+						})
+					}
 				}
 
 				that.$refs.inputDialog2.open();
 
 				let tx = await collectContract.forgeEquip(equipId1, equipId2)
 				tx.wait().then(res => {
-				
-				console.log("合成成功")
-				getMyEquips(that.myAccount, that.equipContract).then(myEquips => {
-					uni.showToast({
-						title: "合成成功",
-						icon: "success"
+
+					console.log("合成成功")
+					getMyEquips(that.myAccount, that.equipContract).then(myEquips => {
+						uni.showToast({
+							title: "合成成功",
+							icon: "success"
+						})
+						that.myEquips = myEquips;
+						that.$refs.inputDialog2.close();
+						console.log("合成后的装备列表", myEquips)
 					})
-					that.myEquips = myEquips;
-					that.$refs.inputDialog2.close();
-					console.log("合成后的装备列表", myEquips)
+
+
 				})
-					
-				
+			} catch (e) {
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "购买失败" + ":" + reason,
+					icon: "none"
 				})
-				
-			},
-			async bind() {
 
 			}
+		},
+		async bind() {
 
 		}
+
 	}
+}
 </script>
 
 <style>
@@ -1205,7 +1244,7 @@
 		width: 40%;
 		margin: 0 auto;
 		display: inline-block;
-		margin: 0rem auto;
+		margin: 1.25rem auto;
 
 		display: flex;
 		flex-direction: column;
@@ -1215,11 +1254,12 @@
 
 	/* 图片居中 */
 	.addcards {
-		width: 30%;
+		width: 28%;
 		margin: 0 auto;
 		display: inline-block;
 		margin: 1.25rem auto;
-		height: 220rpx;
+		height: 120rpx;
+
 		display: flex;
 		flex-direction: column;
 		justify-content: center;

@@ -172,7 +172,7 @@
 						</uni-card>
 
 						<view @tap="recordList(0)" class="recordList">獲獎記錄</view>
-						<view style="" class="text" v-for="(item, index) in lotteryRec"  :key="index">
+						<view style="" class="text" v-for="(item, index) in lotteryRec" :key="index">
 							<uni-card title="" extra=""
 								style="width: 90%; border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
 
@@ -182,7 +182,7 @@
 
 									<img class="leLogo2"
 										:src="item.status == 0 ? '../../static/Group15-1.png' : '../../static/Group15.png'"
-										@click="winClick(item.status,index)" />
+										@click="winClick(item.status, index)" />
 								</view>
 
 								<view class="uni-flex uni-row">
@@ -223,20 +223,20 @@
 					<view>
 
 
-						<view v-if="lotindex" style="width: 100%; margin: 10px auto;" >
+						<view v-if="lotindex" style="width: 100%; margin: 10px auto;">
 							<view class="id4">恭喜中獎！本次獲得</view>
-							<view class="uni-flex uni-row" >
+							<view class="uni-flex uni-row">
 								<view class="win1 ">
 									<image class="smicon win1Logo" src="../../static/Group120121.png"></image>
-									<view style="margin-left: 0.325rem;">{{lotteryRec[lotindex].rb}}</view>
+									<view style="margin-left: 0.325rem;">{{ lotteryRec[lotindex].rb }}</view>
 								</view>
 								<view class="win1 ">
 									<image class="smicon win1Logo" src="../../static/Group120122.png"></image>
-									<view style="margin-left: 0.325rem;">{{lotteryRec[lotindex].rbct}}</view>
+									<view style="margin-left: 0.325rem;">{{ lotteryRec[lotindex].rbct }}</view>
 								</view>
 								<view class="win1 ">
 									<image class="smicon win1Logo" src="../../static/Group120671.png"></image>
-									<view style="margin-left: 0.325rem;">{{lotteryRec[lotindex].rbet}}</view>
+									<view style="margin-left: 0.325rem;">{{ lotteryRec[lotindex].rbet }}</view>
 								</view>
 							</view>
 							<view class="id4">將直接方法至您的帳戶!</view>
@@ -290,14 +290,14 @@ export default {
 			balanceofUSDT: 0,
 			unclaimReward: 0,
 			claimedReward: 0,
-			startDate: '2022-08-25 21:00:00',
-			endDate: '2022-08-25 22:00:00',
+			startDate: '2022-08-25',
+			endDate: '2022-08-25',
 			lottery: {
 				rb: 10,
 				rbct: 20,
 				rbet: 30
 			},
-			lotindex:''
+			lotindex: ''
 
 		}
 	},
@@ -305,27 +305,28 @@ export default {
 	onLoad() {
 		var that = this;
 		try {
-			//按小时算，默认查询近7个小时数据，包含当前小时
-			this.endDate = getDay(0)
-			this.startDate = getDay(-45)
 
-
-			var start = this.date2block(this.startDate)
-			var end = this.date2block(this.endDate)
-			console.log("block------", this.startDate, "end--", this.endDate)
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
+			provider.getBlock().then(block => {
+				//按天算，默认查询近7天数据,不含当天
+				this.endDate = getDay(block.timestamp*1000, -1)
+				this.startDate = getDay(block.timestamp*1000, -8)
 
-			provider.send("eth_requestAccounts", []).then(accounts => {
-				this.myAccount = accounts[0]
+				var start = this.date2block(this.startDate)
+				var end = this.date2block(this.endDate)
+				console.log("block------", this.startDate, "end--", this.endDate)
 
-				useContract(RunbitAddress, RunbitAbi).then(runContract => {
-					this.runContract = runContract
-					for (let day = end; day >= start; day--) {
-						this.runContract.getUserState(this.myAccount, day).then(res => {
+				provider.send("eth_requestAccounts", []).then(accounts => {
+					this.myAccount = accounts[0]
 
-							//未收获
+					useContract(RunbitAddress, RunbitAbi).then(runContract => {
+						this.runContract = runContract
+						for (let day = end; day >= start; day--) {
+							this.runContract.getUserState(this.myAccount, day).then(res => {
+
+								//未收获
 								this.runContract.getUnharvestReward(this.myAccount, day).then(rew => {
-									console.log("---"+day+"----"+big2num(rew))
+									console.log("---" + day + "----" + big2num(rew))
 									if (!rew.eq(0)) {
 										var data = {}
 										data.amount = big2num(rew)
@@ -333,28 +334,29 @@ export default {
 										this.harvest[day] = data
 									}
 								})
-							
-							//有步数查询是否中奖，抽奖状态
-							if (!res.lastSteps.eq(0)) {
-								this.runContract.isLucky(this.myAccount, day).then(lott => {								
-									if (!lott[0].eq(0) || !lott[1].eq(0) || !lott[2].eq(0)) {
-									//中奖
-									var data = {}
-									data.rb = big2num(lott[0])
-									data.rbct = lott[1]
-									data.rbet = lott[2]
-									data.status = res.lottery
 
-							console.log("state------", lott)
-									this.lotteryRec[day] = data
+								//有步数查询是否中奖，抽奖状态
+								if (!res.lastSteps.eq(0)) {
+									this.runContract.isLucky(this.myAccount, day).then(lott => {
+										if (!lott[0].eq(0) || !lott[1].eq(0) || !lott[2].eq(0)) {
+											//中奖
+											var data = {}
+											data.rb = big2num(lott[0])
+											data.rbct = lott[1]
+											data.rbet = lott[2]
+											data.status = res.lottery
 
-									}
-								})
-							}
-						})
+											console.log("state------", lott)
+											this.lotteryRec[day] = data
 
-					}
-				})
+										}
+									})
+								}
+							})
+
+						}
+					})
+				});
 			});
 			useContract(RBAddress, RBAbi).then(RBContract => {
 				//获取rb余额
@@ -448,16 +450,22 @@ export default {
 					})
 				})
 
-			} catch (e) { } finally { uni.hideLoading() }
+			} catch (e) {
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "收获失败" + ":" + reason,
+					icon: "none"
+				})
+			} finally { uni.hideLoading() }
 
 		},
 		block2date(block) {
-			let date = new Date((block * 3600 - 28800) * 1000)
+			let date = new Date((block * 86400 - 28800) * 1000)
 			let month = date.getMonth() + 1
 			return date.getFullYear() + '-' + month + '-' + date.getDate()
 		},
 		date2block(date) {
-			return Math.trunc((new Date(date).getTime() / 1000 + 28800) / 3600)
+			return Math.trunc((new Date(date).getTime() / 1000 + 28800) / 86400)
 		},
 
 		//切换tab
@@ -492,8 +500,8 @@ export default {
 				url: '../userSetting/userSetting'
 			});
 		},
-		winClick(status,index) {
-			if(!status)this.$refs.inputDialog2.open()
+		winClick(status, index) {
+			if (!status) this.$refs.inputDialog2.open()
 			this.lotindex = index
 		},
 		/**钱包相关 */
