@@ -367,6 +367,9 @@
 					uni.setStorageSync('myAccount', this.myAccount);
 
 					this.getStep();
+					setInterval(() => {
+					this.getStep();
+					}, 60000);
 					this.userAccount = hideBankCards(accounts[0]);
 
 
@@ -829,6 +832,7 @@
 			},
 			//获取最新步数
 			getStep() {
+				
 				//从接口获取最新步数
 				return new Promise((resolve, reject) => {
 					//todo 设置baseurl
