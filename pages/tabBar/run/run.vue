@@ -3,7 +3,7 @@
 		<view class="bg">
 
 			<view class="uni-flex uni-row" @tap="openUser" style="margin: 1.425rem; height: 89.44rpx; ">
-				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:3.125rem;" />
+				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:2.8rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
 				<view class="currentbs">{{getSteps}}步</view>
 				<view class="userName">

@@ -37,7 +37,7 @@
 
 						<view class="curId uni-flex uni-row">
 							<view class="level2">{{ displayAdddress(item.address )}}</view>
-							<view class="level3">{{ item.value }}</view>
+							<view class="level3">{{ item.value }} RB</view>
 							<view class="level4">{{ item.create_time.substring(0,10) }}</view>
 						</view>
 
@@ -55,7 +55,7 @@
 
 						<view class="curId uni-flex uni-row">
 							<view class="level2">{{ displayAdddress(item.address) }}</view>
-							<view class="level3">{{ item.value }}</view>
+							<view class="level3">{{ item.value }} RB</view>
 							<view class="level4">{{ item.create_time.substring(0,10) }}</view>
 						</view>
 
@@ -145,7 +145,7 @@ export default {
 		},
 		recordList(index) {
 			this.curList = index;
-			this.getTransactions(2)
+			this.getTransactions(index+1)
 		},
 		setting() {
 			uni.navigateTo({

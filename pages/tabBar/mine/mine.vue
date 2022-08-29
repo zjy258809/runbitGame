@@ -3,7 +3,7 @@
 		<view class="bg">
 
 			<view class="uni-flex uni-row" @tap="openUser" style="margin: 1.425rem; height: 89.44rpx; ">
-				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:3.125rem;" />
+				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:2.8rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
 				<view class="currentbs">{{ getSteps }}步</view>
 				<view class="userName">
@@ -146,7 +146,7 @@
 								<view class="flex-item idvalue2">累計收益</view>
 							</view>
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item flex-itemValue">{{curCard.card.durability}}/100</view>
+								<view class="flex-item flex-itemValue">{{curCard.card.durability}}</view>
 								<view class="flex-item flex-itemValue idvalue2">0</view>
 							</view>
 						</uni-card>
@@ -177,7 +177,7 @@
 						</view>
 
 						<uni-card title="" extra=""
-							style="width: 90%; border:1px solid black; border-radius: 0.825rem; background-color:#F4F5F6 ; margin: 0.6rem auto;">
+							style="width: 90%; border:1px solid black; border-radius: 0.825rem; background-color:#F4F5F6 ; margin: 0.2rem auto;">
 
 
 							<view class="curId uni-flex uni-row">
@@ -207,7 +207,7 @@
 							</view>
 
 							<view class="curId uni-flex uni-row">
-								<view class="level flex-itemValue">{{curEquip.equip.capacity}}/3</view>
+								<view class="level flex-itemValue">{{curEquip.equip.capacity}}</view>
 								<view v-if="curEquip.equip.upgradeable==0" class="flex-item flex-itemValue rare">否
 								</view>
 								<view v-if="curEquip.equip.upgradeable == 1" class="flex-item flex-itemValue rare">是
@@ -1244,7 +1244,7 @@ export default {
 		width: 40%;
 		margin: 0 auto;
 		display: inline-block;
-		margin: 1.25rem auto;
+		margin: 0rem auto;
 
 		display: flex;
 		flex-direction: column;
@@ -1257,8 +1257,8 @@ export default {
 		width: 28%;
 		margin: 0 auto;
 		display: inline-block;
-		margin: 1.25rem auto;
-		height: 120rpx;
+		margin: 0.5rem auto;
+		height: 200rpx;
 
 		display: flex;
 		flex-direction: column;

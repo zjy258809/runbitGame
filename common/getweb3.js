@@ -25,7 +25,7 @@ const getWeb3 = () =>
       // Fallback to localhost; use dev console port by default...
       else {
         const provider = new Web3.providers.HttpProvider(
-          "https://polygon-mainnet.infura.io/v3/7cf5cd1002f8469f99e58402ff469f83"
+          "https://hardworking-purple-leaf.matic.quiknode.pro/e1643782b57442cc5a0cf0cc3870474adad502c9/"
         );
         const web3 = new Web3(provider);
         console.log("No web3 instance injected, using Local web3.");
