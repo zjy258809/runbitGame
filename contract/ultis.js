@@ -18,18 +18,17 @@ export function displayDate(date) {
 	var date2 = new Date(date)
 	return date2.getFullYear + "-" + month + "-" + date2.getDate()
 }
-//按小时测试
-export function getDay(day) {
-	var today = new Date();
-	var targetday_milliseconds = today.getTime() + 1000 * 60 * 60 *  day;
+//按天测试 date-当前block时间戳 day 时间偏移量
+export function getDay(date,day) {
+	var today =  new Date(date)
+var targetday_milliseconds = date  + 1000 * 60 * 60 *24*  day;
 	today.setTime(targetday_milliseconds); //注意，这行是关键代码
 	var tYear = today.getFullYear();
 	var tMonth = today.getMonth();
 	var tDate = today.getDate();
 	tMonth = doHandleMonth(tMonth + 1);
 	tDate = doHandleMonth(tDate);
-	var time = today.toTimeString().substring(0,8)
-	return tYear + "-" + tMonth + "-" + tDate +" "+time;
+	return tYear + "-" + tMonth + "-" + tDate;
 	// return today.toLocaleString()
 }
 export function doHandleMonth(month) {
