@@ -196,56 +196,56 @@
 </template>
 
 <script>
-	import {
-		ethers,
-		BigNumber
-	} from 'ethers'
-	import {
-		cardAddress,
-		cardAbi,
-		equipAddress,
-		equipAbi,
-		RunbitCollectionAddress,
-		RunbitCollectionAbi,
-		RBAddress,
-		RBAbi,
-		RBCTAddress,
-		RBETAddress,
-		RBCTAbi,
-		RBETAbi
-	} from '../../../contract/address.js'
-	import {
-		useContract,
-		getApproveState,
-		contractApprove,
-		hideBankCards
-	} from '../../../contract/useContract.js'
-	import {
-		big2num
-	} from '../../../contract/ultis.js'
-	import {
-		myRequest
-	} from '../../../utils/api.js'
-	import {
-		getMyCards,
-		getMyEquips
-	} from '../../../contract/useEquipCard.js'
-	export default {
-		data() {
-			return {
-				changeType: 10,
-				getSteps: '',
-				userAccount: '',
-				currentcover: '',
-				currentprice0: 0,
-				currentprice1: 0,
-				currentCard: {
-					cover: "",
-					card: {
-						price0: '',
-						price1: '',
-						sales: '',
-						stock: ''
+import {
+	ethers,
+	BigNumber
+} from 'ethers'
+import {
+	cardAddress,
+	cardAbi,
+	equipAddress,
+	equipAbi,
+	RunbitCollectionAddress,
+	RunbitCollectionAbi,
+	RBAddress,
+	RBAbi,
+	RBCTAddress,
+	RBETAddress,
+	RBCTAbi,
+	RBETAbi
+} from '../../../contract/address.js'
+import {
+	useContract,
+	getApproveState,
+	contractApprove,
+	hideBankCards
+} from '../../../contract/useContract.js'
+import {
+	big2num
+} from '../../../contract/ultis.js'
+import {
+	myRequest
+} from '../../../utils/api.js'
+import {
+	getMyCards,
+	getMyEquips
+} from '../../../contract/useEquipCard.js'
+export default {
+	data() {
+		return {
+			changeType: 10,
+			getSteps: '',
+			userAccount: '',
+			currentcover: '',
+			currentprice0: 0,
+			currentprice1: 0,
+			currentCard: {
+				cover: "",
+				card: {
+					price0: '',
+					price1: '',
+					sales: '',
+					stock: ''
 
 					}
 				},
@@ -448,9 +448,9 @@
 							}
 						});
 
-					});
-
 				});
+
+			});
 
 
 			} catch (e) {
@@ -466,7 +466,10 @@
 			updateMyCards() {
 				getMyCards(this.myAccount, this.cardContract).then(myCards => {
 					this.myCards = myCards;
-					uni.setStorage({
+					getApp().globalData.loadIndex = 1;
+				
+				getApp().globalData.loadMine = 1;
+				uni.setStorage({
 						key: 'myCards',
 						data: JSON.stringify(myCards),
 						success: function() {
@@ -478,7 +481,10 @@
 			updateMyEquips() {
 				getMyEquips(this.myAccount, this.equipContract).then(myEquips => {
 					this.myEquips = myEquips;
-					uni.setStorage({
+					getApp().globalData.loadIndex = 1;
+				
+				getApp().globalData.loadMine = 1;
+				uni.setStorage({
 						key: 'myEquips',
 						data: JSON.stringify(myEquips),
 						success: function() {
@@ -704,7 +710,6 @@
 			},
 
 
-
 			//购买卡片
 			async buyCard(contract, cardId) {
 				try {
@@ -751,13 +756,13 @@
 					})
 				} finally {
 
-					this.$refs.inputDialog2.close()
-				}
-			},
-			//购买装备
-			async buyEquip(contract, equipType, collectionid) {
-				try {
-					//判断是否授权
+				this.$refs.inputDialog2.close()
+			}
+		},
+		//购买装备
+		async buyEquip(contract, equipType, collectionid) {
+			try {
+				//判断是否授权
 
 					if (!this.approveState) {
 						//未授权，弹窗提示授权？
@@ -772,6 +777,10 @@
 						})
 					}
 					//已授权
+					this.updateMyEquips()
+					//购买成功的一些操作，如关闭loading
+				
+
 
 					this.$refs.inputDialog2.open()
 
@@ -795,14 +804,14 @@
 				} catch (e) {
 					//出错的一些操作
 
-					console.error(e)
-					let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
-					uni.showToast({
-						title: "购买失败" + ":" + reason,
-						icon: "none"
-					})
-				} finally {
-					this.$refs.inputDialog2.close()
+				console.error(e)
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "购买失败" + ":" + reason,
+					icon: "none"
+				})
+			} finally {
+				this.$refs.inputDialog2.close()
 
 				}
 			},
@@ -887,14 +896,14 @@
 					tx.wait().then(res => {
 						console.log("装备兑换成功----" + collectionId);
 
-						this.$refs.inputDialog2.close()
-						uni.showToast({
-							title: "兑换成功,请稍后到背包中查看",
-							icon: "success"
-						})
-						//兑换成功的一些操作，如关闭loading
-						this.updateMyEquips
+					this.$refs.inputDialog2.close()
+					uni.showToast({
+						title: "兑换成功,请稍后到背包中查看",
+						icon: "success"
 					})
+					//兑换成功的一些操作，如关闭loading
+					this.updateMyEquips
+				})
 
 				} catch (e) {
 					//出错的一些操作
