@@ -1,5 +1,5 @@
 {
-    "name" : "test12",
+    "name" : "runbitGame",
     "appid" : "__UNI__ED8AAFA",
     "description" : "",
     "versionName" : "1.0.0",
@@ -69,7 +69,7 @@
         "enable" : false
     },
     "h5" : {
-        "title" : "test12",
+        "title" : "runbitGame",
         "domain" : "https://admin.runbit.org/"
     }
 }

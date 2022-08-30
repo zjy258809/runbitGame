@@ -36,6 +36,7 @@ export async function useContract(address, abi) {
 	// }
 	if (window.ethereum) {
 		try {
+			
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
 			const signer = provider.getSigner();
 			let accounts = await provider.send("eth_requestAccounts", []);

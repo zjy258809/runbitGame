@@ -16,7 +16,7 @@ export async function getEquip(contract, equipId,account) {
     var equip = {}
     var copy ={}
     return useContract(RunbitAddress, RunbitAbi).then(runContract => {
-        return contract.tokenMeta(equipId).then(async e => {            
+        return contract.tokenMetaData(equipId).then(async e => {            
             Object.keys(e).forEach((key, index) => {
                 copy[key] = typeof e[key] == 'number'?e[key]:e[key].toNumber()
                 
@@ -39,8 +39,10 @@ export async function getEquip(contract, equipId,account) {
 export async function getCard(contract, cardId) {
     var card = {}
     var copy ={}
+	
     return useContract(RunbitAddress, RunbitAbi).then(async runContract => {
-    return contract.tokenMeta(cardId).then(async e => {            
+		
+    return contract.tokenMetaData(cardId).then(async e => {   
         Object.keys(e).forEach((key, index) => {
             copy[key] = typeof e[key] == 'number'?e[key]:e[key].toNumber()
             
@@ -65,11 +67,15 @@ export async function getMyCards(account,contract) {
     //获取属性卡数量numOfCard和属性卡合集cardCollect
     //cardLoading=true获取数据中
     var cardCollect=[]
-
     return contract.balanceOf(account).then(async num => {
+		
         for (let i = 0;i < num; i++) {
+		
+		
            await contract.tokenOfOwnerByIndex(account,i).then(async cardId => {
+			  
                   await  getCard(contract,cardId).then(card=>{
+					 
                             cardCollect[i] = card
                         })
                 })

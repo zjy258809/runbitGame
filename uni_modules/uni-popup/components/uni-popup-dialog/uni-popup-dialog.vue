@@ -2,7 +2,7 @@
 	<view class="uni-popup-dialog">
 		<view class="uni-dialog-title">
 			<text class="uni-dialog-title-text" :class="['uni-popup__'+dialogType]">{{titleText}}</text>
-			<uni-icons class="closeIcon" @click="closeDialogImg" type="clear" size="30"></uni-icons>
+			<uni-icons v-if="title!='请输入激活码'" class="closeIcon" @click="closeDialogImg" type="clear" size="30"></uni-icons>
 		</view>
 		<view v-if="mode === 'base'" class="uni-dialog-content">
 			<slot>
@@ -169,7 +169,9 @@
 			 * 点击取消按钮
 			 */
 			closeDialogImg() {
+				
 				this.popup.close()
+				
 			},
 			close(){
 				this.popup.close()

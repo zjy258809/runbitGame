@@ -51,10 +51,10 @@
 						<view v-if="curList == 0">
 							<view style="" class="text" v-for="(item, index) in pending" :key="index">
 								<uni-card title="" extra=""
-									style="width: 90%; border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
+									style="width: 95%;  border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
 
 
-									<view class="curId uni-flex uni-row">
+									<view class="curId uni-flex uni-row" >
 										<view class="level2">{{ item.lable }}</view>
 										<view class="level3">{{ item.num }}</view>
 										<view class="level4">{{ item.time }}</view>
@@ -71,7 +71,7 @@
 							<view style="" v-if="history.length > 0" class="text" v-for="(item, index) in history"
 								:key="index">
 								<uni-card title="" extra=""
-									style="width: 90%; border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
+									style="width: 95%;  border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
 
 
 									<view class="curId uni-flex uni-row">
@@ -231,12 +231,12 @@
 					<view>
 
 
-						<view v-if="lotindex" style="width: 100%; margin: 10px auto;">
+						<view v-if="lotindex!=null" style="width: 100%; margin: 10px auto;">
 							<view class="id4">恭喜中獎！本次獲得</view>
 							<view class="uni-flex uni-row">
 								<view class="win1 ">
 									<image class="smicon win1Logo" src="../../static/Group120121.png"></image>
-									<view style="margin-left: 0.325rem;">{{ lotteryRec[lotindex].rb }}</view>
+									<view style="margin-left: 0.325rem;">{{ getFix2(lotteryRec[lotindex].rb) }}</view>
 								</view>
 								<view class="win1 ">
 									<image class="smicon win1Logo" src="../../static/Group120122.png"></image>
@@ -313,7 +313,7 @@
 					rbct: 20,
 					rbet: 30
 				},
-				lotindex: ''
+				lotindex: null
 
 			}
 		},
@@ -337,7 +337,28 @@
 						this.myAccount = accounts[0]
 						this.getHistory();
 						this.getLotteryRecords();
+useContract(RBAddress, RBAbi).then(RBContract => {
+					//获取rb余额
+					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
+						this.balanceOfRB = big2num(balanceOfRB)
+					})
 
+				});
+				//获取属性卡碎片
+				useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
+					this.RBCTContract = RBCTContract
+					RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
+						console.log(balanceofRBCT);
+						this.balanceofRBCT = parseFloat(balanceofRBCT)
+					})
+				});
+				//获取装备碎片
+				useContract(RBETAddress, RBETAbi).then(RBETContract => {
+					this.RBETContract = RBETContract
+					RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
+						this.balanceofRBET = parseFloat(balanceofRBET)
+					})
+				})
 						useContract(RunbitAddress, RunbitAbi).then(runContract => {
 							this.runContract = runContract
 							for (let day = end; day >= start; day--) {
@@ -380,28 +401,7 @@
 						})
 					});
 				});
-				useContract(RBAddress, RBAbi).then(RBContract => {
-					//获取rb余额
-					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
-						this.balanceOfRB = big2num(balanceOfRB)
-					})
-
-				});
-				//获取属性卡碎片
-				useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
-					this.RBCTContract = RBCTContract
-					RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
-						console.log(balanceofRBCT);
-						this.balanceofRBCT = big2num(balanceofRBCT)
-					})
-				});
-				//获取装备碎片
-				useContract(RBETAddress, RBETAbi).then(RBETContract => {
-					this.RBETContract = RBETContract
-					RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
-						this.balanceofRBET = big2num(balanceofRBET)
-					})
-				})
+				
 				setTimeout(() => {
 
 				}, 5000);
@@ -417,8 +417,9 @@
 					mask: true
 				})
 				try {
-					this.runContract.lottery(index).then(res => {
+					this.runContract.lottery(this.lotteryRec[this.lotindex].day).then(res => {
 						uni.hideLoading()
+						
 						uni.showToast({
 							title: '获取成功',
 							mask: true,
@@ -427,6 +428,7 @@
 					})
 
 				} catch (e) {} finally {
+					this.getLotteryRecords();
 					uni.hideLoading()
 				}
 			},
@@ -434,8 +436,8 @@
 				return address.substring(0, 4) + "..." + address.substring(address.length - 5, address.length - 1)
 			},
 			getFix2(num) {
-				var value = parseFloat(num)
-				return value.toFixed(2)
+				var value = Math.floor(num*1000)/1000
+				return value
 			},
 			async getLotterySum() {
 				await myRequest({
@@ -535,8 +537,10 @@
 				});
 			},
 			winClick(status, index) {
-				if (!status) this.$refs.inputDialog2.open()
+				debugger
 				this.lotindex = index
+				if (!status) this.$refs.inputDialog2.open()
+				
 			},
 			/**钱包相关 */
 
@@ -759,13 +763,11 @@
 	.level4 {
 		font-weight: bold;
 		color: #000;
-		width: 160.55rpx;
+		width: 190.55rpx;
 		height: 50.72rpx;
-		font-size: 0.875rem;
+		font-size: 0.775rem;
 		line-height: 50rpx;
-
-
-
+		text-align: center;
 	}
 
 	.level3 {
