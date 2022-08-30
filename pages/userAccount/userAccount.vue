@@ -20,7 +20,7 @@
 							<view @tap="openRb" class="curId uni-flex uni-row">
 								<image class="smicon " src="../../static/Group120121.png"></image>
 								<view class="level ">RB</view>
-								<view class="rare">{{ balanceOfRB }}</view>
+								<view class="rare">{{ displayNum(balanceOfRB) }}</view>
 							</view>
 							<view
 								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -29,7 +29,7 @@
 							<view class="curId uni-flex uni-row">
 								<image class="smicon " src="../../static/Group120122.png"></image>
 								<view class="level">属性卡碎片</view>
-								<view class="rare">{{ balanceofRBCT }}</view>
+								<view class="rare">{{ displayNum(balanceofRBCT) }}</view>
 							</view>
 							<view
 								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -38,7 +38,7 @@
 							<view class="curId uni-flex uni-row">
 								<image class="smicon " src="../../static/Group120671.png"></image>
 								<view class="level ">装备碎片</view>
-								<view class="rare">{{ balanceofRBET }}</view>
+								<view class="rare">{{ displayNum(balanceofRBET) }}</view>
 							</view>
 
 
@@ -99,7 +99,7 @@
 
 							<view class="curId uni-flex uni-row">
 								<view class="level ">未領取收益</view>
-								<view class="rare" style="color: #FF5C00;">{{ big2num(unclaimReward) }} RB</view>
+								<view class="rare" style="color: #FF5C00;">{{ displayNum(big2num(unclaimReward)) }} RB</view>
 							</view>
 							<view
 								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -107,7 +107,7 @@
 
 							<view class="curId uni-flex uni-row">
 								<view class="level ">已領取收益</view>
-								<view class="rare">{{ claimedReward }} RB</view>
+								<view class="rare">{{ displayNum(claimedReward) }} RB</view>
 							</view>
 
 
@@ -154,7 +154,7 @@
 							<view @tap="openRb" class="curId uni-flex uni-row">
 								<image class="smicon " src="../../static/Group120121.png"></image>
 								<view class="level ">RB</view>
-								<view class="rare">{{ lottery.rb }}</view>
+								<view class="rare">{{ displayNum(lottery.rb) }}</view>
 							</view>
 							<view
 								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -163,7 +163,7 @@
 							<view class="curId uni-flex uni-row">
 								<image class="smicon " src="../../static/Group120122.png"></image>
 								<view class="level ">属性卡碎片</view>
-								<view class="rare">{{ lottery.rbct }}</view>
+								<view class="rare">{{ displayNum(lottery.rbct) }}</view>
 							</view>
 							<view
 								style="width: 100%;height: 0.0625rem;background-color: #000000; margin-top: 0.5rem; margin-bottom: 1rem;">
@@ -172,7 +172,7 @@
 							<view class="curId uni-flex uni-row">
 								<image class="smicon " src="../../static/Group120671.png"></image>
 								<view class="level ">裝備碎片</view>
-								<view class="rare">{{ lottery.rbet }}</view>
+								<view class="rare">{{ displayNum(lottery.rbet )}}</view>
 							</view>
 
 
@@ -280,7 +280,7 @@
 	} from '../../contract/useContract.js'
 	import {
 		big2num,
-		displayDate,
+		displayNum,
 		getDay
 
 	} from '../../contract/ultis.js'
@@ -379,7 +379,6 @@
 							}
 						})
 					});
-				});
 				useContract(RBAddress, RBAbi).then(RBContract => {
 					//获取rb余额
 					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
@@ -392,16 +391,17 @@
 					this.RBCTContract = RBCTContract
 					RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
 						console.log(balanceofRBCT);
-						this.balanceofRBCT = big2num(balanceofRBCT)
+						this.balanceofRBCT = balanceofRBCT.toNumber()
 					})
 				});
 				//获取装备碎片
 				useContract(RBETAddress, RBETAbi).then(RBETContract => {
 					this.RBETContract = RBETContract
 					RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
-						this.balanceofRBET = big2num(balanceofRBET)
+						this.balanceofRBET = balanceofRBET.toNumber()
 					})
 				})
+				});
 				setTimeout(() => {
 
 				}, 5000);
@@ -411,6 +411,7 @@
 		},
 		methods: {
 			big2num,
+			displayNum,
 			async getLottery(index) {
 				uni.showLoading({
 					title: '正在收获...',

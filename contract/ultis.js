@@ -19,9 +19,9 @@ export function displayDate(date) {
 	return date2.getFullYear + "-" + month + "-" + date2.getDate()
 }
 //按天测试 date-当前block时间戳 day 时间偏移量
-export function getDay(date,day) {
-	var today =  new Date(date)
-var targetday_milliseconds = date  + 1000 * 60 * 60 *24*  day;
+export function getDay(date, day) {
+	var today = new Date(date)
+	var targetday_milliseconds = date + 1000 * 60 * 60 * 24 * day;
 	today.setTime(targetday_milliseconds); //注意，这行是关键代码
 	var tYear = today.getFullYear();
 	var tMonth = today.getMonth();
@@ -37,4 +37,15 @@ export function doHandleMonth(month) {
 		m = "0" + month;
 	}
 	return m;
+}
+export function displayNum(num) {
+	if (typeof num == 'string')
+		num = parseFloat(num)
+
+	if (typeof num == 'number') {
+		if (!num) return 0
+		if (num < 0.001) return '<0.001'
+		return num.toFixed(3)
+	}
+
 }
