@@ -148,7 +148,8 @@
 							<view class="curId uni-flex uni-row">
 								<view class="flex-item flex-itemValue">{{ curCard.consume }}/{{ curCard.card.durability
 								}}</view>
-								<view class="flex-item flex-itemValue idvalue2">0</view>
+								<view class="flex-item flex-itemValue idvalue2">{{ displayNum(curCard.reward) }} RB
+								</view>
 							</view>
 						</uni-card>
 						<view class="uni-flex uni-row" style="width: 60%; text-align: center; margin: 10px auto;">
@@ -300,7 +301,10 @@ import {
 	getNFTApprove,
 	approveNFT
 } from '../../../contract/useEquipCard.js'
-
+import { myRequest } from '../../../utils/api.js'
+import {
+	displayNum
+} from '../../../contract/ultis.js'
 export default {
 	data() {
 		return {
@@ -417,6 +421,7 @@ export default {
 			getApp().globalData.loadMine = 0
 
 		}
+		this.steps = uni.getStorageSync('steps');
 	},
 	onLoad() {
 		try {
@@ -426,6 +431,10 @@ export default {
 			this.getSteps = getApp().globalData.userStep
 			this.steps = uni.getStorageSync('steps');
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
+
+			provider.getBlock().then(block => {
+				this.curDay = parseInt((block.timestamp + 28800) / 86400);
+			});
 			provider.getGasPrice().then((gasPrice) => {
 				// gasPrice is a BigNumber; convert it to a decimal string
 				this.gasPriceString = (parseInt(gasPrice) * 2).toString();
@@ -566,6 +575,7 @@ export default {
 
 	},
 	methods: {
+		displayNum,
 		updateMyCards() {
 			getMyCards(this.myAccount, this.cardContract).then(myCards => {
 				this.myCards = myCards;
@@ -690,28 +700,41 @@ export default {
 			uni.showLoading({
 				title: '卸下中...'
 			})
+
 			try {
-				let tx = await unbindCard(this.runContract, this.bindCardId, this.bindCardIndex, this.gasPriceString)
-				await tx.wait()
+				//查看该卡所绑装备是否正在使用中
+				this.runContract.getEquipInfo(this.bindCardId).then(async date => {
+					if (date.latestDay == this.curDay) {
+						uni.showToast({
+							title: "属性卡正在使用,请明天再试!",
+							icon: "none"
+						})
+						return
+					}
 
-				uni.showToast({
-					title: "卸下成功",
-					icon: "success"
-				})
-				getBindEquips(this.runContract, this.myAccount).then(async equips => {
-					this.equips = equips
-					uni.setStorage({
-						key: 'bindEquips',
-						data: JSON.stringify(this.equips),
-						success: function () {
-							console.log('cache bindEquips');
-						}
-					});
 
+					let tx = await unbindCard(this.runContract, this.bindCardId, this.bindCardIndex, this.gasPriceString)
+					await tx.wait()
+
+					uni.showToast({
+						title: "卸下成功",
+						icon: "success"
+					})
+					getBindEquips(this.runContract, this.myAccount).then(async equips => {
+						this.equips = equips
+						uni.setStorage({
+							key: 'bindEquips',
+							data: JSON.stringify(this.equips),
+							success: function () {
+								console.log('cache bindEquips');
+							}
+						});
+
+					})
+					//没缓存
+					this.updateMyEquips()
+					//重新加载
 				})
-				//没缓存
-				this.updateMyEquips()
-				//重新加载
 			} catch (e) {
 				console.error(e)
 				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
@@ -905,12 +928,22 @@ export default {
 			}
 		},
 		// 卡片列表点击
-		clickCard(item) {
+		async clickCard(item) {
 			console.log("卡片ID:" + item.id);
 			this.$refs.inputDialog3.open();
 			this.curCard = item;
+			//获取累计收益
+			await myRequest({
+				url: 'game/getCardEarnings',
+				data: {
+					nft_id: item.id
+				}
+			}).then(data => {
+				this.curCard.reward = data
+			})
 			this.runContract.getCardInfo(item.id).then(
 				card => {
+					this.bindEquip = card
 					if (card[0] == 0) {
 						this.cardStatus = "未装备"
 						this.cardconfirm = "转让"
