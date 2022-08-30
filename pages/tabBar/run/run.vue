@@ -5,11 +5,11 @@
 			<view class="uni-flex uni-row" @tap="openUser" style="margin: 1.425rem; height: 89.44rpx; ">
 				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:2.8rem;" />
 				<img class="currentImg" src="../../../static/Ellipse38.png" />
-				<view class="currentbs">{{getSteps}}步</view>
+				<view class="currentbs">{{ getSteps }}步</view>
 				<view class="userName">
 					<img class="input_edi" src="../../../static/input_edi.png"></img>
 					<img class="input_logo" src="../../../static/inputlogo.png"></img>
-					<view class="input_txt">{{userAccount}}</view>
+					<view class="input_txt">{{ userAccount }}</view>
 				</view>
 			</view>
 
@@ -27,17 +27,20 @@
 							<!-- <image @click="actionSheetTap" class="filltericon" src="../../../static/Frame3.png"></image> -->
 
 						</view>
-						<oct-goods v-if="equipCollect.length>0" :lists="equipCollect" price-type="$" @onGoods="onGoods" />
+						<oct-goods v-if="equipCollect.length > 0" :lists="equipCollect" price-type="$"
+							@onGoods="onGoods" />
 					</view>
 					<view v-if="curNow === 1" style="background:#FFFDEC">
 						<view class="uni-flex uni-row"
 							style="display: flex; margin:1rem 0px; height: 85.55rpx;margin-left: 5%; width: 90%; ">
 							<view style="width: 50%; margin: auto 0; ">
-								<uni-data-select v-model="carvalue" :localdata="carRange" @change="carChange"></uni-data-select>
+								<uni-data-select v-model="carvalue" :localdata="carRange" @change="carChange">
+								</uni-data-select>
 							</view>
 
 						</view>
-						<cardItem v-if="cardCollect.length>0" :lists="cardCollect" price-type="$" @onGoods="onGoods2" />
+						<cardItem v-if="cardCollect.length > 0" :lists="cardCollect" price-type="$"
+							@onGoods="onGoods2" />
 
 					</view>
 				</view>
@@ -66,16 +69,16 @@
 							<view class="curId uni-flex uni-row">
 								<view class="flex-item">
 									<image class="smicon " src="../../../static/Group115861.png"></image>
-									<image v-if="currentEquips.equip.level>=2" class="smicon "
+									<image v-if="currentEquips.equip.level >= 2" class="smicon "
 										src="../../../static/Group115861.png"></image>
-									<image v-if="currentEquips.equip.level>=3" class="smicon "
+									<image v-if="currentEquips.equip.level >= 3" class="smicon "
 										src="../../../static/Group115861.png"></image>
-									<image v-if="currentEquips.equip.level>=4" class="smicon "
+									<image v-if="currentEquips.equip.level >= 4" class="smicon "
 										src="../../../static/Group115861.png"></image>
-									<image v-if="currentEquips.equip.level>=5" class="smicon "
+									<image v-if="currentEquips.equip.level >= 5" class="smicon "
 										src="../../../static/Group115861.png"></image>
 								</view>
-								<view class="flex-item flex-itemValue idvalue2">{{currentEquips.equip.quality}}</view>
+								<view class="flex-item flex-itemValue idvalue2">{{ currentEquips.equip.quality }}</view>
 							</view>
 
 							<view class="curId uni-flex uni-row" style="margin-top: 0.8rem;">
@@ -84,10 +87,10 @@
 							</view>
 
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item flex-itemValue">{{currentEquips.equip.capacity}}/3</view>
-								<view v-if="currentEquips.equip.upgradeable==0"
+								<view class="flex-item flex-itemValue">{{ currentEquips.equip.capacity }}/3</view>
+								<view v-if="currentEquips.equip.upgradeable == 0"
 									class="flex-item flex-itemValue idvalue2">否</view>
-								<view v-if="currentEquips.equip.upgradeable==1"
+								<view v-if="currentEquips.equip.upgradeable == 1"
 									class="flex-item flex-itemValue idvalue2">是</view>
 							</view>
 
@@ -95,7 +98,8 @@
 
 						<view class="uni-flex uni-row" style="width: 98%; margin: 0 auto;">
 							<view class="flex-item id3">mint</view>
-							<view class="idvalue3">{{currentEquips.equip.sales}}/{{currentEquips.equip.stock}}</view>
+							<view class="idvalue3">{{ currentEquips.equip.sales }}/{{ currentEquips.equip.stock }}
+							</view>
 						</view>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">购买价格(RB)</view>
@@ -103,7 +107,7 @@
 						</view>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">兑换价格(RB)</view>
-							<view class="idvalue3">{{currentEquips.equip.price0}}</view>
+							<view class="idvalue3">{{ currentEquips.equip.price0 }}</view>
 						</view>
 
 					</view>
@@ -118,7 +122,7 @@
 			<uni-popup ref="inputDialog2" type="dialog">
 
 
-				<uni-popup-dialog  ref="inputClose" mode="base" :mask-click="true" cancelText="" confirmText=""
+				<uni-popup-dialog ref="inputClose" mode="base" :mask-click="true" cancelText="" confirmText=""
 					title="支出账户中" value="对话框预置提示内容!" placeholder="请输入内容" @confirm="dialogInputConfirm2">
 					<view>
 
@@ -128,13 +132,13 @@
 
 
 							<view class="curId uni-flex uni-row">
-								<view class=" ">{{currnetDesc}}</view>
+								<view class=" ">{{ currnetDesc }}</view>
 							</view>
 
 						</uni-card>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">cost</view>
-							<view v-if="currentPayType==0" class="idvalue3">{{currentprice0}} RB
+							<view v-if="currentPayType == 0" class="idvalue3">{{ currentprice0 }} RB
 							</view>
 							<!-- 兑换 -->
 							<view v-if="currentPayType == 1" class="idvalue3">{{ currentprice1 }} RB</view>
@@ -170,7 +174,7 @@
 
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">mint</view>
-							<view class="idvalue3">{{currentCard.card.sales}}/{{currentCard.card.stock}}</view>
+							<view class="idvalue3">{{ currentCard.card.sales }}/{{ currentCard.card.stock }}</view>
 						</view>
 						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
 							<view class="flex-item id3">购买价格(RB)</view>
@@ -192,50 +196,56 @@
 </template>
 
 <script>
-	import {
-		ethers,
-		BigNumber
-	} from 'ethers'
-	import {
-		refStoreAddress,
-		refAbi,
-		RunbitCollectionAddress,
-		RunbitCollectionAbi,
-		RBAddress,
-		RBAbi,
-		RBCTAddress,
-		RBETAddress,
-		RBCTAbi,
-		RBETAbi
-	} from '../../../contract/address.js'
-	import {
-		useContract,
-		getApproveState,
-		contractApprove,
-		hideBankCards
-	} from '../../../contract/useContract.js'
-	import {
-		big2num
-	} from '../../../contract/ultis.js'
-		import {
-		myRequest
-	} from '../../../utils/api.js'
-	export default {
-		data() {
-			return {
-				changeType: 10,
-				getSteps: '',
-				userAccount: '',
-				currentcover: '',
-				currentprice0: 0,
-				currentprice1: 0,
-				currentCard: {
-					cover: "",
-					card: {
-						price0: '',
-						price1: '',
-						sales: '',
-						stock: ''
+import {
+	ethers,
+	BigNumber
+} from 'ethers'
+import {
+	cardAddress,
+	cardAbi,
+	equipAddress,
+	equipAbi,
+	RunbitCollectionAddress,
+	RunbitCollectionAbi,
+	RBAddress,
+	RBAbi,
+	RBCTAddress,
+	RBETAddress,
+	RBCTAbi,
+	RBETAbi
+} from '../../../contract/address.js'
+import {
+	useContract,
+	getApproveState,
+	contractApprove,
+	hideBankCards
+} from '../../../contract/useContract.js'
+import {
+	big2num
+} from '../../../contract/ultis.js'
+import {
+	myRequest
+} from '../../../utils/api.js'
+import {
+	getMyCards,
+	getMyEquips
+} from '../../../contract/useEquipCard.js'
+export default {
+	data() {
+		return {
+			changeType: 10,
+			getSteps: '',
+			userAccount: '',
+			currentcover: '',
+			currentprice0: 0,
+			currentprice1: 0,
+			currentCard: {
+				cover: "",
+				card: {
+					price0: '',
+					price1: '',
+					sales: '',
+					stock: ''
 
 				}
 			},
@@ -247,7 +257,7 @@
 			isOpen: true,
 			equips: {},
 			collectionId: 0,
-			currnetDesc :"",
+			currnetDesc: "",
 			currentEquips: {
 				equip: {
 					capacity: '',
@@ -268,7 +278,7 @@
 			buttonRect: {},
 			baseurl: 'https://gapi.runbit.org/api/v1/',
 			value: 10,
-			carvalue:  10,
+			carvalue: 10,
 			carRange: [{
 				value: 10,
 				text: "全部"
@@ -318,24 +328,24 @@
 			items: ['选项卡1', '选项卡2'],
 			styleType: 'button',
 			activeColor: '#FFEB34',
-				currentUnit:'',
+			currentUnit: '',
 			contract: null,
 			RBETContract: null,
 			RBCTContract: null,
 			RBContract: null,
-			refContract:  null
+			refContract: null
 		}
 	},
 	mounted() {
 
 
-		},
-		onLoad() {
-			var that = this;
-			that.getSteps = getApp().globalData.userStep
-			try {
+	},
+	onLoad() {
+		var that = this;
+		that.getSteps = getApp().globalData.userStep
+		try {
 
-				const provider = new ethers.providers.Web3Provider(window.ethereum);
+			const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 			provider.send("eth_requestAccounts", []).then(accounts => {
 				this.myAccount = accounts[0]
@@ -400,6 +410,42 @@
 				});
 
 
+				useContract(cardAddress, cardAbi).then(contract => {
+					this.cardContract = contract
+					uni.getStorage({
+						key: 'myCards'
+					}).then(res => {
+						//有缓存
+						if (!res[0]) {
+							this.myCards = JSON.parse(res[1].data);
+						}
+						else {
+							//没缓存
+							this.updateMyCards()
+
+						}
+					})
+
+				});
+
+				useContract(equipAddress, equipAbi).then(contract => {
+					this.equipContract = contract
+					uni.getStorage({
+						key: 'myEquips'
+					}).then(res => {
+						//有缓存
+						if (!res[0]) {
+							this.myEquips = JSON.parse(res[1].data);
+						}
+						else {
+							//没缓存
+							this.updateMyEquips()
+
+						}
+					});
+
+				});
+
 			});
 
 
@@ -413,6 +459,30 @@
 		}
 	},
 	methods: {
+		updateMyCards() {
+			getMyCards(this.myAccount, this.cardContract).then(myCards => {
+				this.myCards = myCards;
+				uni.setStorage({
+					key: 'myCards',
+					data: JSON.stringify(myCards),
+					success: function () {
+						console.log('cache myCards');
+					}
+				});
+			})
+		},
+		updateMyEquips() {
+			getMyEquips(this.myAccount, this.equipContract).then(myEquips => {
+				this.myEquips = myEquips;
+				uni.setStorage({
+					key: 'myEquips',
+					data: JSON.stringify(myEquips),
+					success: function () {
+						console.log('cache myEquips');
+					}
+				});
+			})
+		},
 		big2num,
 		openUser() {
 			uni.navigateTo({
@@ -487,8 +557,8 @@
 			this.collectionId = item;
 			this.currentEquips = this.equipCollect[item];
 			this.currentprice0 = this.currentEquips.equip.price0;
-			
-				this.currnetDesc = "mint中,您将很快收到您的装备";
+
+			this.currnetDesc = "mint中,您将很快收到您的装备";
 			this.currentprice1 = ethers.utils.formatEther(this.currentEquips.equip.price1);
 			this.currentcover = this.currentEquips.cover;
 			this.isOpen = true;
@@ -521,7 +591,7 @@
 			this.collectionId = index;
 			this.currentCard = this.cardCollect[index];
 			this.currentprice0 = this.currentCard.card.price0;
-				this.currnetDesc = "mint中,您将很快收到您的装备";
+			this.currnetDesc = "mint中,您将很快收到您的装备";
 			this.currentprice1 = ethers.utils.formatEther(this.currentCard.card.price1);
 			this.currentcover = this.currentCard.cover;
 			this.$refs.inputDialog3.open()
@@ -657,7 +727,8 @@
 					title: "购买成功,请稍后到背包中查看",
 					icon: "success"
 				})
-				//购买成功的一些操作，如关闭loading
+
+				this.updateMyCards()
 
 			} catch (e) {
 				//出错的一些操作
@@ -702,13 +773,13 @@
 						title: "购买成功,请稍后到背包中查看",
 						icon: "success"
 					})
+
+					this.updateMyEquips()
 					//购买成功的一些操作，如关闭loading
 				})
 
 			} catch (e) {
 				//出错的一些操作
-
-				console.error(e)
 
 				console.error(e)
 				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
@@ -752,6 +823,7 @@
 						icon: "success"
 					})
 					//兑换成功的一些操作，如关闭loading
+					this.updateMyCards()
 				})
 
 			} catch (e) {
@@ -799,6 +871,7 @@
 						icon: "success"
 					})
 					//兑换成功的一些操作，如关闭loading
+					this.updateMyEquips
 				})
 
 			} catch (e) {
@@ -817,161 +890,161 @@
 }
 </script>
 <style>
-	.content {
+.content {
 
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		height: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
 
 
-	}
+}
 
-	.bg {
-		position: absolute;
-		width: 100%;
-		height: 232px;
-		left: 0px;
-		top: 0px;
+.bg {
+	position: absolute;
+	width: 100%;
+	height: 232px;
+	left: 0px;
+	top: 0px;
 
-		background: linear-gradient(180deg, #FFF7B0 0%, rgba(255, 247, 176, 0) 100%);
-		border-radius: 0px 0px 36px 36px;
-	}
+	background: linear-gradient(180deg, #FFF7B0 0%, rgba(255, 247, 176, 0) 100%);
+	border-radius: 0px 0px 36px 36px;
+}
 
-	.currentbs {
-		display: flex;
+.currentbs {
+	display: flex;
 
-		flex-direction: row;
-		font-weight: bold;
-		align-items: center;
-		width: 7.25rem;
-	}
+	flex-direction: row;
+	font-weight: bold;
+	align-items: center;
+	width: 7.25rem;
+}
 
-	.currentImg {
-		width: 0.625rem;
-		height: 0.625rem;
-		display: block;
-		margin: auto 0;
-		margin-left: 0.825rem;
-	}
+.currentImg {
+	width: 0.625rem;
+	height: 0.625rem;
+	display: block;
+	margin: auto 0;
+	margin-left: 0.825rem;
+}
 
-	.userName {
-		display: block;
-		margin: auto 0;
-		margin-left: 1.1rem;
-		width: 10rem;
-		height: 2.25rem;
-	}
+.userName {
+	display: block;
+	margin: auto 0;
+	margin-left: 1.1rem;
+	width: 10rem;
+	height: 2.25rem;
+}
 
-	.fillter {
-		margin: auto 0;
-		margin-left: 126.94rpx;
-	}
+.fillter {
+	margin: auto 0;
+	margin-left: 126.94rpx;
+}
 
-	.filltericon {
+.filltericon {
 
-		width: 50.83rpx;
-		height: 45.83rpx;
-		margin: auto 0;
-		padding-top: 18.94rpx;
+	width: 50.83rpx;
+	height: 45.83rpx;
+	margin: auto 0;
+	padding-top: 18.94rpx;
 
-	}
+}
 
-	.input_edi {
-		position: absolute;
-		width: 300.44rpx;
-	}
+.input_edi {
+	position: absolute;
+	width: 300.44rpx;
+}
 
-	.input_logo {
-		margin-left: 0.2rem;
-		position: absolute;
-		width: 70.44rpx;
-	}
+.input_logo {
+	margin-left: 0.2rem;
+	position: absolute;
+	width: 70.44rpx;
+}
 
-	.input_txt {
-		color: #000000;
-		position: absolute;
-		font-size: 28.33rpx;
-		margin-left: 2.5rem;
-		text-align: center;
-		height: 70.72rpx;
-		line-height: 70.72rpx;
-	}
-	
-	.nocard {
-		display: inline-block;
-		margin: 0 auto;
-		margin-top: 6rem;
-		width: 35%;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
+.input_txt {
+	color: #000000;
+	position: absolute;
+	font-size: 28.33rpx;
+	margin-left: 2.5rem;
+	text-align: center;
+	height: 70.72rpx;
+	line-height: 70.72rpx;
+}
 
-	.dialogimg {
-		display: block;
-		margin: 0 auto;
-		width: 350.33rpx;
-		height: 350.88rpx;
-		padding: 6.94rpx;
+.nocard {
+	display: inline-block;
+	margin: 0 auto;
+	margin-top: 6rem;
+	width: 35%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
 
-	}
+.dialogimg {
+	display: block;
+	margin: 0 auto;
+	width: 350.33rpx;
+	height: 350.88rpx;
+	padding: 6.94rpx;
 
-	.curId {
-		width: 13.25rem;
-		margin: 0.225rem;
-	}
+}
 
-	.idvalue2 {
-		margin-left: 7rem;
-	}
+.curId {
+	width: 13.25rem;
+	margin: 0.225rem;
+}
 
-	.idvalue3 {
-		width: 75%;
-		text-align: right;
-		float: right;
-	}
+.idvalue2 {
+	margin-left: 7rem;
+}
 
-	.smicon {
-		width: 15.88rpx;
-		height: 23.88rpx;
-	}
+.idvalue3 {
+	width: 75%;
+	text-align: right;
+	float: right;
+}
 
-	.flex-item {
-		width: 95.55rpx;
-		height: 34.72rpx;
-		text-align: center;
-	}
+.smicon {
+	width: 15.88rpx;
+	height: 23.88rpx;
+}
 
-	.flex-itemLogo {
-		width: 3.125rem;
-		text-align: center;
-	}
+.flex-item {
+	width: 95.55rpx;
+	height: 34.72rpx;
+	text-align: center;
+}
 
-	.flex-itemValue {
-		color: #000;
-	}
+.flex-itemLogo {
+	width: 3.125rem;
+	text-align: center;
+}
 
-	.id3 {
+.flex-itemValue {
+	color: #000;
+}
 
-		color: #969696;
-		width: 7.55rem;
-		font-size: 0.90rem;
-		text-align: left;
-	}
+.id3 {
 
-	/* 图片居中 */
-	.cards {
-		width: 60%;
-		margin: 0 auto;
-		display: inline-block;
-		margin: 1.25rem auto;
+	color: #969696;
+	width: 7.55rem;
+	font-size: 0.90rem;
+	text-align: left;
+}
 
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
+/* 图片居中 */
+.cards {
+	width: 60%;
+	margin: 0 auto;
+	display: inline-block;
+	margin: 1.25rem auto;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
 </style>

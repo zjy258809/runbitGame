@@ -136,7 +136,7 @@
 			<uni-popup ref="inputDialog3" type="dialog">
 				<uni-popup-dialog ref="inputClose" :mask-click="true" :cancelText="cardCancle"
 					:confirmText="cardconfirm" title="屬性卡信息" @close="cancleCard" value="對話框預置提示內容!" placeholder="請輸入內容"
-					@confirm="dialogInputConfirm4">
+					@confirm="dialogInputConfirm4(0)">
 					<view>
 						<img class="cards" :src="curCard.img" />
 						<uni-card title="" extra=""
@@ -146,12 +146,12 @@
 								<view class="flex-item idvalue2">累計收益</view>
 							</view>
 							<view class="curId uni-flex uni-row">
-								<view class="flex-item flex-itemValue">{{curCard.card.durability}}</view>
+								<view class="flex-item flex-itemValue">{{ curCard.consume }}/{{ curCard.card.durability }}</view>
 								<view class="flex-item flex-itemValue idvalue2">0</view>
 							</view>
 						</uni-card>
 						<view class="uni-flex uni-row" style="width: 60%; text-align: center; margin: 10px auto;">
-							<view class="id4">{{cardStatus}}</view>
+							<view class="id4">{{ cardStatus }}</view>
 						</view>
 
 					</view>
@@ -164,8 +164,9 @@
 		<!-- 装备信息 -->
 		<view>
 			<uni-popup ref="inputDialog5" type="dialog">
-				<uni-popup-dialog ref="inputClose" :mask-click="true" :cancelText="cancleText" confirmText="确认"
-					title="裝備信息" value="對話框預置提示內容!" placeholder="請輸入內容" @close="cancleEquip" @confirm="equipInfo">
+				<uni-popup-dialog ref="inputClose" :mask-click="true" :cancelText="cancleText"
+					:confirmText="confirmText" title="裝備信息" value="對話框預置提示內容!" placeholder="請輸入內容" @close="cancleEquip"
+					@confirm="dialogInputConfirm4(1)">
 					<view>
 
 						<img class="cards2" :src="curEquip.img" />
@@ -189,16 +190,16 @@
 							<view class="curId uni-flex uni-row">
 								<view class="level flex-item">
 									<image class="smicon " src="../../../static/Group115861.png"></image>
-									<image v-if="curEquip.equip.level>=2" class="smicon "
+									<image v-if="curEquip.equip.level >= 2" class="smicon "
 										src="../../../static/Group115861.png"></image>
-									<image v-if="curEquip.equip.level>=3" class="smicon "
+									<image v-if="curEquip.equip.level >= 3" class="smicon "
 										src="../../../static/Group115861.png"></image>
-									<image v-if="curEquip.equip.level>=4" class="smicon "
+									<image v-if="curEquip.equip.level >= 4" class="smicon "
 										src="../../../static/Group115861.png"></image>
-									<image v-if="curEquip.equip.level>=5" class="smicon "
+									<image v-if="curEquip.equip.level >= 5" class="smicon "
 										src="../../../static/Group115861.png"></image>
 								</view>
-								<view class="rare">{{curEquip.equip.quality}}</view>
+								<view class="rare">{{ curEquip.equip.quality }}</view>
 							</view>
 
 							<view class="curId uni-flex uni-row" style="margin-top: 0.8rem;">
@@ -207,8 +208,8 @@
 							</view>
 
 							<view class="curId uni-flex uni-row">
-								<view class="level flex-itemValue">{{curEquip.equip.capacity}}</view>
-								<view v-if="curEquip.equip.upgradeable==0" class="flex-item flex-itemValue rare">否
+								<view class="level flex-itemValue">{{ curEquip.equip.capacity }}</view>
+								<view v-if="curEquip.equip.upgradeable == 0" class="flex-item flex-itemValue rare">否
 								</view>
 								<view v-if="curEquip.equip.upgradeable == 1" class="flex-item flex-itemValue rare">是
 								</view>
@@ -243,7 +244,7 @@
 			</uni-popup>
 
 		</view>
-		
+
 		<!-- 激活码弹框 -->
 		<view>
 			<!-- 输入框示例 -->
@@ -306,6 +307,7 @@ export default {
 			cardconfirm: '',
 			cardStatus: '',
 			cancleText: '取消',
+			confirmText: '确认',
 			equipStatus: '未裝備',
 			bindCardId: '',
 			title: '',
@@ -404,43 +406,96 @@ export default {
 			refContract: null
 		}
 	},
+	onShow() {
+		this.myCards = JSON.parse(uni.getStorageSync('myCards'));
+		this.myEquips = JSON.parse(uni.getStorageSync('myEquips'));
+		this.equips = JSON.parse(uni.getStorageSync('bindEquips'));
+	}
+	,
 	onLoad() {
 		try {
 			uni.showLoading({
 				title: '加载中'
 			});
 			this.getSteps = getApp().globalData.userStep
+			this.steps = uni.getStorageSync('steps');
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
+
 			provider.send("eth_requestAccounts", []).then(accounts => {
 				this.myAccount = accounts[0]
+				uni.getStorage({
+					key: 'account'
+				})
+					.then(res => {
+						//有缓存
+						if (!res[0]) {
+							if (ethers.utils.getAddress(res[1].data) != ethers.utils.getAddress(this.myAccount)) {
+								uni.clearStorage();
+							}
+						} else {
+							uni.setStorage({
+								key: 'account',
+								data: this.myAccount,
+								success: function () {
+									console.log('cache account');
+								}
+							});
+
+						}
+					})
 				this.userAccount = hideBankCards(accounts[0]);
-				uni.showLoading({
-					title: '加载中'
+
+				useContract(cardAddress, cardAbi).then(contract => {
+					this.cardContract = contract
+					uni.getStorage({
+						key: 'myCards'
+					}).then(res => {
+						//有缓存
+						if (!res[0]) {
+							this.myCards = JSON.parse(res[1].data);
+						}
+						else {
+							//没缓存
+							this.updateMyCards().then(res => {
+
+								uni.hideLoading()
+							})
+
+						}
+					})
+					getNFTApprove(this.cardContract, this.myAccount, RunbitCollectionAddress).then(
+						state => {
+							this.approveCard = state
+						})
+
 				});
-				//加载我的属性卡和装备库 
+
 				useContract(equipAddress, equipAbi).then(contract => {
 					this.equipContract = contract
-					getMyEquips(this.myAccount, contract).then(myEquips => {
-						this.myEquips = myEquips;
-						console.log("myEquips--------", myEquips)
-						uni.hideLoading();
-					})
+					uni.getStorage({
+						key: 'myEquips'
+					}).then(res => {
+						//有缓存
+						if (!res[0]) {
+							this.myEquips = JSON.parse(res[1].data);
+							uni.hideLoading()
+						}
+						else {
+							//没缓存
+							this.updateMyEquips().then(res => {
+
+								uni.hideLoading()
+							})
+
+						}
+					});
 					getNFTApprove(this.equipContract, this.myAccount, RunbitCollectionAddress).then(
 						state => {
 							this.approveEquip = state
 						})
 
 				});
-				uni.showLoading({
-					title: '加载中'
-				});
-				useContract(cardAddress, cardAbi).then(contract => {
-					this.cardContract = contract
-					getMyCards(this.myAccount, contract).then(myCards => {
-						this.myCards = myCards;
-						console.log("myCards--------", myCards)
-					})
-				});
+
 
 				//查询商店合约授权情况，授权后才能购买和兑换
 				useContract(RBAddress, RBAbi).then(RBContract => {
@@ -450,9 +505,6 @@ export default {
 						this.balanceOfRB = balanceOfRB
 						console.log("balanceOfRB", this.balanceOfRB);
 					})
-					uni.showLoading({
-						title: '加载中'
-					});
 					//获取RB对商品合约的授权情况
 					RBContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
 						if (data.eq(BigNumber.from(0))) {
@@ -466,11 +518,31 @@ export default {
 
 				useContract(RunbitAddress, RunbitAbi).then(contract => {
 					this.runContract = contract
-					//获取装备,0代表没装备
-					getBindEquips(contract, this.myAccount).then(async equips => {
-						console.log("已经穿了" + equips);
-						this.onEquips = equips;
+					uni.getStorage({
+						key: 'bindEquips'
 					})
+						.then(res => {
+							//有缓存
+							if (!res[0]) {
+								this.equips = JSON.parse(res[1].data);
+							}
+							//无缓存
+							else {
+								getBindEquips(this.runContract, this.myAccount).then(async equips => {
+									this.equips = equips
+									uni.hideLoading();
+									uni.setStorage({
+										key: 'bindEquips',
+										data: JSON.stringify(this.equips),
+										success: function () {
+											console.log('cache bindEquips');
+										}
+									});
+
+								})
+							}
+						})
+
 				})
 			});
 			useContract(RunbitCollectionAddress, RunbitCollectionAbi).then(contract => {
@@ -489,6 +561,30 @@ export default {
 
 	},
 	methods: {
+		updateMyCards() {
+			getMyCards(this.myAccount, this.cardContract).then(myCards => {
+				this.myCards = myCards;
+				uni.setStorage({
+					key: 'myCards',
+					data: JSON.stringify(myCards),
+					success: function () {
+						console.log('cache myCards');
+					}
+				});
+			})
+		},
+		updateMyEquips() {
+			getMyEquips(this.myAccount, this.equipContract).then(myEquips => {
+				this.myEquips = myEquips;
+				uni.setStorage({
+					key: 'myEquips',
+					data: JSON.stringify(myEquips),
+					success: function () {
+						console.log('cache myEquips');
+					}
+				});
+			})
+		},
 		// 激活码激活
 		async isopenDialog(val) {
 			console.log(val)
@@ -529,7 +625,14 @@ export default {
 				})
 				return
 			}
-			this.transfer(0, val, this.curCard.id);
+			if (this.transferType == 0)
+				this.transfer(0, val, this.curCard.id);
+			else {
+
+
+				this.transfer(1, val, this.curEquip.id);
+			}
+
 		},
 		//卸装
 		async cancleEquip() {
@@ -543,20 +646,26 @@ export default {
 					let tx = await unbindEquip(this.runContract, this.curEquip.equip.equipType)
 					await tx.wait()
 					uni.showToast({
-						title: "卸装成功",
+						title: "卸载成功",
 						icon: "success"
 					})
-					//获取装备,0代表没装备
-					getBindEquips(this.runContract, this.myAccount).then(async equips => {
-						console.log("已经穿了" + equips);
-						this.onEquips = equips;
-					})
+
+					this.equips[this.curEquip.equip.equipType] = 0
+
+					uni.setStorage({
+						key: 'bindEquips',
+						data: JSON.stringify(this.equips),
+						success: function () {
+							console.log('cache bindEquips');
+						}
+					});
+
 					this.$refs.inputDialog5.close();
 				} catch (e) {
 					console.error(e)
 					let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
 					uni.showToast({
-						title: "购买失败" + ":" + reason,
+						title: "卸载失败" + ":" + reason,
 						icon: "none"
 					})
 				} finally {
@@ -574,24 +683,36 @@ export default {
 			try {
 				let tx = await unbindCard(this.runContract, this.bindCardId, this.bindCardIndex)
 				await tx.wait()
+
 				uni.showToast({
 					title: "卸下成功",
 					icon: "success"
 				})
+				getBindEquips(this.runContract, this.myAccount).then(async equips => {
+					this.equips = equips
+					uni.setStorage({
+						key: 'bindEquips',
+						data: JSON.stringify(this.equips),
+						success: function () {
+							console.log('cache bindEquips');
+						}
+					});
+
+				})
+				//没缓存
+				this.updateMyEquips()
+				//重新加载
 			} catch (e) {
 				console.error(e)
 				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
 				uni.showToast({
-					title: "购买失败" + ":" + reason,
+					title: "卸载失败" + ":" + reason,
 					icon: "none"
 				})
 				//todo 错误提示
 			} finally {
 				uni.hideLoading()
 			}
-		},
-		equipInfo() {
-			this.$refs.inputDialog5.close()
 		},
 		//筛选点击事件合成筛选
 		getClick(item) {
@@ -655,30 +776,38 @@ export default {
 			}
 		},
 		//获取当前装备绑定的卡片
-		async getEquitCard(equipId) {
-			console.log("装备id" + equipId);
-			getBindCards(this.runContract, equipId).then(async cards => {
-				if (cards[0].img) {
-					this.cards[0].img = cards[0].img;
-				} else {
-					this.cards[0].img = '../../../static/Group12032.png';
-				}
-				if (cards[1].img) {
-					this.cards[1].img = cards[1].img;
-				} else {
-					this.cards[1].img = '../../../static/Group12032.png';
-				}
-				if (cards[2].img) {
-					this.cards[2].img = cards[2].img;
-				} else {
-					this.cards[2].img = '../../../static/Group12032.png';
-				}
-				console.log("当前装备卡片:" + cards);
-			})
+		async getEquitCard(equip) {
+			console.log("装备id" + equip);
+			let cards = equip.cards
+			if (cards[0].img) {
+				this.cards[0].img = cards[0].img;
+			} else {
+				this.cards[0].img = '../../../static/Group12032.png';
+			}
+			if (cards[1].img) {
+				this.cards[1].img = cards[1].img;
+			} else {
+				this.cards[1].img = '../../../static/Group12032.png';
+			}
+			if (cards[2].img) {
+				this.cards[2].img = cards[2].img;
+			} else {
+				this.cards[2].img = '../../../static/Group12032.png';
+			}
+			console.log("当前装备卡片:" + cards);
 		},
 		//打开卡片筛选
 		addCard(index) {
 			this.carIndex = index;
+			//当前装备已使用
+			if (this.steps != 0 && this.equips[this.curEquip.equip.equipType].id == this.curEquip.id) {
+
+				uni.showToast({
+					title: "装备正在使用，无法更换属性卡",
+					icon: "error"
+				})
+				return
+			}
 			this.$refs.inputDialog5.close()
 			this.$refs.inputDialog4.open() //装备筛选
 		},
@@ -699,14 +828,14 @@ export default {
 					})
 				}
 			}
-				catch(e){
+			catch (e) {
 				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
 				uni.showToast({
 					title: "购买失败" + ":" + reason,
 					icon: "none"
 				})
-					
-				}
+
+			}
 
 		},
 		actionSheetTap() {
@@ -734,18 +863,26 @@ export default {
 			this.cardIndex = 0;
 			this.curEquip = item
 			this.title = "属性卡选择";
-			this.goodsArr = this.myCards;
 			this.$refs.inputDialog5.open()
-			this.getEquitCard(item.id);
+			this.getEquitCard(item);
 			var index = item.equip.equipType;
 			this.equipStatus = "未裝備"
 			this.cancleText = "取消";
-			if (this.onEquips[index].id) {
-				if (parseInt(this.onEquips[index].id) == parseInt(item.id)) {
+			this.confirmText = "转让";
+			if (this.equips[index]) {
+				if (parseInt(this.equips[index].id) == parseInt(item.id)) {
 					this.equipStatus = "已裝備"
 					this.cancleText = "卸下";
+					this.confirmText = "确认";
 				}
 			}
+			this.goodsArr = []
+			Object.keys(this.myCards).forEach((key, index) => {
+				if (this.myCards[key].status == 0 && this.myCards[key].card.level <= this.curEquip.equip.level) {
+					this.goodsArr.push(this.myCards[key])
+				}
+
+			})
 		},
 		// 卡片详情取消按钮
 		cancleCard() {
@@ -827,17 +964,19 @@ export default {
 			console.log("卡片id:" + this.currentCard.id);
 			console.log("孔:" + this.carIndex);
 			this.$refs.inputDialog4.close()
-			try{
-			let tx = await bindCard(this.runContract, this.curEquip.id, this.currentCard.id, this.carIndex);
-			tx.wait().then(res => {
-				uni.hideLoading();
-				this.getEquitCard(this.curEquip.id);
-				uni.showToast({
-					title: "绑定成功",
-					icon: "success"
+			try {
+				let tx = await bindCard(this.runContract, this.curEquip.id, this.currentCard.id, this.carIndex);
+				tx.wait().then(res => {
+					uni.hideLoading();
+					this.curEquip.cards[carIndex] = this.currentCard
+					this.getEquitCard(this.curEquip);
+					uni.showToast({
+						title: "绑定成功",
+						icon: "success"
+					})
+					//this.$refs.inputDialog5.open()
 				})
-				//this.$refs.inputDialog5.open()
-			})}catch(e){
+			} catch (e) {
 				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
 				uni.showToast({
 					title: "绑定失败" + ":" + reason,
@@ -860,10 +999,24 @@ export default {
 
 		},
 		// 转让属性卡
-		dialogInputConfirm4() {
-			this.$refs.inputDialog3.close();
-			if (this.cardconfirm == "转让") {
+		dialogInputConfirm4(type) {
+			this.transferType = type
+			if (type == 0 && this.cardconfirm == "转让") {
 				this.$refs.inputDialog6.open();
+				this.$refs.inputDialog3.close();
+			}
+			if (type == 1 && this.confirmText == "转让") {
+				if (this.curEquip.cards[0] || this.curEquip.cards[1] || this.curEquip.cards[2])
+
+					uni.showToast({
+						title: "请将属性卡卸载后再转让!",
+						icon: "error"
+					})
+				else {
+
+					this.$refs.inputDialog3.close();
+					this.$refs.inputDialog6.open();
+				}
 			}
 		},
 		change(item) {
@@ -930,12 +1083,12 @@ export default {
 				var that = this;
 
 				//1.先判断是否穿戴
-				console.log(this.onEquips);
+				console.log(this.equips);
 				console.log(this.card1.equip.equipType);
-				console.log(this.onEquips[this.card1.equip.equipType].id);
+				console.log(this.equips[this.card1.equip.equipType].id);
 
-				if (this.onEquips[this.card1.equip.equipType].id) {
-					if (parseInt(this.onEquips[this.card1.equip.equipType].id) == parseInt(this.card1.id)) {
+				if (this.equips[this.card1.equip.equipType].id) {
+					if (parseInt(this.equips[this.card1.equip.equipType].id) == parseInt(this.card1.id)) {
 						uni.showToast({
 							title: "已穿戴装备不可合成",
 							icon: "error"
@@ -988,15 +1141,12 @@ export default {
 				tx.wait().then(res => {
 
 					console.log("合成成功")
-					getMyEquips(that.myAccount, that.equipContract).then(myEquips => {
-						uni.showToast({
-							title: "合成成功",
-							icon: "success"
-						})
-						that.myEquips = myEquips;
-						that.$refs.inputDialog2.close();
-						console.log("合成后的装备列表", myEquips)
+					this.updateMyEquips()
+					uni.showToast({
+						title: "合成成功",
+						icon: "success"
 					})
+					that.$refs.inputDialog2.close();
 
 
 				})
@@ -1018,251 +1168,252 @@ export default {
 </script>
 
 <style>
-	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		height: 100%;
+.content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
 
-	}
+}
 
-	.bg {
-		position: absolute;
-		width: 100%;
-		height: 8.875rem;
-		left: 0px;
-		top: 0px;
-		background: linear-gradient(180deg, #FFF7B0 0%, rgba(255, 247, 176, 0) 100%);
-		border-radius: 0px 0px 36px 36px;
-	}
+.bg {
+	position: absolute;
+	width: 100%;
+	height: 8.875rem;
+	left: 0px;
+	top: 0px;
+	background: linear-gradient(180deg, #FFF7B0 0%, rgba(255, 247, 176, 0) 100%);
+	border-radius: 0px 0px 36px 36px;
+}
 
-	.id4 {
-		width: 12.5rem;
-		color: #000000;
-		font-size: 0.9375rem;
-		font-weight: bold;
-	}
+.id4 {
+	width: 12.5rem;
+	color: #000000;
+	font-size: 0.9375rem;
+	font-weight: bold;
+}
 
-	.currentbs {
-		display: flex;
+.currentbs {
+	display: flex;
 
-		flex-direction: row;
-		font-weight: bold;
-		align-items: center;
-		width: 7.25rem;
-	}
+	flex-direction: row;
+	font-weight: bold;
+	align-items: center;
+	width: 7.25rem;
+}
 
-	.currentImg {
-		width: 0.625rem;
-		height: 0.625rem;
-		display: block;
-		margin: auto 0;
-		margin-left: 0.825rem;
-	}
+.currentImg {
+	width: 0.625rem;
+	height: 0.625rem;
+	display: block;
+	margin: auto 0;
+	margin-left: 0.825rem;
+}
 
-	.userName {
-		display: block;
-		margin: auto 0;
-		margin-left: 1.1rem;
-		width: 10rem;
-		height: 2.25rem;
-	}
+.userName {
+	display: block;
+	margin: auto 0;
+	margin-left: 1.1rem;
+	width: 10rem;
+	height: 2.25rem;
+}
 
-	.fillter {
-		margin: auto 0;
-		margin-left: 176.94rpx;
-	}
+.fillter {
+	margin: auto 0;
+	margin-left: 176.94rpx;
+}
 
-	.filltericon {
+.filltericon {
 
-		width: 50.83rpx;
-		height: 45.83rpx;
-		margin: auto 0;
-		padding-top: 18.94rpx;
+	width: 50.83rpx;
+	height: 45.83rpx;
+	margin: auto 0;
+	padding-top: 18.94rpx;
 
-	}
+}
 
-	.filltericon2 {
+.filltericon2 {
 
-		width: 180.83rpx;
-		height: 55.83rpx;
-		text-align: right;
-		/* margin-left: 56.94rpx; */
-		position: absolute;
-		right: 80.83rpx;
-		padding-top: 18.94rpx;
+	width: 180.83rpx;
+	height: 55.83rpx;
+	text-align: right;
+	/* margin-left: 56.94rpx; */
+	position: absolute;
+	right: 80.83rpx;
+	padding-top: 18.94rpx;
 
-	}
-	.nocard {
-		display: inline-block;
-		margin: 0 auto;
-		margin-top: 6rem;
-		width: 35%;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
+}
 
-	.dialogimg {
-		display: block;
-		margin: 0 auto;
-		width: 40%;
-		height: 208.88rpx;
-		margin-left: 5%;
-		padding: 6.94rpx;
-		border-radius: 10%;
-		border: 1px solid black;
+.nocard {
+	display: inline-block;
+	margin: 0 auto;
+	margin-top: 6rem;
+	width: 35%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
 
-	}
+.dialogimg {
+	display: block;
+	margin: 0 auto;
+	width: 40%;
+	height: 208.88rpx;
+	margin-left: 5%;
+	padding: 6.94rpx;
+	border-radius: 10%;
+	border: 1px solid black;
 
-	.curId {
-		width: 13.25rem;
-		margin: 0rem;
-	}
+}
 
-	.curId2 {
-		margin-top: 2rem;
-		width: 13.25rem;
-		text-align: center;
-	}
+.curId {
+	width: 13.25rem;
+	margin: 0rem;
+}
 
-	.flex-item3 {
-		font-size: 0.8875rem;
-		margin-left: 3rem;
-		color: #969696;
-		text-align: right;
+.curId2 {
+	margin-top: 2rem;
+	width: 13.25rem;
+	text-align: center;
+}
 
-	}
+.flex-item3 {
+	font-size: 0.8875rem;
+	margin-left: 3rem;
+	color: #969696;
+	text-align: right;
 
-	.flex-item4 {
-		font-size: 0.8875rem;
-		color: #000000;
-		margin-left: 0.2rem;
-		text-align: left;
+}
 
-	}
+.flex-item4 {
+	font-size: 0.8875rem;
+	color: #000000;
+	margin-left: 0.2rem;
+	text-align: left;
 
-	.idvalue2 {
-		margin-left: 5rem;
-	}
+}
 
-	.input_edi {
-		position: absolute;
-		width: 300.44rpx;
-	}
+.idvalue2 {
+	margin-left: 5rem;
+}
 
-	.input_logo {
-		margin-left: 0.2rem;
-		position: absolute;
-		width: 70.44rpx;
-	}
+.input_edi {
+	position: absolute;
+	width: 300.44rpx;
+}
 
-	.input_txt {
-		color: #000000;
-		position: absolute;
-		font-size: 28.33rpx;
-		margin-left: 2.5rem;
-		text-align: center;
-		height: 70.72rpx;
-		line-height: 70.72rpx;
-	}
+.input_logo {
+	margin-left: 0.2rem;
+	position: absolute;
+	width: 70.44rpx;
+}
 
-	.idvalue3 {
-		width: 75%;
-		text-align: right;
-		float: right;
-	}
+.input_txt {
+	color: #000000;
+	position: absolute;
+	font-size: 28.33rpx;
+	margin-left: 2.5rem;
+	text-align: center;
+	height: 70.72rpx;
+	line-height: 70.72rpx;
+}
 
-	.smicon {
-		width: 15rpx;
-		height: 23rpx;
-	}
+.idvalue3 {
+	width: 75%;
+	text-align: right;
+	float: right;
+}
 
-	.flex-item {
-		color: #969696;
-		width: 140.55rpx;
-		height: 34.72rpx;
-		text-align: center;
-	}
+.smicon {
+	width: 15rpx;
+	height: 23rpx;
+}
 
-	.level {
-		color: #969696;
-		width: 95.55rpx;
-		height: 34.72rpx;
-		text-align: center;
-	}
+.flex-item {
+	color: #969696;
+	width: 140.55rpx;
+	height: 34.72rpx;
+	text-align: center;
+}
 
-	.rare {
-		color: #969696;
-		width: 95.55rpx;
-		height: 34.72rpx;
-		text-align: center;
-		margin-left: 7rem;
-	}
+.level {
+	color: #969696;
+	width: 95.55rpx;
+	height: 34.72rpx;
+	text-align: center;
+}
 
-	.rareValue {
-		color: #000000;
-		width: 95.55rpx;
-		height: 34.72rpx;
-		text-align: center;
-		margin-left: 7.5rem;
-	}
+.rare {
+	color: #969696;
+	width: 95.55rpx;
+	height: 34.72rpx;
+	text-align: center;
+	margin-left: 7rem;
+}
 
-	.flex-itemLogo {
-		width: 3.125rem;
-		text-align: center;
-	}
+.rareValue {
+	color: #000000;
+	width: 95.55rpx;
+	height: 34.72rpx;
+	text-align: center;
+	margin-left: 7.5rem;
+}
 
-	.flex-itemValue {
-		color: #000;
-	}
+.flex-itemLogo {
+	width: 3.125rem;
+	text-align: center;
+}
 
-	.id3 {
+.flex-itemValue {
+	color: #000;
+}
 
-		color: #969696;
-		width: 7.55rem;
-		font-size: 0.90rem;
-		text-align: left;
-	}
+.id3 {
 
-	/* 图片居中 */
-	.cards {
-		width: 60%;
-		margin: 0 auto;
-		display: inline-block;
-		margin: 1.25rem auto;
+	color: #969696;
+	width: 7.55rem;
+	font-size: 0.90rem;
+	text-align: left;
+}
 
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
+/* 图片居中 */
+.cards {
+	width: 60%;
+	margin: 0 auto;
+	display: inline-block;
+	margin: 1.25rem auto;
 
-	.cards2 {
-		width: 40%;
-		margin: 0 auto;
-		display: inline-block;
-		margin: 0rem auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
 
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
+.cards2 {
+	width: 40%;
+	margin: 0 auto;
+	display: inline-block;
+	margin: 0rem auto;
 
-	/* 图片居中 */
-	.addcards {
-		width: 28%;
-		margin: 0 auto;
-		display: inline-block;
-		margin: 0.5rem auto;
-		height: 200rpx;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
 
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
+/* 图片居中 */
+.addcards {
+	width: 28%;
+	margin: 0 auto;
+	display: inline-block;
+	margin: 0.5rem auto;
+	height: 200rpx;
+
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
 </style>

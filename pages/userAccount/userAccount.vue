@@ -334,7 +334,7 @@
 					console.log("block------", start, "end--", end)
 
 					provider.send("eth_requestAccounts", []).then(accounts => {
-						this.myAccount = "0x39BbEf9fcFA566727874BFc3597B41D04A72FfF9"
+						this.myAccount = accounts[0]
 						this.getHistory();
 						this.getLotteryRecords();
 
