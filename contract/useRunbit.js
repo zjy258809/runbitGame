@@ -44,7 +44,9 @@ import {
 import {
     getEquip, getCard
 } from './useEquipCard.js'
-
+import {
+    ethers,
+} from 'ethers'
 /*---------------查询类合约调用-------------*/
 
 //查看account账户绑定equipType（即上衣，裤子鞋子）的情况
@@ -57,17 +59,29 @@ export async function getBindEquip(contract, account, equipType) {
 export async function getBindEquips(contract, account) {
     var equips = []
     return useContract(equipAddress, equipAbi).then(async equipContract => {
-		
+
         for (let equipType = 0; equipType < 3; equipType++) {
-          await  contract.getBindEquip(account, equipType).then(async equipId => {
+            await contract.getBindEquip(account, equipType).then(async equipId => {
+
                 //equipId=0代表未配备,不去获取装备详情
                 if (equipId.toNumber() === 0)
-                equips[equipType] = 0
+                    equips[equipType] = 0
                 //equipId不为0代表已配备,获取装备详情
                 //进一步获取equip详情
-                else await getEquip(equipContract, equipId).then(async equip => {
-                        equips[equipType] = equip
+                else {
+                    await equipContract.ownerOf(equipId).then(async owner => {
+                        if (ethers.utils.getAddress(owner) != ethers.utils.getAddress(account))
+                            equipCollect[i] = 0
+                        else
+                            //获取基本信息
+                            await getEquip(equipContract, equipId, account).then(async equip => {
+                                equips[equipType] = equip
+                            })
                     })
+                    //获取绑定的卡片信息
+
+
+                }
 
             })
         }
@@ -78,19 +92,30 @@ export async function getBindEquips(contract, account) {
 
 //查看equipId的装备的所有卡槽情况
 //0-没属性卡 非0-绑定的cardId
-export async function getBindCards(contract, equipId) {
+export async function getBindCards(contract, equipId, account) {
     var cards = []
     return useContract(cardAddress, cardAbi).then(async cardContract => {
         for (let index = 0; index < 3; index++) {
-           await contract.getBindCard(equipId, index).then(async cardId => {
+            await contract.getBindCard(equipId, index).then(async cardId => {
                 if (cardId.toNumber() === 0)
-                cards[index] = 0
+                    cards[index] = 0
                 //cardId=0代表未配备,不去获取装备详情
                 //cardId不为0代表已配备,获取装备详情
                 //进一步获取card详情
-                else await getCard(cardContract, cardId).then(async card => {
-                        cards[index] = card
-                    })
+                else await cardContract.ownerOf(cardId).then(async owner => {
+                    if (ethers.utils.getAddress(owner) != ethers.utils.getAddress(account))
+                        cardCollect[i] = 0
+                    else {
+                            await getCard(cardContract, cardId).then(async card => {
+                                if(card.consume<card.card.durability)
+                                cards[index] = card
+                                else card[index]=0
+                            })
+
+                        
+                    }
+
+                })
 
             })
         }
@@ -99,14 +124,14 @@ export async function getBindCards(contract, equipId) {
 }
 
 //获取合成费用
-export async function getForgeFee(collectContract,equipType,level){
-    return collectContract.getForgeFee(equipType,level)
-    }
-	
-	//获取预计收益
-	export async function getUnharvestReward(collectContract,userAddress,curDay){
-	    return collectContract.getUnharvestReward(userAddress,curDay)
-	    }
+export async function getForgeFee(collectContract, equipType, level) {
+    return collectContract.getForgeFee(equipType, level)
+}
+
+//获取预计收益
+export async function getUnharvestReward(collectContract, userAddress, curDay) {
+    return collectContract.getUnharvestReward(userAddress, curDay)
+}
 
 
 
@@ -115,7 +140,7 @@ export async function getForgeFee(collectContract,equipType,level){
 export async function bindCard(contract, equipId, cardId, index) {
 
     let tx = await contract.bindCard(equipId, cardId, index)
-	
+
     //交易hash
     return tx
 }
@@ -148,11 +173,11 @@ export async function setTrack(contract, trackId) {
 export function getTrackId(contract) {
     return contract.getTrackId()
 }
-export function getUserState(contract,address,day) {
-    return contract.getUserState(address,day)
+export function getUserState(contract, address, day) {
+    return contract.getUserState(address, day)
 }
 
 // const checkSum = (uint256(keccak256(abi.encodePacked(steps, user, day, seed))) & 0xffffffffffffffffffffffffffffffffffffffffffffffff) | (steps << 192) 
-export function updateStep(contract,steps){
+export function updateStep(contract, steps) {
     return contract.updateSteps(steps)
 }
