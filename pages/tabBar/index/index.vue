@@ -385,7 +385,6 @@ export default {
 			});
 
 
-			uni.clearStorage();
 			provider.send("eth_requestAccounts", []).then(accounts => {
 				this.myAccount = accounts[0];
 				uni.getStorage({
@@ -440,7 +439,7 @@ export default {
 					getTrackId(this.runContract).then(id => {
 						//id[1]是次日赛道
 						this.trackId = id[0].toNumber()
-						this.nextTrack = id[1].toNumber()
+						this.setTrackId = id[1].toNumber()
 						this.chooseTrack(this.trackId)
 					})
 					console.log("curDay ", this.curDay)
@@ -882,6 +881,12 @@ export default {
 
 		// 赛道弹框
 		inputDialogToggle() {
+			if(this.trackId!=this.setTrackId)
+				uni.showToast({
+					title: "今日已更新过赛道",
+					icon: "error"
+				})
+
 			this.$refs.inputDialog.open()
 		}
 
@@ -1066,7 +1071,7 @@ export default {
 }
 
 .flex-item {
-		width: 158.88rpx;
+	width: 158.88rpx;
 	height: 34.72rpx;
 	text-align: center;
 }
@@ -1280,7 +1285,7 @@ export default {
 }
 
 .idvalue2 {
-		width: 138.88rpx;
+	width: 138.88rpx;
 	margin-left: 6rem;
 }
 
