@@ -137,37 +137,59 @@ export async function getUnharvestReward(collectContract, userAddress, curDay) {
 
 /*---------------操作类合约调用-------------*/
 //绑定卡片 contract-runbit合约  index卡槽
-export async function bindCard(contract, equipId, cardId, index) {
+export async function bindCard(contract, equipId, cardId, index,gasPriceString) {
 
-    let tx = await contract.bindCard(equipId, cardId, index)
+   // let tx = await contract.bindCard(equipId, cardId, index)
+	let tx = await contract.bindCard(equipId, cardId, index, {
+		gasLimit: 1200000,
+		gasPrice: gasPriceString
+	});
 
     //交易hash
     return tx
 }
 //绑定装备-runbit合约
-export async function bindEquip(contract, equipId) {
-    let tx = await contract.bindEquip(equipId)
+export async function bindEquip(contract, equipId,gasPriceString) {
+	let tx = await contract.bindEquip(equipId, {
+		gasLimit: 1200000,
+		gasPrice: gasPriceString
+	});
+    // let tx = await contract.bindEquip(equipId)
     return tx
 }
 //卸下装备 equipType 0-上衣 1-裤子 2-鞋子
-export async function unbindEquip(contract, equipType) {
+export async function unbindEquip(contract, equipType,gasPriceString) {
 
-    let tx = await contract.unbindEquip(equipType)
+   // let tx = await contract.unbindEquip(equipType)
+	let tx = await contract.unbindEquip(equipType, {
+		gasLimit: 1200000,
+		gasPrice: gasPriceString
+	});
+	
     //交易hash
     return tx
 
 }
 //卸下卡片 equipId-装备id，index-卡槽
-export async function unbindCard(contract, equipId, index) {
+export async function unbindCard(contract, equipId, index,gasPriceString) {
 
-    let tx = await contract.unbindCard(equipId, index)
+    // let tx = await contract.unbindCard(equipId, index)
+	let tx = await contract.unbindCard(equipId,index, {
+		gasLimit: 1200000,
+		gasPrice: gasPriceString
+	});
     //交易hash
     return tx
 }
 
 //设置赛道
-export async function setTrack(contract, trackId) {
-    return contract.updateTrack(trackId)
+export async function setTrack(contract, trackId,gasPriceString) {
+    // return contract.updateTrack(trackId)
+	let tx = await contract.updateTrack(trackId, {
+		gasLimit: 1200000,
+		gasPrice: gasPriceString
+	});
+	 return tx
 }
 //获取赛道
 export function getTrackId(contract) {

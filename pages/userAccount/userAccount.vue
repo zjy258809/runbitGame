@@ -186,7 +186,7 @@
 
 
 								<view class="curId uni-flex uni-row">
-									<view class="level4">{{ block2date(index) }}</view>
+									<view class="level4">{{ displayTime(item.create_time) }}</view>
 
 									<img class="leLogo2"
 										:src="item.status == 0 ? '../../static/Group15-1.png' : '../../static/Group15.png'"
@@ -196,7 +196,7 @@
 								<view class="uni-flex uni-row">
 									<view class="level4 uni-flex uni-row">
 										<image class="smicon " src="../../static/Group120121.png"></image>
-										<view style="margin-left: 0.325rem;">{{ item.rb }}</view>
+										<view style="margin-left: 0.325rem;">{{ getFix2(item.rb) }}</view>
 									</view>
 									<view class="level3-2 uni-flex uni-row">
 										<image class="smicon " src="../../static/Group120122.png"></image>
@@ -346,8 +346,7 @@
 									//未收获
 									this.runContract.getUnharvestReward(this.myAccount,
 										day).then(rew => {
-										console.log("---" + day + "----" + big2num(
-											rew))
+										
 										if (!rew.eq(0)) {
 											var data = {}
 											data.amount = big2num(rew)
@@ -392,14 +391,15 @@
 				useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
 					this.RBCTContract = RBCTContract
 					RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
-						this.balanceofRBCT = parseInt(balanceofRBCT)
+						console.log(balanceofRBCT);
+						this.balanceofRBCT = big2num(balanceofRBCT)
 					})
 				});
 				//获取装备碎片
 				useContract(RBETAddress, RBETAbi).then(RBETContract => {
 					this.RBETContract = RBETContract
 					RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
-						this.balanceofRBET = parseInt(balanceofRBET)
+						this.balanceofRBET = big2num(balanceofRBET)
 					})
 				})
 				setTimeout(() => {
@@ -446,6 +446,7 @@
 						// end: end
 					}
 				}).then(data => {
+					console.log(data);
 					this.lottery.rb = data.rb ? data.rb : 0
 					this.lottery.rbct = data.rbct ? data.rbct : 0
 					this.lottery.rbet = data.rbet ? data.rbet : 0

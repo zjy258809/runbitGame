@@ -111,6 +111,7 @@ export default {
 
 			provider.send("eth_requestAccounts", []).then(accounts => {
 				this.myAccount = accounts[0]
+				this.getTransactions(1)
 				useContract(RBAddress, RBAbi).then(RBContract => {
 					//获取rb余额
 					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
@@ -125,18 +126,7 @@ export default {
 			console.error(e);
 		}
 	},
-	onload() {
-		const provider = new ethers.providers.Web3Provider(window.ethereum);
-
-		provider.send("eth_requestAccounts", []).then(accounts => {
-			this.myAccount = accounts[0]
-			provider.on(this.myAccount, (balance) => {
-				console.log('New Balance: ' + balance);
-			});
-			this.getTransactions(1)
-
-		})
-	},
+	
 	methods: {
 		back() {
 			uni.navigateBack({
@@ -161,7 +151,6 @@ export default {
 					trans_type: type
 				}
 			}).then(data => {
-				debugger
 				if (type == 1)
 					this.data = data.list
 				else this.data2 = data.list

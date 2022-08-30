@@ -58,7 +58,15 @@ export async function getEquips(contract) {
 //购买卡片
 export async function buyCard(contract, cardId) {
 
-        let tx = await contract.buyCard(cardId)
+// const tx = await contract.buyCard(from, to, tokenId, amount, [], {
+//   // gasLimit: 100000,
+//   // nonce: nonce || undefined,
+// });
+
+        let tx = await contract.buyCard(cardId,{
+			 gasLimit: 121344,
+			 gasprice:60574687305
+		})
         //交易hash
     return tx
 }
