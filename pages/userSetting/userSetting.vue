@@ -23,7 +23,7 @@
 			<view class="uni-flex uni-row linheigh" style="margin-top: 0.625rem;">
 				<view class="lin1">总距离</view>
 				<view class="lin2">{{distance}}km</view>
-				<img class="backIcon" src="../../static/Group11596.png" />
+				<!-- <img class="backIcon" src="../../static/Group11596.png" /> -->
 			</view>
 
 			<view class="uni-flex uni-row linheigh" style="margin-top: 0.625rem;">
@@ -39,8 +39,8 @@
 
 			<view class="uni-flex uni-row linheigh" style="margin-top: 0.625rem;">
 				<view class="lin1">區塊鏈</view>
-				<view class="lin2">solana</view>
-				<img class="backIcon" src="../../static/Group11596.png" />
+				<view class="lin2">polygon</view>
+				<!-- <img class="backIcon" src="../../static/Group11596.png" /> -->
 			</view>
 			<view class="uni-flex uni-row linheigh" style="margin-top: 0.625rem;">
 				<view class="lin1">版本號</view>
@@ -156,10 +156,12 @@
 
 	.backIcon {
 		width: 0.5rem;
-		height: 1rem;
+		height: 0.8rem;
 		position: absolute;
 		right: 1.625rem;
-		margin-top: 1.3rem;
+		margin-top: 38.94rpx;
+		
+		
 	}
 	.star {
 		margin-left: 6.94rpx;
