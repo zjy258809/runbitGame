@@ -4,8 +4,8 @@
 
 			<view class="uni-flex uni-row" @tap="openUser" style="margin: 1.425rem; height: 89.44rpx; ">
 				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:2.8rem;" />
-				<img class="currentImg" src="../../../static/Ellipse38.png" />
-				<view class="currentbs">{{ getSteps }}步</view>
+				<img class="currentImg" :src="stepLogo" />
+				<view :class="stepStaus==1?'currentbs':'currentbs2'">{{ getSteps }}步</view>
 				<view class="userName">
 					<img class="input_edi" src="../../../static/input_edi.png"></img>
 					<img class="input_logo" src="../../../static/inputlogo.png"></img>
@@ -308,6 +308,8 @@ import {
 export default {
 	data() {
 		return {
+			stepLogo:'',
+			stepStaus:1,
 			cardCancle: '',
 			cardconfirm: '',
 			cardStatus: '',
@@ -422,6 +424,7 @@ export default {
 
 		}
 		this.steps = uni.getStorageSync('steps');
+		
 	},
 	onLoad() {
 		try {
@@ -430,6 +433,9 @@ export default {
 			});
 			this.getSteps = getApp().globalData.userStep
 			this.steps = uni.getStorageSync('steps');
+			this.stepStaus =getApp().globalData.stepStaus;
+			this.stepLogo =getApp().globalData.stepLogo;
+			
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
 
 			provider.getBlock().then(block => {
@@ -1232,11 +1238,10 @@ export default {
 .bg {
 	position: absolute;
 	width: 100%;
-	height: 8.875rem;
+	height: 232px;
 	left: 0px;
 	top: 0px;
-	background: linear-gradient(180deg, #FFF7B0 0%, rgba(255, 247, 176, 0) 100%);
-	border-radius: 0px 0px 36px 36px;
+	background-color: #F3F3F3;
 }
 
 .id4 {
@@ -1252,8 +1257,21 @@ export default {
 	flex-direction: row;
 	font-weight: bold;
 	align-items: center;
-	width: 7.25rem;
+	width: 188.88rpx;
+	font-size: 25rpx;
 }
+
+.currentbs2 {
+		margin-left: 8.47rpx;
+		display: flex;
+		flex-direction: row;
+		font-weight: bold;
+		align-items: center;
+		font-size: 25rpx;
+		width: 188.88rpx;
+		color: red;
+	}
+
 
 .currentImg {
 	width: 0.625rem;
@@ -1266,9 +1284,10 @@ export default {
 .userName {
 	display: block;
 	margin: auto 0;
-	margin-left: 1.1rem;
+	position: absolute;
+	right: 6.94rpx;
 	width: 10rem;
-	height: 2.25rem;
+	height: 65rpx;
 }
 
 .fillter {
@@ -1353,23 +1372,24 @@ export default {
 
 .input_edi {
 	position: absolute;
-	width: 300.44rpx;
+	width: 280.44rpx;
+	height: 65rpx;
 }
 
 .input_logo {
 	margin-left: 0.2rem;
 	position: absolute;
-	width: 70.44rpx;
+	width: 60.44rpx;
 }
 
 .input_txt {
 	color: #000000;
 	position: absolute;
-	font-size: 28.33rpx;
-	margin-left: 2.5rem;
+	font-size: 25.83rpx;
+	margin-left: 66.94rpx;
 	text-align: center;
-	height: 70.72rpx;
-	line-height: 70.72rpx;
+	height: 60rpx;
+	line-height: 65rpx;
 }
 
 .idvalue3 {
@@ -1392,14 +1412,14 @@ export default {
 
 .level {
 	color: #969696;
-	width: 95.55rpx;
+	width: 110.55rpx;
 	height: 34.72rpx;
 	text-align: center;
 }
 
 .rare {
 	color: #969696;
-	width: 95.55rpx;
+	width: 110.55rpx;
 	height: 34.72rpx;
 	text-align: center;
 	margin-left: 7rem;
@@ -1407,7 +1427,7 @@ export default {
 
 .rareValue {
 	color: #000000;
-	width: 95.55rpx;
+	width: 110.55rpx;
 	height: 34.72rpx;
 	text-align: center;
 	margin-left: 7.5rem;

@@ -4,8 +4,8 @@
 
 			<view class="uni-flex uni-row" @tap="openUser" style="margin: 1.425rem; height: 89.44rpx; ">
 				<img class="flex-itemLogo" src="../../../static/heard.png" style="width:2.8rem;" />
-				<img class="currentImg" src="../../../static/Ellipse38.png" />
-				<view class="currentbs">{{ getSteps }}步</view>
+				<img class="currentImg" :src="stepLogo" />
+				<view :class="stepStaus==1?'currentbs':'currentbs2'">{{ getSteps }}步</view>
 				<view class="userName">
 					<img class="input_edi" src="../../../static/input_edi.png"></img>
 					<img class="input_logo" src="../../../static/inputlogo.png"></img>
@@ -17,20 +17,20 @@
 				<u-subsection style="width: 90%; margin-left: 5%;" activeColor="#FFEB34" font-size="15" :list="list"
 					mode="subsection" :current="curNow" @change="sectionChange"></u-subsection>
 				<view>
-					<view v-if="curNow === 0" style="background:#FFFDEC">
+					<view v-if="curNow === 0" style="background:#F3F3F3">
 						<view class="uni-flex uni-row"
 							style="display: flex; margin:1rem 0px; height: 85.55rpx; margin-left: 5%; width: 90%; ">
 							<view style="width: 50%; margin: auto 0;  ">
 								<uni-data-select v-model="value" :localdata="range" @change="change"></uni-data-select>
 							</view>
-							<!-- <view @click="actionSheetTap" class="fillter">Fillter(0)</view> -->
-							<!-- <image @click="actionSheetTap" class="filltericon" src="../../../static/Frame3.png"></image> -->
+							<view @click="actionSheetTap" class="fillter">筛选</view>
+							<image @click="actionSheetTap" class="filltericon" src="../../../static/Frame3.png"></image>
 
 						</view>
 						<oct-goods v-if="equipCollect.length > 0" :lists="equipCollect" price-type="$"
 							@onGoods="onGoods" />
 					</view>
-					<view v-if="curNow === 1" style="background:#FFFDEC">
+					<view v-if="curNow === 1" style="background:#F3F3F3">
 						<view class="uni-flex uni-row"
 							style="display: flex; margin:1rem 0px; height: 85.55rpx;margin-left: 5%; width: 90%; ">
 							<view style="width: 50%; margin: auto 0; ">
@@ -96,17 +96,17 @@
 
 						</uni-card>
 
-						<view class="uni-flex uni-row" style="width: 98%; margin: 0 auto;">
+						<view class="uni-flex uni-row" style="width: 90%; margin: 0 auto;">
 							<view class="flex-item id3">mint</view>
 							<view class="idvalue3">{{ currentEquips.equip.sales }}/{{ currentEquips.equip.stock }}
 							</view>
 						</view>
-						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
-							<view class="flex-item id3">购买价格(RB)</view>
+						<view class="uni-flex uni-row" style="width: 90%; margin: 10px auto;">
+							<view class="id3">购买价格(RB)</view>
 							<view class="idvalue3">{{ big2num(currentEquips.equip.price1) }}</view>
 						</view>
-						<view class="uni-flex uni-row" style="width: 98%; margin: 10px auto;">
-							<view class="flex-item id3" style="width: 438.88rpx;">兑换价格(RBET)</view>
+						<view class="uni-flex uni-row" style="width: 90%; margin: 10px auto;">
+							<view class="id3">兑换价格(RBET)</view>
 							<view class="idvalue3">{{ currentEquips.equip.price0 }}</view>
 						</view>
 
@@ -233,7 +233,9 @@
 	export default {
 		data() {
 			return {
-				changeType: 10,
+				stepLogo: '',
+				stepStaus: 1,
+				changeType: '',
 				getSteps: '',
 				userAccount: '',
 				currentcover: '',
@@ -277,34 +279,34 @@
 				buttonRect: {},
 				baseurl: 'https://gapi.runbit.org/api/v1/',
 				value: 10,
-				carvalue: 10,
+				carvalue: '',
 				carRange: [{
-						value: 10,
+						value: '',
 						text: "全部"
 					},
 					{
 						value: 1,
-						text: "等于1"
+						text: "一级"
 					},
 					{
 						value: 2,
-						text: "等于2"
+						text: "二级"
 					},
 					{
 						value: 3,
-						text: "等于3"
+						text: "三级"
 					},
 					{
 						value: 4,
-						text: "等于4"
+						text: "四级"
 					},
 					{
 						value: 5,
-						text: "等于5"
+						text: "五级"
 					},
 				],
 				range: [{
-						value: 10,
+						value: '',
 						text: "全部"
 					},
 					{
@@ -333,7 +335,8 @@
 				RBCTContract: null,
 				RBContract: null,
 				refContract: null,
-				gasPriceString: ''
+				gasPriceString: '',
+				equip_level:''
 			}
 		},
 		mounted() {
@@ -343,6 +346,8 @@
 		onLoad() {
 			var that = this;
 			that.getSteps = getApp().globalData.userStep
+			that.stepStaus = getApp().globalData.stepStaus;
+			that.stepLogo = getApp().globalData.stepLogo;
 			try {
 
 				const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -361,8 +366,9 @@
 					//加载属性卡和装备库
 					useContract(RunbitCollectionAddress, RunbitCollectionAbi).then(collectContract => {
 						this.collectContract = collectContract
-						this.getCards(collectContract)
-						this.getEquips(collectContract)
+						this.getShops();
+						//this.getCards(collectContract)
+						//this.getEquips(collectContract)
 					});
 					//查询商店合约授权情况，授权后才能购买和兑换
 					useContract(RBAddress, RBAbi).then(RBContract => {
@@ -536,10 +542,10 @@
 
 				this.$refs.inputDialogs.close();
 				var a = ethers.utils.formatEther(this.balanceOfRB);
-				var b = ethers.utils.formatEther(this.currentEquips.equip.price1);
+				var b = this.currentEquips.equip.price1;
 
 				if (parseFloat(a) > parseFloat(b)) {
-					this.buyEquip(this.collectContract, this.currentEquips.equip.equipType, this.collectionId);
+					this.buyEquip(this.collectContract, this.currentEquips.equip.equip_Type, this.collectionId);
 				} else {
 					uni.showToast({
 						title: "余额不足",
@@ -559,7 +565,7 @@
 			buyCardBtn() {
 				this.currentPayType = 1;
 				var a = ethers.utils.formatEther(this.balanceOfRB);
-				var b = ethers.utils.formatEther(this.currentCard.card.price1);
+				var b = this.currentCard.card.price1;
 
 				if (parseFloat(a) > parseFloat(b)) {
 
@@ -575,12 +581,12 @@
 			},
 			//点击装备列表
 			onGoods(item) {
-				this.collectionId = item;
+				this.collectionId = this.equipCollect[item].equip.collection_id;
 				this.currentEquips = this.equipCollect[item];
 				this.currentprice0 = this.currentEquips.equip.price0;
 
 				this.currnetDesc = "mint中,您将很快收到您的装备";
-				this.currentprice1 = ethers.utils.formatEther(this.currentEquips.equip.price1);
+				this.currentprice1 = this.currentEquips.equip.price1;
 				this.currentcover = this.currentEquips.cover;
 				this.isOpen = true;
 				if (this.isOpen) {
@@ -591,29 +597,34 @@
 			actionSheetTap() {
 				const that = this
 				uni.showActionSheet({
-					title: '装备筛选',
-					itemList: ['鞋子', '裤子', '上衣'],
+					title: '',
+					itemList: ['全部','一级', '二级', '三级','四级','五级'],
 					popover: {
 						// 104: navbar + topwindow 高度，暂时 fix createSelectorQuery 在 pc 上获取 top 不准确的 bug
 						top: that.buttonRect.top + 104 + that.buttonRect.height,
 						left: that.buttonRect.left + that.buttonRect.width / 2
 					},
 					success: (e) => {
-						uni.showToast({
-							title: "点击了第" + e.tapIndex + "个选项",
-							icon: "none"
-						})
+						if(e.tapIndex==0)
+						this.equip_level ="";
+						else
+						this.equip_level =e.tapIndex;
+						this.getShops();
+						// uni.showToast({
+						// 	title: "点击了第" + e.tapIndex + "个选项",
+						// 	icon: "none"
+						// })
 					}
 				})
 			},
 
 			// 点击卡片列表
 			onGoods2(index) {
-				this.collectionId = index;
+				this.collectionId = this.cardCollect[index].card.collection_id;
 				this.currentCard = this.cardCollect[index];
 				this.currentprice0 = this.currentCard.card.price0;
-				this.currnetDesc = "mint中,您将很快收到您的装备";
-				this.currentprice1 = ethers.utils.formatEther(this.currentCard.card.price1);
+				this.currnetDesc = "mint中,您将很快收到您的属性卡";
+				this.currentprice1 = this.currentCard.card.price1;
 				this.currentcover = this.currentCard.cover;
 				this.$refs.inputDialog3.open()
 			},
@@ -633,20 +644,74 @@
 			},
 			change(item) {
 				this.changeType = item;
-				this.getEquips(this.collectContract)
+				this.getShops();
+				// this.getEquips(this.collectContract)
 
 			},
 			carChange(item) {
 				this.carvalue = item;
-				this.getCards(this.collectContract);
+				this.getShops();
+				//this.getCards(this.collectContract);
 
 			},
+
+			async getShops() {
+				var that = this;
+				uni.showLoading({
+					title: '加载中....'
+				});
+				this.baseurl = 'https://gapi.runbit.org/api/v1/'
+				uni.request({
+					url: this.baseurl + 'game/storeInfo',
+					data: {
+						equip_type:this.changeType,
+						card_level:this.carvalue,
+						equip_level:this.equip_level
+					},
+					method: "GET",
+					success: res => {
+						uni.hideLoading();
+						if (res.data.code === 0) {
+							that.equipCollect = [];
+							that.cardCollect = [];
+
+							for (var i = 0; i < res.data.data.equip.length; i++) {
+								var resultObj = {};
+								resultObj.balance = res.data.data.equip[i].sales / res.data.data.equip[i]
+									.stock * 100
+								resultObj.cover = "https://gapi.runbit.org/images/" + res.data.data
+									.equip[i].cover;
+								resultObj.equip = res.data.data.equip[i];
+								if (res.data.data.equip[i].status != '0') {
+									that.equipCollect.push(resultObj);
+								}
+							}
+
+							for (var i = 0; i < res.data.data.card.length; i++) {
+								var resultObj = {};
+								resultObj.balance = res.data.data.card[i].sales / res.data.data.card[i]
+									.stock * 100
+								resultObj.card = res.data.data.card[i];
+								resultObj.cover = "https://gapi.runbit.org/images/" + res.data.data.card[
+									i].cover;
+								if (res.data.data.card[i].status != '0') {
+
+									that.cardCollect.push(resultObj);
+								}
+							}
+
+
+						}
+					}
+				})
+			},
+
 			async getCards(contract) {
 				var that = this;
 				//获取属性卡数量numOfCard和属性卡合集cardCollect
 				//cardLoading=true获取数据中
 				uni.showLoading({
-					title: '加载中1....'
+					title: '加载中....'
 				});
 				that.cardCollect = [];
 				contract.getCardCollectCount().then(async num => {
@@ -703,7 +768,7 @@
 						resultObj.equip = currentObj;
 						if (that.changeType == 10) { //默认加载全部
 							that.equipCollect.push(resultObj); //获取内容
-						} else if (that.changeType == currentObj.equipType) {
+						} else if (that.changeType == currentObj.equip_Type) {
 							that.equipCollect.push(resultObj); //加载指定
 						}
 
@@ -730,7 +795,7 @@
 			async buyCard(contract, cardId) {
 				try {
 					uni.showLoading({
-						title: '购买中...'
+						title: '正在为您的购买订单提交上链...'
 					});
 					//判断是否授权
 					if (!this.approveState) {
@@ -755,7 +820,7 @@
 					//交易hash
 					await tx.wait()
 					uni.showToast({
-						title: "购买成功,请稍后到背包中查看",
+						title: "正在为您创建NFT卡片,请3分钟后到卡片页面查看",
 						icon: "success"
 					})
 					uni.hideLoading()
@@ -779,9 +844,7 @@
 			async buyEquip(contract, equipType, collectionid) {
 				try {
 					//判断是否授权
-					uni.showLoading({
-						title: '购买中...'
-					});
+
 					if (!this.approveState) {
 						//未授权，弹窗提示授权？
 						//用户点击确认授权后，调用授权代码，如下						
@@ -790,7 +853,7 @@
 						console.log("approveState2", this.approveState)
 
 						uni.showToast({
-							title: "授权中,授权后重新点击购买",
+							title: "授权中,授权后重新购买",
 							icon: "none"
 						})
 					}
@@ -801,7 +864,9 @@
 
 
 					this.$refs.inputDialog2.open()
-
+					uni.showLoading({
+						title: '正在为您的购买订单提交上链...'
+					});
 
 					let tx = await contract.buyEquip(collectionid, {
 						gasLimit: 1200000,
@@ -812,7 +877,7 @@
 					tx.wait().then(res => {
 						uni.hideLoading();
 						uni.showToast({
-							title: "购买成功,请稍后到背包中查看",
+							title: "正在为您创建装备，请3分钟后到装备页面查看",
 							icon: "success"
 						})
 
@@ -838,7 +903,7 @@
 			async redeemCard(contract, cardId) {
 				try {
 					uni.showLoading({
-						title: '兑换中...'
+						title: '正在为您的兑换订单提交上链...'
 					});
 					//判断是否授权
 					if (!this.approveRBCT) {
@@ -856,7 +921,7 @@
 						})
 						return
 					}
-					
+
 
 					this.$refs.inputDialog2.open()
 					//已授权
@@ -869,7 +934,7 @@
 						this.$refs.inputDialog2.close()
 						uni.hideLoading();
 						uni.showToast({
-							title: "兑换成功,请稍后到背包中查看",
+							title: "正在为您创建NFT卡片，请3分钟后到卡片页面查看",
 							icon: "success"
 						})
 						//兑换成功的一些操作，如关闭loading
@@ -890,7 +955,7 @@
 			async redeemEquip(contract, collectionId) {
 				try {
 					uni.showLoading({
-						title: '兑换中...'
+						title: '正在为您的兑换订单提交上链...'
 					});
 					if (!this.approveRBET) {
 						uni.showLoading({
@@ -908,7 +973,7 @@
 						})
 
 					}
-					
+
 					console.log("装备兑换开始----" + collectionId);
 
 					this.$refs.inputDialog2.open()
@@ -925,7 +990,7 @@
 
 						this.$refs.inputDialog2.close()
 						uni.showToast({
-							title: "兑换成功,请稍后到背包中查看",
+							title: "正在为您创建装备，请3分钟后到装备页面查看",
 							icon: "success"
 						})
 						//兑换成功的一些操作，如关闭loading
@@ -965,8 +1030,9 @@
 		height: 232px;
 		left: 0px;
 		top: 0px;
+		background-color: #F3F3F3;
 
-		background: linear-gradient(180deg, #FFF7B0 0%, rgba(255, 247, 176, 0) 100%);
+		/* background: linear-gradient(180deg, #FFF7B0 0%, rgba(255, 247, 176, 0) 100%); */
 		border-radius: 0px 0px 36px 36px;
 	}
 
@@ -976,7 +1042,19 @@
 		flex-direction: row;
 		font-weight: bold;
 		align-items: center;
-		width: 7.25rem;
+		font-size: 25rpx;
+		width: 188.88rpx;
+	}
+
+	.currentbs2 {
+		margin-left: 8.47rpx;
+		display: flex;
+		flex-direction: row;
+		font-weight: bold;
+		align-items: center;
+		font-size: 25rpx;
+		color: red;
+		width: 188.88rpx;
 	}
 
 	.currentImg {
@@ -990,44 +1068,50 @@
 	.userName {
 		display: block;
 		margin: auto 0;
-		margin-left: 1.1rem;
+		position: absolute;
+		right: 6.94rpx;
 		width: 10rem;
-		height: 2.25rem;
+		height: 65rpx;
 	}
 
 	.fillter {
 		margin: auto 0;
-		margin-left: 126.94rpx;
+		font-size: 10rpx;
+		width: 50%;
+		text-align: right;
+		
 	}
 
 	.filltericon {
 
-		width: 50.83rpx;
+		width: 45.83rpx;
 		height: 45.83rpx;
 		margin: auto 0;
+		margin-left: 5rpx;
 		padding-top: 18.94rpx;
 
 	}
 
 	.input_edi {
 		position: absolute;
-		width: 300.44rpx;
+		width: 280rpx;
+		height: 65rpx;
 	}
 
 	.input_logo {
 		margin-left: 0.2rem;
 		position: absolute;
-		width: 70.44rpx;
+		width: 60.44rpx;
 	}
 
 	.input_txt {
 		color: #000000;
 		position: absolute;
-		font-size: 28.33rpx;
-		margin-left: 2.5rem;
+		font-size: 25.83upx;
+		margin-left: 66.94rpx;
 		text-align: center;
-		height: 70.72rpx;
-		line-height: 70.72rpx;
+		height: 60rpx;
+		line-height: 65rpx;
 	}
 
 	.nocard {
@@ -1060,7 +1144,7 @@
 	}
 
 	.idvalue3 {
-		width: 75%;
+		width: 50%;
 		text-align: right;
 		float: right;
 	}
@@ -1071,7 +1155,7 @@
 	}
 
 	.flex-item {
-		width: 95.55rpx;
+		width: 200.55rpx;
 		height: 34.72rpx;
 		text-align: center;
 	}
@@ -1088,14 +1172,15 @@
 	.id3 {
 
 		color: #969696;
-		width: 7.55rem;
+		width: 70%;
 		font-size: 0.90rem;
 		text-align: left;
 	}
 
 	/* 图片居中 */
 	.cards {
-		width: 60%;
+		width: 50%;
+		height: 288.88rpx;
 		margin: 0 auto;
 		display: inline-block;
 		margin: 1.25rem auto;

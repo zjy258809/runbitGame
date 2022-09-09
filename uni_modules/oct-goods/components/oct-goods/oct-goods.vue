@@ -14,9 +14,9 @@
 						<image v-if="item.equip.level>=5" class="smicon " src="https://gapi.runbit.org/images/star.png">
 						</image>
 					</view>
-					<view class="smtxt" v-if="item.equip.equipType==0">鞋子</view>
-					<view class="smtxt" v-if="item.equip.equipType==1">裤子</view>
-					<view class="smtxt" v-if="item.equip.equipType==2">衣服</view>
+					<view class="smtxt" v-if="item.equip.equip_type==0">鞋子</view>
+					<view class="smtxt" v-if="item.equip.equip_type==1">裤子</view>
+					<view class="smtxt" v-if="item.equip.equip_type==2">衣服</view>
 				</view>
 
 				<image class="logo" :src="item.cover" />
@@ -26,7 +26,7 @@
 				</view>
 				<view class="uni-flex uni-row itemdesc-box">
 					<image class="itemprice1" src="https://gapi.runbit.org/images/runbit.png" />
-					<view class="itemdesc-boxtxt">{{item.equip.price1/1000000000000000000}}</view>
+					<view class="itemdesc-boxtxt">{{item.equip.price1}}</view>
 					<image class="itemprice1" src="https://gapi.runbit.org/images/chip.png" />
 					<view class="itemdesc-boxtxt">{{item.equip.price0}}</view>
 				</view>

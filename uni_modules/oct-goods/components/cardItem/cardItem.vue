@@ -12,7 +12,7 @@
 				</view>
 				<view class="uni-flex uni-row itemdesc-box">
 					<image class="itemprice1" src="https://gapi.runbit.org/images/runbit.png" />
-					<view class="itemdesc-boxtxt">{{item.card.price1/1000000000000000000}}</view>
+					<view class="itemdesc-boxtxt">{{item.card.price1}}</view>
 					<image class="itemprice1" src="https://gapi.runbit.org/images/chip.png" />
 					<view class="itemdesc-boxtxt">{{item.card.price0}}</view>
 				</view>

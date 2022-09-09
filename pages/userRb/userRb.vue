@@ -238,7 +238,7 @@ export default {
 	left: 0px;
 	top: 0px;
 
-	background: linear-gradient(180deg, #FFF7B0 0%, rgba(255, 247, 176, 0) 100%);
+	background: linear-gradient(180deg, #F3F3F3 0%, rgba(255, 177, 20, 0.0) 100%);
 	border-radius: 0px 0px 36px 36px;
 }
 

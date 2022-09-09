@@ -1023,7 +1023,6 @@
 			 get() {
 			      if (window.ethereum) {
 			        window.ethereum.enable().then((res) => {
-			          alert("当前钱包地址:" + res[0]);
 					  this.myAccount =res[0];
 			        });
 			      } else {

@@ -142,7 +142,7 @@ export default {
                 const style = {};
                 if (this.mode === "subsection") {
                     // 设置border的样式
-                    style.borderColor = this.activeColor;
+                    style.borderColor = '#000';
                     style.borderWidth = "1.5px";
                     style.borderStyle = "solid";
                 }
