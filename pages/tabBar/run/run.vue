@@ -205,6 +205,8 @@
 		cardAbi,
 		equipAddress,
 		equipAbi,
+		RunbitAddress ,
+		RunbitAbi,
 		RunbitCollectionAddress,
 		RunbitCollectionAbi,
 		RBAddress,
@@ -422,38 +424,40 @@
 						})
 					});
 
-
+					useContract(RunbitAddress, RunbitAbi).then(contract=>{						
+						this.runContract = contract
+					})
 					useContract(cardAddress, cardAbi).then(contract => {
 						this.cardContract = contract
-						uni.getStorage({
-							key: 'myCards'
-						}).then(res => {
-							//有缓存
-							if (!res[0]) {
-								this.myCards = JSON.parse(res[1].data);
-							} else {
-								//没缓存
-								this.updateMyCards()
+						// uni.getStorage({
+						// 	key: 'myCards'
+						// }).then(res => {
+						// 	//有缓存
+						// 	if (!res[0]) {
+						// 		this.myCards = JSON.parse(res[1].data);
+						// 	} else {
+						// 		//没缓存
+						// 		this.updateMyCards()
 
-							}
-						})
+						// 	}
+						// })
 
 					});
 
 					useContract(equipAddress, equipAbi).then(contract => {
 						this.equipContract = contract
-						uni.getStorage({
-							key: 'myEquips'
-						}).then(res => {
-							//有缓存
-							if (!res[0]) {
-								this.myEquips = JSON.parse(res[1].data);
-							} else {
-								//没缓存
-								this.updateMyEquips()
+						// uni.getStorage({
+						// 	key: 'myEquips'
+						// }).then(res => {
+						// 	//有缓存
+						// 	if (!res[0]) {
+						// 		this.myEquips = JSON.parse(res[1].data);
+						// 	} else {
+						// 		//没缓存
+						// 		this.updateMyEquips()
 
-							}
-						});
+						// 	}
+						// });
 
 					});
 
@@ -471,7 +475,7 @@
 		},
 		methods: {
 			updateMyCards() {
-				getMyCards(this.myAccount, this.cardContract).then(myCards => {
+				getMyCards(this.runContract, this.myAccount, this.cardContract).then(myCards => {
 					this.myCards = myCards;
 					getApp().globalData.loadIndex = 1;
 
@@ -486,7 +490,7 @@
 				})
 			},
 			updateMyEquips() {
-				getMyEquips(this.myAccount, this.equipContract).then(myEquips => {
+				getMyEquips(this.runContract, this.myAccount,this.equipContract).then(myEquips => {
 					this.myEquips = myEquips;
 					getApp().globalData.loadIndex = 1;
 
