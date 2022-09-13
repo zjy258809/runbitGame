@@ -56,70 +56,78 @@ export async function getBindEquip(contract, account, equipType) {
 
 }
 //一次性获取account绑定着装情况,equipId=0代表未配备
-export async function getBindEquips(contract, account) {
-    var equips = []
-    return useContract(equipAddress, equipAbi).then(async equipContract => {
-
-        for (let equipType = 0; equipType < 3; equipType++) {
-            await contract.getBindEquip(account, equipType).then(async equipId => {
-
-                //equipId=0代表未配备,不去获取装备详情
-                if (equipId.toNumber() === 0)
-                    equips[equipType] = 0
-                //equipId不为0代表已配备,获取装备详情
-                //进一步获取equip详情
-                else {
-                    await equipContract.ownerOf(equipId).then(async owner => {
-                        if (ethers.utils.getAddress(owner) != ethers.utils.getAddress(account))
-                            equipCollect[i] = 0
-                        else
-                            //获取基本信息
-                            await getEquip(equipContract, equipId, account).then(async equip => {
-                                equips[equipType] = equip
-                            })
-                    })
-                    //获取绑定的卡片信息
-
-
-                }
-
+export async function getBindEquips(runContract, account) {
+    let equips = []
+    let equipIds = []
+    let owners = []
+    const equipContract = useContract(equipAddress, equipAbi)
+    for (let equipType = 0; equipType < 3; equipType++)
+        equipIds[equipType] = runContract.getBindEquip(account, equipType)
+    return Promise.all([...equipIds, equipContract]).then(res => {
+        for (let i = 0; i < 3; i++)
+            if (res[i].toNumber() != 0) owners[i] = res[3].ownerOf(res[i])
+        return Promise.all(owners).then(results => {
+            results.map((item, index) => {
+                if (item && ethers.utils.getAddress(item) == ethers.utils.getAddress(account))
+                    equips[index] = getEquip(runContract, res[3], res[index], account,1)
             })
-        }
-        return equips
-    })
+            return Promise.all(equips).then(res2 => {
+                let equipResults = []
+                for (let i = 0; i < 3; i++)
+                    if (res2[i]) equipResults[i] = res2[i]
+                    else equipResults[i] = 0
+                return equipResults
+            })
 
+        })
+    })
 }
 
 //查看equipId的装备的所有卡槽情况
 //0-没属性卡 非0-绑定的cardId
-export async function getBindCards(contract, equipId, account) {
-    var cards = []
-    return useContract(cardAddress, cardAbi).then(async cardContract => {
-        for (let index = 0; index < 3; index++) {
-            await contract.getBindCard(equipId, index).then(async cardId => {
-                if (cardId.toNumber() === 0)
-                    cards[index] = 0
-                //cardId=0代表未配备,不去获取装备详情
-                //cardId不为0代表已配备,获取装备详情
-                //进一步获取card详情
-                else await cardContract.ownerOf(cardId).then(async owner => {
-                    if (ethers.utils.getAddress(owner) != ethers.utils.getAddress(account))
-                        cardCollect[i] = 0
-                    else {
-                            await getCard(cardContract, cardId).then(async card => {
-                                if(card.consume<card.card.durability)
-                                cards[index] = card
-                                else card[index]=0
-                            })
+export async function getBindCards(runContract, equipId, account,flag) {
+    let cards = []
+    let cardIds = []
+    let owners = []
 
-                        
+    const cardContract = useContract(cardAddress, cardAbi)
+    for (let index = 0; index < 3; index++)
+        cardIds[index] = runContract.getBindCard(equipId, index)
+    return Promise.all([...cardIds, cardContract]).then(res => {
+        for (let i = 0; i < 3; i++)
+            if (res[i].toNumber() != 0) owners[i] = res[3].ownerOf(res[i])
+        if (owners.length != 0)
+            return Promise.all(owners).then(results => {
+                //getBindEquips
+                if(flag==1){
+                    for (let i = 0; i < 3; i++) {
+                        if (results[i] && ethers.utils.getAddress(results[i]) == ethers.utils.getAddress(account))
+                            cards[i] = getCard(runContract, res[3], res[i])
+                        else cards[i] = 0
                     }
+                    return cards
 
-                })
+                }
+                //getMyEquips
+                else{
+                    results.map((item, index) => {
+                        if (item&&ethers.utils.getAddress(item) == ethers.utils.getAddress(account))
+                            cards[index] = getCard(runContract, res[3], res[index])
+                    })
+                    return Promise.all(cards).then(res2 => {
+                        let cardResults = []
+                        for (let index = 0; index < 3; index++) {
+                            if (res2[index]?.consume < res2[index]?.card.durability)
+                                cardResults[index] = res2[index]
+                            else cardResults[index] = 0
+                        }
+                        return cardResults
+                    })
+
+                }
 
             })
-        }
-        return cards
+        else return [0, 0, 0]
     })
 }
 
@@ -137,59 +145,59 @@ export async function getUnharvestReward(collectContract, userAddress, curDay) {
 
 /*---------------操作类合约调用-------------*/
 //绑定卡片 contract-runbit合约  index卡槽
-export async function bindCard(contract, equipId, cardId, index,gasPriceString) {
+export async function bindCard(contract, equipId, cardId, index, gasPriceString) {
 
-   // let tx = await contract.bindCard(equipId, cardId, index)
-	let tx = await contract.bindCard(equipId, cardId, index, {
-		gasLimit: 1200000,
-		gasPrice: gasPriceString
-	});
+    // let tx = await contract.bindCard(equipId, cardId, index)
+    let tx = await contract.bindCard(equipId, cardId, index, {
+        gasLimit: 1200000,
+        gasPrice: gasPriceString
+    });
 
     //交易hash
     return tx
 }
 //绑定装备-runbit合约
-export async function bindEquip(contract, equipId,gasPriceString) {
-	let tx = await contract.bindEquip(equipId, {
-		gasLimit: 1200000,
-		gasPrice: gasPriceString
-	});
+export async function bindEquip(contract, equipId, gasPriceString) {
+    let tx = await contract.bindEquip(equipId, {
+        gasLimit: 1200000,
+        gasPrice: gasPriceString
+    });
     // let tx = await contract.bindEquip(equipId)
     return tx
 }
 //卸下装备 equipType 0-上衣 1-裤子 2-鞋子
-export async function unbindEquip(contract, equipType,gasPriceString) {
+export async function unbindEquip(contract, equipType, gasPriceString) {
 
-   // let tx = await contract.unbindEquip(equipType)
-	let tx = await contract.unbindEquip(equipType, {
-		gasLimit: 1200000,
-		gasPrice: gasPriceString
-	});
-	
+    // let tx = await contract.unbindEquip(equipType)
+    let tx = await contract.unbindEquip(equipType, {
+        gasLimit: 1200000,
+        gasPrice: gasPriceString
+    });
+
     //交易hash
     return tx
 
 }
 //卸下卡片 equipId-装备id，index-卡槽
-export async function unbindCard(contract, equipId, index,gasPriceString) {
+export async function unbindCard(contract, equipId, index, gasPriceString) {
 
     // let tx = await contract.unbindCard(equipId, index)
-	let tx = await contract.unbindCard(equipId,index, {
-		gasLimit: 1200000,
-		gasPrice: gasPriceString
-	});
+    let tx = await contract.unbindCard(equipId, index, {
+        gasLimit: 1200000,
+        gasPrice: gasPriceString
+    });
     //交易hash
     return tx
 }
 
 //设置赛道
-export async function setTrack(contract, trackId,gasPriceString) {
+export async function setTrack(contract, trackId, gasPriceString) {
     // return contract.updateTrack(trackId)
-	let tx = await contract.updateTrack(trackId, {
-		gasLimit: 1200000,
-		gasPrice: gasPriceString
-	});
-	 return tx
+    let tx = await contract.updateTrack(trackId, {
+        gasLimit: 1200000,
+        gasPrice: gasPriceString
+    });
+    return tx
 }
 //获取赛道
 export function getTrackId(contract) {
