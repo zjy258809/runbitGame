@@ -235,14 +235,9 @@ import {
 } from '../../../contract/useContract.js'
 import {
 	setTrack,
-	getTrackId,
-	getBindEquips,
 	bindEquip,
-	getBindCards,
 	bindCard,
 	unbindEquip,
-	getUnharvestReward,
-	getUserState
 } from '../../../contract/useRunbit.js'
 import {
 	getMyCards,
@@ -256,6 +251,9 @@ import {
 import {
 	myRequest
 } from '../../../utils/api.js'
+import {
+	getUserInfo
+} from '../../../contract/useRunbitProxy.js'
 export default {
 	data() {
 		return {
@@ -338,7 +336,6 @@ export default {
 			cardContract: null,
 			setTrackId: 0,
 			gasPriceString: '',
-			currenttrackId: 0,
 		}
 	},
 	onShow() {
@@ -381,11 +378,6 @@ export default {
 				title: '正在从区块链同步您的数据...'
 
 			})
-			provider.getBlock().then(block => {
-				this.curDay = parseInt((block.timestamp + 28800) / 86400);
-			});
-
-
 			provider.send("eth_requestAccounts", []).then(accounts => {
 				this.myAccount = accounts[0];
 				getApp().globalData.userAccount = this.myAccount;
@@ -396,7 +388,6 @@ export default {
 				}, 10000);
 				//
 				this.userAccount = hideBankCards(accounts[0]);
-
 
 				//判断是否需要填激活码		 
 				useContract(refStoreAddress, refAbi).then(refContract => {
@@ -417,24 +408,6 @@ export default {
 
 				useContract(RunbitAddress, RunbitAbi).then(async runContract => {
 					this.runContract = runContract
-					//获取赛道,使用getTrackId()获取，返回2个值，第一个是当前的赛道，第二个是次日生效的赛道，如果两个值不一样，表示用户今天更新过赛道（最好在赛道更新页面加个提示）
-
-					getTrackId(this.runContract).then(id => {
-						//id[1]是次日赛道
-						this.trackId = id[0].toNumber()
-						this.currenttrackId = id[0].toNumber()
-						this.setTrackId = id[1].toNumber()
-						this.chooseTrack(this.trackId)
-					})
-					// console.log("curDay ", this.curDay)
-					getUserState(this.runContract, this.myAccount, this.curDay).then(data => {
-						this.steps = data.lastSteps;
-
-					})
-					getUnharvestReward(this.runContract, this.myAccount, this.curDay).then(
-						estReward => {
-							this.reward = ethers.utils.formatEther(estReward)
-						})
 					uni.getStorage({
 						key: 'bindEquips'
 					})
@@ -442,31 +415,64 @@ export default {
 							//有缓存
 							if (!res[0]) {
 								this.equips = JSON.parse(res[1].data);
-								console.log("bindEquips", this.equips)
+
 								this.getequipsImg(this.equips);
 								uni.hideLoading();
-								this.getEquitCardValue()
+								console.log("bindEquips", this.equips)
 							}
 							//无缓存
 							else {
-								getBindEquips(this.runContract, this.myAccount).then(
-									async equips => {
-										this.equips = equips
-										this.getequipsImg(this.equips);
-										uni.hideLoading();
-										this.getEquitCardValue()
-										uni.setStorage({
-											key: 'bindEquips',
-											data: JSON.stringify(this.equips),
-											success: function () {
-												console.log(
-													'cache bindEquips');
-											}
-										});
+								getUserInfo(this.myAccount).then(info => {
+									let equips = []
+									for (let i = 0; i < 3; ++i) {
+										let equipItem = {}
+										let equipCopy = {}
+										let e = info[1][i]
+										Object.keys(e).forEach((key, index) => {
+											equipCopy[key] = typeof e[key] == 'number' ? e[key] : e[key].toNumber()
+										})
+										equipItem.equip = equipCopy
+										equipItem.id = info[0][i].toNumber()
+										equipItem.img = info[2][i]
+										let cards = []
+										for (let j = i * 3; j < i * 3 + 3; ++j) {
+											let cardItem = {}
+											let cardCopy = {}
+											let c = info[5][j]
+											cardItem.id = info[3][j].toNumber()
+											cardItem.img = info[6][j]
+											cardItem.consume = info[4][j].toNumber()
+											Object.keys(c).forEach((key, index) => {
+												cardCopy[key] = typeof c[key] == 'number' ? c[key] : c[key].toNumber()
+											})
+											cardItem.card = cardCopy
+											cards[j % 3] = cardItem
+										}
+										equipItem.cards = cards
+										equips[i] = equipItem
+									}
+									this.equips = equips
 
-									})
+									this.getequipsImg(this.equips);
+									uni.hideLoading();
+									this.specialty = info[7].toNumber()
+									this.aesthetic = info[8].toNumber()
+									this.comfort = info[9].toNumber()
+									this.steps = info[10].toNumber()
+									this.reward = ethers.utils.formatEther(info[11])
+									this.trackId = info[12].toNumber()
+									this.setTrackId = info[13].toNumber()
+									this.chooseTrack(this.trackId)
+									uni.setStorage({
+										key: 'bindEquips',
+										data: JSON.stringify(this.equips),
+										success: function () {
+											console.log(
+												'cache bindEquips');
+										}
+									});
+								})
 							}
-							this.getequipsImg(this.equips);
 						})
 					//加载我的属性卡
 					useContract(cardAddress, cardAbi).then(contract => {
@@ -493,7 +499,6 @@ export default {
 											}
 										});
 									})
-
 							}
 						})
 
@@ -604,16 +609,18 @@ export default {
 			}
 
 			this.carIndex = index;
-			this.cardsList = []
-			Object.keys(this.myCards).forEach((key, index) => {
-				if (this.myCards[key].status == 0 && this.myCards[key].card.level <= this.equips[this
-					.curequipIndex].equip.level) {
-					this.cardsList.push(this.myCards[key])
-				}
-
+			console.log("******",this.myCards,this.equips)
+			this.cardsList = this.myCards?.filter((item)=>{
+				if (item.status == 0 && item.card.level <= this.equips[this
+					.curequipIndex].equip.level) return item
 			})
 			this.$refs.equipInfo.close()
 			this.$refs.choosecardDialog.open() //装备筛选
+			if(this.cardsList.length==0) 
+			uni.showToast({
+					title: "没有可绑定的卡片",
+					icon: "error"
+				})
 		},
 		getFix2(num) {
 			var value = Math.floor(num * 1000) / 1000
@@ -715,8 +722,6 @@ export default {
 		},
 		// 获取装备图片绑定
 		getequipsImg(equips) {
-			this.equips = equips
-
 			if (equips.length > 0) {
 				if (equips[0].img) {
 					this.equipsImgs[0].img = equips[0].img;
@@ -794,25 +799,23 @@ export default {
 		},
 		//获取绑定的卡片
 		async getEquitCard(index) {
-			let cardsPromise = this.equips[index].cards
-			Promise.all(cardsPromise).then(cards => {
-				if (cards && cards[0] && cards[0].img) {
-					this.cards[0].img = cards[0].img;
-				} else {
-					this.cards[0].img = '../../../static/Group12032.png';
-				}
-				if (cards && cards[1] && cards[1]?.img) {
-					this.cards[1].img = cards[1].img;
-				} else {
-					this.cards[1].img = '../../../static/Group12032.png';
-				}
-				if (cards && cards[2] && cards[2]?.img) {
-					this.cards[2].img = cards[2].img;
-				} else {
-					this.cards[2].img = '../../../static/Group12032.png';
-				}
+			let cards = this.equips[index].cards
+			if (cards && cards[0] && cards[0].img) {
+				this.cards[0].img = cards[0].img;
+			} else {
+				this.cards[0].img = '../../../static/Group12032.png';
+			}
+			if (cards && cards[1] && cards[1]?.img) {
+				this.cards[1].img = cards[1].img;
+			} else {
+				this.cards[1].img = '../../../static/Group12032.png';
+			}
+			if (cards && cards[2] && cards[2]?.img) {
+				this.cards[2].img = cards[2].img;
+			} else {
+				this.cards[2].img = '../../../static/Group12032.png';
+			}
 
-			})
 
 		},
 		//累加已绑卡片的总性能
@@ -822,16 +825,14 @@ export default {
 			this.aesthetic = 0
 			for (let i = 0; i < 3; i++) {
 				if (this.equips[i]) {
-					let cardsPromise = this.equips[i].cards
-					Promise.all(cardsPromise).then(cards => {
+					let cards = this.equips[i].cards
 						for (let j = 0; j < 3 && cards; j++) {
-							if (cards[j]) {
+							if (cards[j].id) {
 								this.specialty = this.specialty + parseInt(cards[j].card.specialty);
 								this.aesthetic = this.aesthetic + parseInt(cards[j].card.aesthetic);
 								this.comfort = this.comfort + parseInt(cards[j].card.comfort);
 							}
 						}
-					})
 				}
 			}
 		},
@@ -979,7 +980,6 @@ export default {
 		},
 		//赛道取消按钮
 		closeTrack() {
-			// this.trackId =this.currenttrackId;
 			// if (this.trackId == 0)
 			// 	this.stack = "石子路"
 			// if (this.trackId == 1)

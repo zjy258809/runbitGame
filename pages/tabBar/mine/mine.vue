@@ -532,17 +532,44 @@ export default {
 								}
 								//无缓存
 								else {
-									getBindEquips(this.runContract, this.myAccount).then(async equips => {
+									getUserInfo(this.myAccount).then(info => {
+										let equips = []
+										for (let i = 0; i < 3; ++i) {
+											let equipItem = {}
+											let equipCopy = {}
+											let e = info[1][i]
+											Object.keys(e).forEach((key, index) => {
+												equipCopy[key] = typeof e[key] == 'number' ? e[key] : e[key].toNumber()
+											})
+											equipItem.equip = equipCopy
+											equipItem.id = info[0][i].toNumber()
+											equipItem.img = info[2][i]
+											let cards = []
+											for (let j = i * 3; j < i * 3 + 3; ++j) {
+												let cardItem = {}
+												let cardCopy = {}
+												let c = info[5][j]
+												cardItem.id = info[3][j].toNumber()
+												cardItem.img = info[6][j]
+												cardItem.consume = info[4][j].toNumber()
+												Object.keys(c).forEach((key, index) => {
+													cardCopy[key] = typeof c[key] == 'number' ? c[key] : c[key].toNumber()
+												})
+												cardItem.card = cardCopy
+												cards[j % 3] = cardItem
+											}
+											equipItem.cards = cards
+											equips[i] = equipItem
+										}
 										this.equips = equips
-										uni.hideLoading();
 										uni.setStorage({
 											key: 'bindEquips',
 											data: JSON.stringify(this.equips),
 											success: function () {
-												console.log('cache bindEquips');
+												console.log(
+													'cache bindEquips');
 											}
 										});
-
 									})
 								}
 							})
@@ -695,7 +722,6 @@ export default {
 			uni.showLoading({
 				title: '卸下中...'
 			})
-
 			try {
 				//查看该卡所绑装备是否正在使用中
 				this.runContract.getEquipInfo(this.bindCardId).then(async date => {
@@ -715,17 +741,20 @@ export default {
 						title: "卸下成功",
 						icon: "success"
 					})
-					getBindEquips(this.runContract, this.myAccount).then(async equips => {
-						this.equips = equips
-						uni.setStorage({
-							key: 'bindEquips',
-							data: JSON.stringify(this.equips),
-							success: function () {
-								console.log('cache bindEquips');
-							}
-						});
-
-					})
+					for (let i = 0; i < 3; ++i) {
+						if (this.equips[i].id == this.bindCardId) {
+							let nullCard = {}
+							nullCard.id = 0
+							this.equips[i].cards[this.bindCardIndex] = nullCard
+							uni.setStorage({
+								key: 'bindEquips',
+								data: JSON.stringify(this.equips),
+								success: function () {
+									console.log('cache bindEquips');
+								}
+							})
+						}
+					}
 					//没缓存
 					this.updateMyCards()
 					this.updateMyEquips()
@@ -940,7 +969,6 @@ export default {
 			})
 			this.runContract.getCardInfo(item.id).then(
 				card => {
-					this.bindEquip = card
 					if (card[0] == 0) {
 						this.cardStatus = "未装备"
 						this.cardconfirm = "转让"
