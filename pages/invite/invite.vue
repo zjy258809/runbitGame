@@ -133,7 +133,7 @@
 				})
 			},
 			displayAdddress(address) {
-				return address.substring(0, 4) + "..." + address.substring(address.length - 5, address.length - 0)
+				return address.substring(0, 4) + "..." + address.substring(address.length - 4, address.length - 0)
 			},
 
 			copy() {
@@ -164,7 +164,7 @@
 		margin-left: 1.25rem;
 	}
 	.recordList4 {
-		font-size: 23.88rpx;
+		font-size: 26rpx;
 		font-weight: bold;
 		color: #000000;
 		margin-left: 1rem;

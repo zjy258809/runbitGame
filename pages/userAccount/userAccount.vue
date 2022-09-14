@@ -327,7 +327,7 @@
 					//按天算，默认查询近7天数据,不含当天
 					console.log(block);
 					this.endDate = getDay(block.timestamp * 1000, -1)
-					this.startDate = getDay(block.timestamp * 1000, -8)
+					this.startDate = getDay(block.timestamp * 1000, -60)
 
 					var start = this.date2block(this.startDate)
 					var end = this.date2block(this.endDate)
