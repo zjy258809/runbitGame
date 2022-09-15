@@ -36,10 +36,10 @@ try{
 
 -------*/
 import {
-    useContract,
+    useContract,useQuickContract
 } from '../contract/useContract.js'
 import {
-    cardAddress, cardAbi, equipAddress, equipAbi
+    cardAddress, cardAbi, equipAddress, equipAbi,RunbitAddress, RunbitAbi
 } from '../contract/address.js'
 import {
     getEquip, getCard
@@ -48,6 +48,9 @@ import {
     ethers,
 } from 'ethers'
 /*---------------查询类合约调用-------------*/
+const runContractPromise = useQuickContract(RunbitAddress, RunbitAbi)
+const equipContractPromise = useQuickContract(equipAddress, equipAbi)
+const cardContractPromise = useQuickContract(cardAddress, cardAbi)
 
 //查看account账户绑定equipType（即上衣，裤子鞋子）的情况
 //0-没绑定 非0-绑定的equipId
@@ -56,20 +59,21 @@ export async function getBindEquip(contract, account, equipType) {
 
 }
 //一次性获取account绑定着装情况,equipId=0代表未配备
-export async function getBindEquips(runContract, account) {
+export async function getBindEquips(account) {
     let equips = []
     let equipIds = []
     let owners = []
-    const equipContract = useContract(equipAddress, equipAbi)
+    var equipContract = await equipContractPromise
+    var runContract = await runContractPromise
     for (let equipType = 0; equipType < 3; equipType++)
         equipIds[equipType] = runContract.getBindEquip(account, equipType)
     return Promise.all([...equipIds, equipContract]).then(res => {
         for (let i = 0; i < 3; i++)
-            if (res[i].toNumber() != 0) owners[i] = res[3].ownerOf(res[i])
+            if (res[i].toNumber() != 0) owners[i] = equipContract.ownerOf(res[i])
         return Promise.all(owners).then(results => {
             results.map((item, index) => {
                 if (item && ethers.utils.getAddress(item) == ethers.utils.getAddress(account))
-                    equips[index] = getEquip(runContract, res[3], res[index], account,1)
+                    equips[index] = getEquip(equipContract, res[index], account)
             })
             return Promise.all(equips).then(res2 => {
                 let equipResults = []
@@ -85,24 +89,24 @@ export async function getBindEquips(runContract, account) {
 
 //查看equipId的装备的所有卡槽情况
 //0-没属性卡 非0-绑定的cardId
-export async function getBindCards(runContract, equipId, account,flag) {
+export async function getBindCards( equipId, account,flag) {
     let cards = []
     let cardIds = []
     let owners = []
-
-    const cardContract = useContract(cardAddress, cardAbi)
+    var cardContract = await cardContractPromise
+    var runContract = await runContractPromise
     for (let index = 0; index < 3; index++)
         cardIds[index] = runContract.getBindCard(equipId, index)
     return Promise.all([...cardIds, cardContract]).then(res => {
         for (let i = 0; i < 3; i++)
-            if (res[i].toNumber() != 0) owners[i] = res[3].ownerOf(res[i])
+            if (res[i].toNumber() != 0) owners[i] = cardContract.ownerOf(res[i])
         if (owners.length != 0)
             return Promise.all(owners).then(results => {
                 //getBindEquips
                 if(flag==1){
                     for (let i = 0; i < 3; i++) {
                         if (results[i] && ethers.utils.getAddress(results[i]) == ethers.utils.getAddress(account))
-                            cards[i] = getCard(runContract, res[3], res[i])
+                            cards[i] = getCard(runContract, cardContract, res[i])
                         else cards[i] = 0
                     }
                     return cards
@@ -112,7 +116,7 @@ export async function getBindCards(runContract, equipId, account,flag) {
                 else{
                     results.map((item, index) => {
                         if (item&&ethers.utils.getAddress(item) == ethers.utils.getAddress(account))
-                            cards[index] = getCard(runContract, res[3], res[index])
+                            cards[index] = getCard(runContract, cardContract, res[index])
                     })
                     return Promise.all(cards).then(res2 => {
                         let cardResults = []
