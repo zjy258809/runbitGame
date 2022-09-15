@@ -10,6 +10,7 @@
 			console.log('App Hide')
 		},
 		globalData: {
+		   rbPrice:0,
 			userAccount: '',
 			userStep: 0,
 			stepStaus: 1,

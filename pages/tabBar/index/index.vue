@@ -341,6 +341,20 @@ export default {
 		}
 	},
 	onShow() {
+		
+		const BASE_URL = 'https://gapi.runbit.org/api/v1/'
+		 uni.request({
+			url: BASE_URL + 'game/getPrice',
+			method: "GET",
+			success: res => {
+				if (res.data.code === 0) {
+					// var data =res.data.data;
+				// this.RBPRICE = res.data.data
+				getApp().globalData.rbPrice =res.data.data;
+				
+				}
+			}
+		})
 
 		this.loadIndex = getApp().globalData.loadIndex;
 		if (this.loadIndex == 1) {

@@ -10,7 +10,7 @@
 				style="width: 90%; text-align: center; border-radius: 0.825rem; background-color:#FFF ; margin: 0 auto; margin-top: 5rem; margin-bottom: 2rem;">
 
 
-				<view class="curId ">
+				<view class="">
 					<view style="margin: 0.5rem;">我的邀请码</view>
 					<view class="logoTx">{{ displayAdddress(myAccount) }}</view>
 					<img class="fontImg" src="../../static/Grou152.png" @click="copy" />
@@ -31,8 +31,10 @@
 						style="width: 90%; border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
 
 
-						<view class="curId uni-flex uni-row">
+						<view class="uni-flex uni-row">
 							<view class="level2">{{ displayAdddress(item.address) }}</view>
+							<view class="level5">{{ item.floor}}层</view>
+							<view class="level3">{{ item.level }}</view>
 							<view class="level4">{{ item.create_time.substring(0, 10) }}</view>
 						</view>
 
@@ -107,16 +109,16 @@
 				this.curList = index;
 			},
 			getRecord() {
-				myRequest({
-					url: 'game/getSubUser',
-					method: 'GET',
-					data: {
-						addr: this.myAccount
-					}
-				}).then(data => {
-					this.data = data.list
-					this.total =data.total
-				})
+				// myRequest({
+				// 	url: 'game/getSubUser',
+				// 	method: 'GET',
+				// 	data: {
+				// 		addr: this.myAccount
+				// 	}
+				// }).then(data => {
+				// 	this.data = data.list
+				// 	this.total =data.total
+				// })
 				
 					this.baseurl = 'https://gapi.runbit.org/api/v1/'
 				uni.request({
@@ -128,6 +130,31 @@
 					success: res => {
 						if (res.data.code === 0) {
 							this.finished =res.data.data.finished;
+						}
+					}
+				})
+				
+				uni.request({
+					url: this.baseurl + 'game/getSubUser',
+					data: {
+						addr: this.myAccount
+					},
+					method: "GET",
+					success: res => {
+						if (res.data.code === 0) {
+							for (var i = 0; i < res.data.data.list.length; i++) {
+								if(res.data.data.list[i].level<=0)
+								{
+									if(res.data.data.list[i].is_valid==0)
+									res.data.data.list[i].level ="运动小白";
+									else
+									res.data.data.list[i].level ="运动达人";
+								}else{
+									res.data.data.list[i].level =res.data.data.list[i].level+'级社区长'
+								}
+							}
+							this.data = res.data.data.list
+							this.total =res.data.data.total
 						}
 					}
 				})
@@ -271,6 +298,25 @@
 		font-size: 0.875rem;
 		line-height: 50rpx;
 	}
+	.level3 {
+		color: #000;
+		width: 150.55rpx;
+		height: 50.72rpx;
+		font-size: 0.875rem;
+		line-height: 50rpx;
+		text-align: center;
+		
+	}
+	.level5 {
+		color: #000;
+		width: 90.55rpx;
+		height: 50.72rpx;
+		text-align: left;
+		font-size: 0.875rem;
+		line-height: 50rpx;
+		text-align: center;
+		
+	}
 
 	.level4 {
 		font-weight: bold;
@@ -286,19 +332,6 @@
 
 	}
 
-	.level3 {
-		font-weight: bold;
-		color: #FF5C00;
-		width: 160.55rpx;
-		height: 50.72rpx;
-		font-size: 0.875rem;
-		line-height: 50rpx;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		margin: auto;
-	}
 
 	.logoTx {
 		font-size: 1rem;

@@ -5,6 +5,8 @@ import uView from '@/uni_modules/uview-ui'
 
 Vue.config.productionTip = false
 Vue.prototype.Web3 = Web3
+//自定义的属性
+Vue.prototype.RBPRICE=1;
 App.mpType = 'app'
 Vue.use(uView)
 

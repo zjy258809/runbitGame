@@ -54,7 +54,7 @@
 									style="width: 95%;  border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
 
 
-									<view class="curId uni-flex uni-row" >
+									<view class="curId uni-flex uni-row">
 										<view class="level2">{{ item.lable }}</view>
 										<view class="level3">{{ item.num }}</view>
 										<view class="level4">{{ item.time }}</view>
@@ -216,6 +216,52 @@
 						</view>
 
 					</view>
+					<!-- 分红 -->
+					<view v-if="curNow === 3">
+						<uni-card title="" extra=""
+							style="width: 90%; border:2px solid black; border-radius: 0.825rem; background-color:#FFF ; margin: 2rem auto;">
+
+
+							<view class="curId uni-flex uni-row">
+								<view class="level ">分红收益</view>
+								<view class="rare uni-flex uni-row" style="color: #FF5C00;">
+									{{ getFix2(amount_total) }}RB <view
+										style="color: #CCCCCC; margin-left: 10.47rpx; font-size: 28rpx;">
+										{{getFix2(this.rbPrice*amount_total)}}$
+									</view>
+								</view>
+							</view>
+
+						</uni-card>
+
+						<view class="uni-flex uni-row" style="margin-bottom: 1rem;">
+							<!-- <view @tap="recordList(0)" :class="curList == 0 ? 'recordList' : 'recordList2'">未完成</view> -->
+							<view class='recordList'>分红記錄</view>
+						</view>
+
+						<view style="" v-if="EarningList.length > 0" class="text" v-for="(item, index) in EarningList"
+							:key="index">
+							<uni-card title="" extra=""
+								style="width: 95%;  border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
+
+
+								<view class="curId uni-flex uni-row">
+									<view class="level2">{{ displayAdddress(item.tx_hash) }}</view>
+									<view class="level3">{{ getFix2(item.amount) }} RB</view>
+									<view class="level4">{{ displayTime(item.create_time) }}</view>
+								</view>
+
+
+
+
+							</uni-card>
+						</view>
+						<view v-show="isLoadMore">
+							<uni-load-more :status="loadStatus"></uni-load-more>
+						</view>
+						<img class="nocard" v-if="EarningList.length == 0" src="../../static/Group12015.png" />
+					</view>
+
 				</view>
 			</view>
 
@@ -281,25 +327,33 @@
 	import {
 		big2num,
 		displayDate,
-		getDay
+		getDay,
 
 	} from '../../contract/ultis.js'
 	import {
 		myRequest
+
 	} from '../../utils/api.js'
 
 	export default {
 		data() {
 			return {
+				rbPrice: 0,
 				curList: 1,
 				curNow: 0,
+				page: 1,
+				amount_total: 0,
+				page_size: 10,
+				loadStatus: 'loading', //加载样式：more-加载前样式，loading-加载中样式，nomore-没有数据样式
+				isLoadMore: false, //是否加载中
 				pending: [],
 				history: [],
 				harvest: {},
+				EarningList: [],
 
 				lotteryRec: [],
 
-				list: ['錢包', '收益', '抽獎'],
+				list: ['钱包', '收益', '抽獎', '分红'],
 				balanceOfRB: 0,
 				balanceofRBCT: 0,
 				balanceofRBET: 0,
@@ -319,6 +373,9 @@
 		},
 
 		onLoad() {
+
+			this.rbPrice = getApp().globalData.rbPrice
+
 			var that = this;
 			try {
 
@@ -337,28 +394,29 @@
 						this.myAccount = accounts[0]
 						this.getHistory();
 						this.getLotteryRecords();
-useContract(RBAddress, RBAbi).then(RBContract => {
-					//获取rb余额
-					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
-						this.balanceOfRB = big2num(balanceOfRB)
-					})
+						this.getEarningList();
+						useContract(RBAddress, RBAbi).then(RBContract => {
+							//获取rb余额
+							RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
+								this.balanceOfRB = big2num(balanceOfRB)
+							})
 
-				});
-				//获取属性卡碎片
-				useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
-					this.RBCTContract = RBCTContract
-					RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
-						console.log(balanceofRBCT);
-						this.balanceofRBCT = parseFloat(balanceofRBCT)
-					})
-				});
-				//获取装备碎片
-				useContract(RBETAddress, RBETAbi).then(RBETContract => {
-					this.RBETContract = RBETContract
-					RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
-						this.balanceofRBET = parseFloat(balanceofRBET)
-					})
-				})
+						});
+						//获取属性卡碎片
+						useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
+							this.RBCTContract = RBCTContract
+							RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
+								console.log(balanceofRBCT);
+								this.balanceofRBCT = parseFloat(balanceofRBCT)
+							})
+						});
+						//获取装备碎片
+						useContract(RBETAddress, RBETAbi).then(RBETContract => {
+							this.RBETContract = RBETContract
+							RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
+								this.balanceofRBET = parseFloat(balanceofRBET)
+							})
+						})
 						useContract(RunbitAddress, RunbitAbi).then(runContract => {
 							this.runContract = runContract
 							for (let day = end; day >= start; day--) {
@@ -367,7 +425,7 @@ useContract(RBAddress, RBAbi).then(RBContract => {
 									//未收获
 									this.runContract.getUnharvestReward(this.myAccount,
 										day).then(rew => {
-										
+
 										if (!rew.eq(0)) {
 											var data = {}
 											data.amount = big2num(rew)
@@ -401,12 +459,20 @@ useContract(RBAddress, RBAbi).then(RBContract => {
 						})
 					});
 				});
-				
+
 				setTimeout(() => {
 
 				}, 5000);
 			} catch (e) {
 				console.error(e);
+			}
+		},
+		onReachBottom() { //上拉触底函数
+
+			if (!this.isLoadMore) { //此处判断，上锁，防止重复请求
+				this.isLoadMore = true
+				this.page += 1
+				this.getEarningList()
 			}
 		},
 		methods: {
@@ -419,7 +485,7 @@ useContract(RBAddress, RBAbi).then(RBContract => {
 				try {
 					this.runContract.lottery(this.lotteryRec[this.lotindex].day).then(res => {
 						uni.hideLoading()
-						
+
 						uni.showToast({
 							title: '获取成功',
 							mask: true,
@@ -436,7 +502,7 @@ useContract(RBAddress, RBAbi).then(RBContract => {
 				return address.substring(0, 4) + "..." + address.substring(address.length - 5, address.length - 1)
 			},
 			getFix2(num) {
-				var value = Math.floor(num*1000)/1000
+				var value = Math.floor(num * 100) / 100
 				return value
 			},
 			async getLotterySum() {
@@ -540,7 +606,7 @@ useContract(RBAddress, RBAbi).then(RBContract => {
 				debugger
 				this.lotindex = index
 				if (!status) this.$refs.inputDialog2.open()
-				
+
 			},
 			/**钱包相关 */
 
@@ -563,8 +629,7 @@ useContract(RBAddress, RBAbi).then(RBContract => {
 					this.claimedReward = res
 				})
 			},
-			displayTime(time)
-			{
+			displayTime(time) {
 				let appointDate = /\d{4}-\d{1,2}-\d{1,2}/g.exec(time)[0];
 				return appointDate;
 			},
@@ -605,7 +670,7 @@ useContract(RBAddress, RBAbi).then(RBContract => {
 					this.history = res.list
 				})
 			},
-			
+
 			//获取领奖记录
 			async getLotteryRecords() {
 				await myRequest({
@@ -619,6 +684,44 @@ useContract(RBAddress, RBAbi).then(RBContract => {
 				})
 			},
 			//收益记录
+			async getEarningList() {
+
+				this.baseurl = 'https://gapi.runbit.org/api/v1/'
+				uni.request({
+					url: this.baseurl + 'game/teamEarning',
+					data: {
+						addr: this.myAccount,
+						page: this.page,
+						page_size: this.page_size
+					},
+					method: "GET",
+					success: res => {
+						if (res.data.code === 0) {
+							if (res.data.data.list) {
+								this.amount_total = res.data.data.amount_total
+								this.EarningList = this.EarningList.concat(res.data.data.list)
+								if (res.data.data.list.length < this
+									.page_size) { //判断接口返回数据量小于请求数据量，则表示此为最后一页
+									this.isLoadMore = true
+									this.loadStatus = 'nomore'
+								} else {
+									this.isLoadMore = false
+								}
+								// this.EarningList = res.data.data.list
+							} else {
+								this.isLoadMore = false
+								if (this.page > 1) {
+									this.page -= 1
+								}
+							}
+						} else {
+							if (this.page > 1) {
+								this.page -= 1
+							}
+						}
+					}
+				})
+			},
 
 
 
