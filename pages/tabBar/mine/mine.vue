@@ -308,6 +308,7 @@ import {
 const runContract = useContract(RunbitAddress, RunbitAbi)
 const equipContract = useContract(equipAddress, equipAbi)
 const cardContract = useContract(cardAddress, cardAbi)
+const collectContract = useContract(RunbitCollectionAddress, RunbitCollectionAbi)
 export default {
 	data() {
 		return {
@@ -445,149 +446,136 @@ export default {
 				this.curDay = parseInt((block.timestamp + 28800) / 86400);
 			});
 
-			Promise.all([runContract, cardContract, equipContract]).then(res => {
+			Promise.all([runContract, cardContract, equipContract, collectContract]).then(res => {
 				this.runContract = res[0]
 				this.cardContract = res[1]
-				this.equipContract = res[1]
-
-				provider.getGasPrice().then((gasPrice) => {
-					// gasPrice is a BigNumber; convert it to a decimal string
-					this.gasPriceString = (parseInt(gasPrice) * 2).toString();
-
-					provider.send("eth_requestAccounts", []).then(accounts => {
-						this.myAccount = accounts[0]
-						this.userAccount = hideBankCards(accounts[0]);
-
-
-						uni.getStorage({
-							key: 'myCards'
-						}).then(res => {
-							//有缓存
-
-							if (!res[0]) {
-								this.myCards = JSON.parse(res[1].data);
-							}
-							else {
-								//没缓存
-								this.updateMyCards()
-
-							}
-						})
-
-						getNFTApprove(this.cardContract, this.myAccount, RunbitCollectionAddress).then(
-							state => {
-								this.approveCard = state
-							})
-
-
-
-						useContract(equipAddress, equipAbi).then(contract => {
-							this.equipContract = contract
-							uni.getStorage({
-								key: 'myEquips'
-							}).then(res => {
-								//有缓存
-								if (!res[0]) {
-									this.myEquips = JSON.parse(res[1].data);
-									uni.hideLoading()
-								}
-								else {
-									//没缓存
-									this.updateMyEquips()
-
-								}
-							});
-							getNFTApprove(this.equipContract, this.myAccount, RunbitCollectionAddress).then(
-								state => {
-									this.approveEquip = state
-								})
-
-						});
-
-
-						//查询商店合约授权情况，授权后才能购买和兑换
-						useContract(RBAddress, RBAbi).then(RBContract => {
-							//获取rb余额
-							this.RBContract = RBContract;
-							RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
-								this.balanceOfRB = balanceOfRB
-							})
-							//获取RB对商品合约的授权情况
-							RBContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
-								if (data.eq(BigNumber.from(0))) {
-									this.approveState = false
-								} else {
-									this.approveState = true
-								}
-							})
-						});
-
-						uni.getStorage({
-							key: 'bindEquips'
-						})
-							.then(res => {
-								//有缓存
-								if (!res[0]) {
-									this.equips = JSON.parse(res[1].data);
-								}
-								//无缓存
-								else {
-									getUserInfo(this.myAccount).then(info => {
-										let equips = []
-										for (let i = 0; i < 3; ++i) {
-											let equipItem = {}
-											let equipCopy = {}
-											let e = info[1][i]
-											Object.keys(e).forEach((key, index) => {
-												equipCopy[key] = typeof e[key] == 'number' ? e[key] : e[key].toNumber()
-											})
-											equipItem.equip = equipCopy
-											equipItem.id = info[0][i].toNumber()
-											equipItem.img = info[2][i]
-											let cards = []
-											for (let j = i * 3; j < i * 3 + 3; ++j) {
-												let cardItem = {}
-												let cardCopy = {}
-												let c = info[5][j]
-												cardItem.id = info[3][j].toNumber()
-												cardItem.img = info[6][j]
-												cardItem.consume = info[4][j].toNumber()
-												Object.keys(c).forEach((key, index) => {
-													cardCopy[key] = typeof c[key] == 'number' ? c[key] : c[key].toNumber()
-												})
-												cardItem.card = cardCopy
-												cards[j % 3] = cardItem
-											}
-											equipItem.cards = cards
-											equips[i] = equipItem
-										}
-										this.equips = equips
-										uni.setStorage({
-											key: 'bindEquips',
-											data: JSON.stringify(this.equips),
-											success: function () {
-												console.log(
-													'cache bindEquips');
-											}
-										});
-									})
-								}
-							})
-
-
-					});
-					useContract(RunbitCollectionAddress, RunbitCollectionAbi).then(contract => {
-						this.collectContract = contract
-
-					});
-					setTimeout(() => {
-						//可在此测试
-
-					}, 10000)
-
-
-				})
+				this.equipContract = res[2]
+				this.collectContract = res[3]
 			})
+
+			provider.getGasPrice().then((gasPrice) => {
+				// gasPrice is a BigNumber; convert it to a decimal string
+				this.gasPriceString = (parseInt(gasPrice) * 2).toString();
+			})
+			provider.send("eth_requestAccounts", []).then(async accounts => {
+				this.myAccount = accounts[0]
+				this.userAccount = hideBankCards(accounts[0]);
+
+
+				uni.getStorage({
+					key: 'myCards'
+				}).then(res => {
+					//有缓存
+
+					if (!res[0]) {
+						this.myCards = JSON.parse(res[1].data);
+					}
+					else {
+						//没缓存
+						this.updateMyCards()
+
+					}
+				})
+
+				getNFTApprove(this.cardContract, this.myAccount, RunbitCollectionAddress).then(
+					state => {
+						this.approveCard = state
+					})
+
+				uni.getStorage({
+					key: 'myEquips'
+				}).then(res => {
+					//有缓存
+					if (!res[0]) {
+						this.myEquips = JSON.parse(res[1].data);
+						uni.hideLoading()
+					}
+					else {
+						//没缓存
+						this.updateMyEquips()
+
+					}
+				});
+				getNFTApprove(this.equipContract, this.myAccount, RunbitCollectionAddress).then(
+					state => {
+						this.approveEquip = state
+					})
+
+
+
+
+				//查询商店合约授权情况，授权后才能购买和兑换
+				useContract(RBAddress, RBAbi).then(RBContract => {
+					//获取rb余额
+					this.RBContract = RBContract;
+					RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
+						this.balanceOfRB = balanceOfRB
+					})
+					//获取RB对商品合约的授权情况
+					RBContract.allowance(this.myAccount, RunbitCollectionAddress).then(data => {
+						if (data.eq(BigNumber.from(0))) {
+							this.approveState = false
+						} else {
+							this.approveState = true
+						}
+					})
+				});
+
+				uni.getStorage({
+					key: 'bindEquips'
+				})
+					.then(res => {
+						//有缓存
+						if (!res[0]) {
+							this.equips = JSON.parse(res[1].data);
+						}
+						//无缓存
+						else {
+							getUserInfo(this.myAccount).then(info => {
+								let equips = []
+								for (let i = 0; i < 3; ++i) {
+									let equipItem = {}
+									let equipCopy = {}
+									let e = info[1][i]
+									Object.keys(e).forEach((key, index) => {
+										equipCopy[key] = typeof e[key] == 'number' ? e[key] : e[key].toNumber()
+									})
+									equipItem.equip = equipCopy
+									equipItem.id = info[0][i].toNumber()
+									equipItem.img = info[2][i]
+									let cards = []
+									for (let j = i * 3; j < i * 3 + 3; ++j) {
+										let cardItem = {}
+										let cardCopy = {}
+										let c = info[5][j]
+										cardItem.id = info[3][j].toNumber()
+										cardItem.img = info[6][j]
+										cardItem.consume = info[4][j].toNumber()
+										Object.keys(c).forEach((key, index) => {
+											cardCopy[key] = typeof c[key] == 'number' ? c[key] : c[key].toNumber()
+										})
+										cardItem.card = cardCopy
+										cards[j % 3] = cardItem
+									}
+									equipItem.cards = cards
+									equips[i] = equipItem
+								}
+								this.equips = equips
+								uni.setStorage({
+									key: 'bindEquips',
+									data: JSON.stringify(this.equips),
+									success: function () {
+										console.log(
+											'cache bindEquips');
+									}
+								});
+							})
+						}
+					})
+
+
+			});
+
 		} catch (e) {
 			console.error(e);
 		}
@@ -595,38 +583,35 @@ export default {
 	},
 	methods: {
 		displayNum,
-		updateMyCards() {
-			Promise.all([runContract, cardContract]).then(res => {
-				getMyCards(res[0], this.myAccount, res[1]).then(myCards => {
-					this.myCards = myCards;
-					getApp().globalData.loadIndex = 1;
-					uni.hideLoading()
-					uni.setStorage({
-						key: 'myCards',
-						data: JSON.stringify(myCards),
-						success: function () {
-							console.log('cache myCards');
-						}
-					});
-				})
+		async updateMyCards() {
+			let myCards = await getMyCards(this.myAccount)
+			this.myCards = myCards;
+			getApp().globalData.loadIndex = 1;
+			uni.hideLoading()
+			uni.setStorage({
+				key: 'myCards',
+				data: JSON.stringify(myCards),
+				success: function () {
+					console.log('cache myCards');
+				}
+			});
 
-			})
+
 		},
-		updateMyEquips() {
-			Promise.all([runContract, equipContract]).then(res => {
-				getMyEquips(res[0], this.myAccount, res[1]).then(myEquips => {
-					this.myEquips = myEquips;
-					getApp().globalData.loadIndex = 1;
-					uni.hideLoading()
-					uni.setStorage({
-						key: 'myEquips',
-						data: JSON.stringify(myEquips),
-						success: function () {
-							console.log('cache myEquips');
-						}
-					});
-				})
-			})
+		async updateMyEquips() {
+			let myEquips = await getMyEquips(this.myAccount)
+			this.myEquips = myEquips;
+			getApp().globalData.loadIndex = 1;
+			uni.hideLoading()
+			uni.setStorage({
+				key: 'myEquips',
+				data: JSON.stringify(myEquips),
+				success: function () {
+					console.log('cache myEquips');
+				}
+			});
+
+
 		},
 		// 激活码激活
 		async isopenDialog(val) {
@@ -641,7 +626,6 @@ export default {
 					return
 				}
 				let tx = await this.refContract.addReferrerWithCheck(val)
-				// console.log(tx.hash)
 				uni.showLoading({
 					title: '请稍等...'
 				})
@@ -743,9 +727,7 @@ export default {
 					})
 					for (let i = 0; i < 3; ++i) {
 						if (this.equips[i].id == this.bindCardId) {
-							let nullCard = {}
-							nullCard.id = 0
-							this.equips[i].cards[this.bindCardIndex] = nullCard
+							this.equips[i].cards[this.bindCardIndex] = 0
 							uni.setStorage({
 								key: 'bindEquips',
 								data: JSON.stringify(this.equips),
@@ -787,7 +769,6 @@ export default {
 				getForgeFee(this.collectContract, item.equip.equipType, item.equip.level).then(
 					ForgeFee => {
 						this.ForgeFee = ForgeFee
-						console.log("合成费用----------", this.ForgeFee);
 					})
 
 
@@ -834,7 +815,6 @@ export default {
 		},
 		//获取当前装备绑定的卡片
 		async getEquitCard(equip) {
-			console.log("装备卡片" + equip.cards[0]);
 			let cards = equip.cards
 			if (cards[0].img) {
 				this.cards[0].img = cards[0].img;
@@ -851,7 +831,6 @@ export default {
 			} else {
 				this.cards[2].img = '../../../static/Group12032.png';
 			}
-			console.log("当前装备卡片:" + cards);
 
 
 		},
@@ -954,7 +933,6 @@ export default {
 		},
 		// 卡片列表点击
 		async clickCard(item) {
-			console.log("卡片ID:" + item.id);
 			this.$refs.inputDialog3.open();
 			this.curCard = item;
 			//获取累计收益
@@ -964,7 +942,6 @@ export default {
 					nft_id: item.id
 				}
 			}).then(data => {
-				console.log("卡片列表-----" + data)
 				this.curCard.reward = data
 			})
 			this.runContract.getCardInfo(item.id).then(
@@ -990,7 +967,6 @@ export default {
 		//装备合成中选择装备
 		changeShop(item) {
 			//如果已经选择了一个，另一个只展示同类型
-			console.log("--------装备合成---", this.card1, this.card2, this.card3)
 			this.cardIndex = item;
 			this.goodsArr = this.myEquips;
 			this.$refs.inputDialog4.open()
@@ -1028,9 +1004,6 @@ export default {
 				return
 			}
 
-			console.log("装备id:" + this.curEquip.id);
-			console.log("卡片id:" + this.currentCard.id);
-			console.log("孔:" + this.carIndex);
 			this.$refs.inputDialog4.close()
 			try {
 				let tx = await bindCard(this.runContract, this.curEquip.id, this.currentCard.id, this.carIndex, this.gasPriceString);
@@ -1072,9 +1045,8 @@ export default {
 		},
 		// 点击去背包
 		dialogInputConfirm2(val) {
-			getMyEquips(this.runContract, this.myAccount, this.equipContract).then(myEquips => {
+			getMyEquips(this.myAccount).then(myEquips => {
 				this.myEquips = myEquips;
-				console.log("合成后的装备列表2", myEquips)
 			})
 
 			this.$refs.inputDialog2.close()
@@ -1104,13 +1076,6 @@ export default {
 		change(item) {
 			this.changeType = item;
 			this.myEquips = [];
-			// getMyEquips(this.runContract,this.myAccount,  contract).then(myEquips => {
-			// 	this.myEquips = myEquips;
-			// 	console.log("myEquips--------", myEquips)
-			// 	uni.hideLoading();
-			// })
-
-
 		},
 		//键入地址时校验地址是否有效，无效输入框提示，转让按钮置灰
 		isVaildAddress(address) {
@@ -1129,11 +1094,9 @@ export default {
 				let tx = await nftContract["safeTransferFrom(address,address,uint256)"](this.myAccount, address,
 					nftId)
 				await tx.wait()
-				getMyCards(this.runContract, this.myAccount, this.cardContract).then(myCards => {
-					this.myCards = myCards;
-					console.log("更新后的卡片:" + this.myCards);
+				
+				this.updateMyCards()
 
-				})
 				uni.hideLoading();
 				this.$refs.inputDialog6.close();
 				uni.showToast({
@@ -1161,9 +1124,6 @@ export default {
 				var that = this;
 
 				//1.先判断是否穿戴
-				console.log("当前穿着" + this.equips);
-				console.log("准备1类型" + this.card1.equip.equipType);
-				console.log("装备id" + this.equips[this.card1.equip.equipType].id);
 
 				if (this.equips[this.card1.equip.equipType].id) {
 					if (parseInt(this.equips[this.card1.equip.equipType].id) == parseInt(this.card1.id)) {
@@ -1204,7 +1164,6 @@ export default {
 						//用户点击确认授权后，调用授权代码，如下						
 						await contractApprove(this.RBContract, RunbitCollectionAddress)
 						this.approveState = true
-						console.log("approveState2", this.approveState)
 
 						uni.showToast({
 							title: "授权中,授权后重新点击购买",
@@ -1215,14 +1174,12 @@ export default {
 
 				that.$refs.inputDialog2.open();
 
-				// let tx = await collectContract.forgeEquip(equipId1, equipId2)
 				let tx = await collectContract.forgeEquip(equipId1, equipId2, {
 					gasLimit: 1200000,
 					gasPrice: this.gasPriceString
 				});
 				await tx.wait()
 
-				console.log("合成成功")
 				this.updateMyEquips()
 				uni.showToast({
 					title: "合成成功",
