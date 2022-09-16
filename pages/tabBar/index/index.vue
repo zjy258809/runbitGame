@@ -1180,7 +1180,7 @@ export default {
 	position: absolute;
 	width: 169.44rpx;
 	height: 60.83rpx;
-	line-height: 53.83rpx;
+	line-height: 60.83rpx;
 	font-weight: bold;
 	font-size: 25.41rpx;
 	right: 0;
@@ -1205,10 +1205,9 @@ export default {
 .input_txt {
 	color: #000000;
 	position: absolute;
-	font-size: 25.83upx;
+	font-size: 25rpx;
 	margin-left: 66.94rpx;
-	text-align: center;
-	height: 60rpx;
+	height: 65rpx;
 	line-height: 65rpx;
 }
 
@@ -1319,7 +1318,6 @@ export default {
 	/* margin-left: 1.1rem; */
 	width: 10rem;
 	top: 6%;
-
 	/* background-color: red; */
 	height: 65rpx;
 }

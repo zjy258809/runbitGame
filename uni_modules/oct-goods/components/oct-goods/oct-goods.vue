@@ -66,11 +66,13 @@
 
 	.smtxt {
 		margin: 3%;
+		font-size: 20.88rpx;
 	}
 
 	.flex-item {
 		margin-top: 3%;
-		margin-left: 35%;
+		text-align: right;
+		
 	}
 
 	.smicon {
@@ -112,11 +114,16 @@
 		margin: auto auto;
 		width: 120px;
 		height: 26px;
+
 		font-weight: bold;
 		text-align: center;
 		font-size: 10rpx;
 		background: #F4F5F6;
 		border-radius: 0px 0px 15px 15px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+
 	}
 
 	.progress-box {

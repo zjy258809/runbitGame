@@ -1075,7 +1075,7 @@ export default {
 
 .fillter {
 	margin: auto 0;
-	font-size: 10rpx;
+	font-size: 20rpx;
 	width: 50%;
 	text-align: right;
 
