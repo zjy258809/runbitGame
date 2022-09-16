@@ -319,7 +319,7 @@ export default {
 			EquipsList: [],
 			getSteps: 0,
 			goodsArr: [],
-			userAccount: '',
+			userAccount: '连接钱包',
 			value: '',
 			type: 'center',
 			scrrenHeight: 10,
@@ -370,6 +370,16 @@ export default {
 	mounted() {
 		this.scrrenHeight = uni.getSystemInfoSync().windowHeight;
 		try {
+			if (!window.ethereum) {
+				uni.showModal({
+					content: '请使用DAPP浏览器或安装metamask!',
+					showCancel: false,
+					success: ({ confirm, cancel }) => {
+
+					}
+				})
+					return
+			}
 			//判断网络
 			window.ethereum.request({
 				method: "eth_chainId"
@@ -565,6 +575,16 @@ export default {
 			})
 		},
 		openUser() {
+			if (!window.ethereum) {
+				uni.showModal({
+					content: '请使用DAPP浏览器或安装metamask!',
+					showCancel: false,
+					success: ({ confirm, cancel }) => {
+
+					}
+				})
+					return
+			}
 			uni.navigateTo({
 				url: '../../userAccount/userAccount'
 			});

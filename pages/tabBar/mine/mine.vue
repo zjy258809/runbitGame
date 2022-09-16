@@ -322,7 +322,7 @@ export default {
 			equipStatus: '未裝備',
 			bindCardId: '',
 			title: '',
-			userAccount: '',
+			userAccount: '连接钱包',
 			getSteps: 0,
 			buttonRect: {},
 			curImg2: "../../../static/Group12032.png",
@@ -431,7 +431,17 @@ export default {
 
 	},
 	onLoad() {
-		try {
+		try {			
+			if (!window.ethereum) {
+				uni.showModal({
+					content: '请使用DAPP浏览器或安装metamask!',
+					showCancel: false,
+					success: ({ confirm, cancel }) => {
+
+					}
+				})
+				return
+			}
 			uni.showLoading({
 				title: '加载中'
 			});
@@ -972,6 +982,17 @@ export default {
 			this.$refs.inputDialog4.open()
 		},
 		openUser() {
+			
+			if (!window.ethereum) {
+				uni.showModal({
+					content: '请使用DAPP浏览器或安装metamask!',
+					showCancel: false,
+					success: ({ confirm, cancel }) => {
+
+					}
+				})
+				return
+			}
 			uni.navigateTo({
 				url: '../../userAccount/userAccount'
 			});

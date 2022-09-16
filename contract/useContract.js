@@ -1,18 +1,7 @@
 import {
 	ethers,
-	BigNumber
 } from 'ethers'
-import {
-	RBAddress,
-	RBAbi
-} from '../contract/address.js'
 
-function isMetaMask() {
-	const {
-		ethereum
-	} = window;
-	return Boolean(ethereum && ethereum.isMetaMask);
-}
 //查询合约授权情况
 export async function getApproveState(tokenContract, account, spender) {
 
@@ -28,10 +17,12 @@ export async function contractApprove(tokenContract, spender) {
 
 
 }
-
-const provider = new ethers.providers.Web3Provider(window.ethereum);
-const quickProvider = new ethers.providers.JsonRpcProvider("https://hardworking-purple-leaf.matic.quiknode.pro/e1643782b57442cc5a0cf0cc3870474adad502c9")
-export async function useContract(address, abi) {
+var  provider,quickProvider
+if(window.ethereum){
+	 provider = new ethers.providers.Web3Provider(window.ethereum);
+	 quickProvider = new ethers.providers.JsonRpcProvider("https://hardworking-purple-leaf.matic.quiknode.pro/e1643782b57442cc5a0cf0cc3870474adad502c9")
+	
+}export async function useContract(address, abi) {
 
 	var readContract, writeContract;
 	// if (!isMetaMask()) {

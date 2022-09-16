@@ -36,10 +36,10 @@ try{
 
 -------*/
 import {
-    useContract,useQuickContract
+    useContract, useQuickContract
 } from '../contract/useContract.js'
 import {
-    cardAddress, cardAbi, equipAddress, equipAbi,RunbitAddress, RunbitAbi
+    cardAddress, cardAbi, equipAddress, equipAbi, RunbitAddress, RunbitAbi
 } from '../contract/address.js'
 import {
     getEquip, getCard
@@ -89,7 +89,7 @@ export async function getBindEquips(account) {
 
 //查看equipId的装备的所有卡槽情况
 //0-没属性卡 非0-绑定的cardId
-export async function getBindCards( equipId, account,flag) {
+export async function getBindCards(equipId, account, flag) {
     let cards = []
     let cardIds = []
     let owners = []
@@ -103,7 +103,7 @@ export async function getBindCards( equipId, account,flag) {
         if (owners.length != 0)
             return Promise.all(owners).then(results => {
                 //getBindEquips
-                if(flag==1){
+                if (flag == 1) {
                     for (let i = 0; i < 3; i++) {
                         if (results[i] && ethers.utils.getAddress(results[i]) == ethers.utils.getAddress(account))
                             cards[i] = getCard(runContract, cardContract, res[i])
@@ -113,9 +113,9 @@ export async function getBindCards( equipId, account,flag) {
 
                 }
                 //getMyEquips
-                else{
+                else {
                     results.map((item, index) => {
-                        if (item&&ethers.utils.getAddress(item) == ethers.utils.getAddress(account))
+                        if (item && ethers.utils.getAddress(item) == ethers.utils.getAddress(account))
                             cards[index] = getCard(runContract, cardContract, res[index])
                     })
                     return Promise.all(cards).then(res2 => {
@@ -140,11 +140,34 @@ export async function getForgeFee(collectContract, equipType, level) {
     return collectContract.getForgeFee(equipType, level)
 }
 
-//获取预计收益
-export async function getUnharvestReward(collectContract, userAddress, curDay) {
-    return collectContract.getUnharvestReward(userAddress, curDay)
-}
 
+//获取收益记录
+export async function getUnharvestReward(account, end, start) {
+    var runContract = await runContractPromise
+    let rewardPromise = []
+    let statePromise = []
+    for (let day = end; day >= start; day--) {
+        statePromise[day-start] = runContract.getUserState(account, day)
+        rewardPromise[day-start] = runContract.getUnharvestReward(account,
+            day)
+
+    }
+    return Promise.all([...statePromise,...rewardPromise]).then(res => {
+        let rewards = []
+        for (let i = 0;i<end-start; ++i) {
+            let state = res[i]
+            let rew = res[end-start+i+1]
+            
+            if (!rew?.eq(0)) {
+                var data = {}
+                data.amount = ethers.utils.formatEther(rew)
+                data.status = state.status
+                rewards[i] = data
+            }
+        }
+        return rewards
+    })
+}
 
 
 /*---------------操作类合约调用-------------*/

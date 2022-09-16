@@ -241,7 +241,7 @@ export default {
 			stepStaus: 1,
 			changeType: '',
 			getSteps: '',
-			userAccount: '',
+			userAccount: '连接钱包',
 			currentcover: '',
 			currentprice0: 0,
 			currentprice1: 0,
@@ -355,6 +355,12 @@ export default {
 		that.stepLogo = getApp().globalData.stepLogo;
 		try {
 
+			this.getShops();
+			if (!window.ethereum) {
+
+				return
+			}
+
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
 			provider.getGasPrice().then((gasPrice) => {
 				// gasPrice is a BigNumber; convert it to a decimal string
@@ -368,7 +374,6 @@ export default {
 				this.userAccount = hideBankCards(accounts[0]);
 
 				//加载属性卡和装备库
-				this.getShops();
 				//查询商店合约授权情况，授权后才能购买和兑换
 				useContract(RBAddress, RBAbi).then(RBContract => {
 					//获取rb余额 本页面RB不进行换算，显示时换算
@@ -463,12 +468,34 @@ export default {
 		},
 		big2num,
 		openUser() {
+			if (!window.ethereum) {
+				uni.showModal({
+					content: '请使用DAPP浏览器或安装metamask!',
+					showCancel: false,
+					success: ({ confirm, cancel }) => {
+
+					}
+				})
+				return
+			}
 			uni.navigateTo({
 				url: '../../userAccount/userAccount'
 			});
 		},
 		//兑换卡片确认按钮
 		redmCardBtn() {
+			
+			if (!window.ethereum) {
+				uni.showModal({
+					content: '请使用DAPP浏览器或安装metamask!',
+					showCancel: false,
+					success: ({ confirm, cancel }) => {
+
+					}
+				})
+				return
+			}
+
 			this.currentUnit = "RBCT"
 			this.currentPayType = 0;
 			if (this.balanceofRBCT > this.currentCard.card.price0) {
@@ -483,6 +510,17 @@ export default {
 		},
 		//兑换装备确认按钮
 		redeemCardBtn() {
+
+			if (!window.ethereum) {
+				uni.showModal({
+					content: '请使用DAPP浏览器或安装metamask!',
+					showCancel: false,
+					success: ({ confirm, cancel }) => {
+
+					}
+				})
+				return
+			}
 			this.currentUnit = "RBET"
 			this.currentPayType = 0;
 			// this.$refs.inputDialogs.colse();
@@ -499,6 +537,16 @@ export default {
 		//装备购买确认按钮
 		dialogInputConfirm(val) {
 
+			if (!window.ethereum) {
+				uni.showModal({
+					content: '请使用DAPP浏览器或安装metamask!',
+					showCancel: false,
+					success: ({ confirm, cancel }) => {
+
+					}
+				})
+				return
+			}
 			this.currentPayType = 1;
 
 			this.$refs.inputDialogs.close();
@@ -516,6 +564,17 @@ export default {
 
 		},
 		buyCardBtn() {
+
+			if (!window.ethereum) {
+				uni.showModal({
+					content: '请使用DAPP浏览器或安装metamask!',
+					showCancel: false,
+					success: ({ confirm, cancel }) => {
+
+					}
+				})
+				return
+			}
 			this.currentPayType = 1;
 			var a = ethers.utils.formatEther(this.balanceOfRB);
 			var b = this.currentCard.card.price1;
