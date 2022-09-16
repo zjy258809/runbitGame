@@ -118,7 +118,7 @@
 
 						<view class="uni-flex uni-row">
 							<view @tap="recordList(0)" class="recordList">收益記錄 </view>
-							<view style=" width: 70%; text-align: right;" @click="getHarvest(-1)">
+							<view v-if="harvest.length!=0" style=" width: 70%; text-align: right;" @click="getHarvest(-1)">
 								<image style="height: 55.72rpx; width: 180.44rpx;" src="../../static/Group16.png">
 								</image>
 							</view>
@@ -129,7 +129,7 @@
 
 
 								<view class="curId uni-flex uni-row">
-									<view class="level4">{{ block2date(index) }}</view>
+									<view class="level4">{{ block2date(index+today) }}</view>
 									<view class="level3">+{{ getFix2(item.amount) }}RB </view>
 									<view v-if="item.status == 0" style="width: 3.125rem; color: #FF5C00;">未收穫</view>
 									<view v-if="item.status == 1" style="width: 3.125rem; color: #969696;">已收穫</view>
@@ -143,6 +143,7 @@
 
 							</uni-card>
 						</view>
+						<img class="nocard" v-if="harvest.length== 0" src="../../static/Group12015.png" />
 
 					</view>
 					<!-- 抽奖 -->
@@ -214,6 +215,8 @@
 
 							</uni-card>
 						</view>
+						
+						<img class="nocard" v-if="lotteryRec.length== 0" src="../../static/Group12015.png" />
 
 					</view>
 					<!-- 分红 -->
@@ -307,629 +310,596 @@
 </template>
 
 <script>
-	import {
-		ethers,
-	} from 'ethers'
-	import {
-		RBAddress,
-		RBAbi,
-		RBCTAddress,
-		RBETAddress,
-		RBCTAbi,
-		RBETAbi,
-		RunbitAddress,
-		RunbitAbi
-	} from '../../contract/address.js'
-	import {
-		useContract,
-		hideBankCards
-	} from '../../contract/useContract.js'
-	import {
-		big2num,
-		displayDate,
-		getDay,
+import {
+	ethers,
+} from 'ethers'
+import {
+	RBAddress,
+	RBAbi,
+	RBCTAddress,
+	RBETAddress,
+	RBCTAbi,
+	RBETAbi,
+	RunbitAddress,
+	RunbitAbi
+} from '../../contract/address.js'
+import {
+	useContract,
+	useQuickContract
+} from '../../contract/useContract.js'
+import {
+	big2num,
+	displayDate,
+	getDay,
 
-	} from '../../contract/ultis.js'
-	import {
-		myRequest
+} from '../../contract/ultis.js'
+import {
+	myRequest
 
-	} from '../../utils/api.js'
+} from '../../utils/api.js'
+import{getUnharvestReward}from '../../contract/useRunbit.js'
+export default {
+	data() {
+		return {
+			rbPrice: 0,
+			curList: 1,
+			curNow: 0,
+			page: 1,
+			amount_total: 0,
+			page_size: 10,
+			loadStatus: 'loading', //加载样式：more-加载前样式，loading-加载中样式，nomore-没有数据样式
+			isLoadMore: false, //是否加载中
+			pending: [],
+			history: [],
+			harvest: {},
+			EarningList: [],
 
-	export default {
-		data() {
-			return {
-				rbPrice: 0,
-				curList: 1,
-				curNow: 0,
-				page: 1,
-				amount_total: 0,
-				page_size: 10,
-				loadStatus: 'loading', //加载样式：more-加载前样式，loading-加载中样式，nomore-没有数据样式
-				isLoadMore: false, //是否加载中
-				pending: [],
-				history: [],
-				harvest: {},
-				EarningList: [],
+			lotteryRec: [],
 
-				lotteryRec: [],
+			list: ['钱包', '收益', '抽獎', '分红'],
+			balanceOfRB: 0,
+			balanceofRBCT: 0,
+			balanceofRBET: 0,
+			balanceofUSDT: 0,
+			unclaimReward: 0,
+			claimedReward: 0,
+			startDate: '2022-08-25',
+			endDate: '2022-08-25',
+			lottery: {
+				rb: 10,
+				rbct: 20,
+				rbet: 30
+			},
+			lotindex: null
 
-				list: ['钱包', '收益', '抽獎', '分红'],
-				balanceOfRB: 0,
-				balanceofRBCT: 0,
-				balanceofRBET: 0,
-				balanceofUSDT: 0,
-				unclaimReward: 0,
-				claimedReward: 0,
-				startDate: '2022-08-25',
-				endDate: '2022-08-25',
-				lottery: {
-					rb: 10,
-					rbct: 20,
-					rbet: 30
-				},
-				lotindex: null
+		}
+	},
 
+	onLoad() {
+
+		this.rbPrice = getApp().globalData.rbPrice
+		try {
+			if (!window.ethereum) {
+				uni.showModal({
+					content: '请使用DAPP浏览器或安装metamask!',
+					showCancel: false,
+					success: ({ confirm, cancel }) => {
+
+					}
+				})
+				return
 			}
-		},
+			useContract(RunbitAddress, RunbitAbi).then(contract=>{
+				this.runContract=contract
+			})
+			const provider = new ethers.providers.Web3Provider(window.ethereum);
+			provider.getBlock().then(block => {
+				//按天算，默认查询近7天数据,不含当天
+				console.log(block);
+				this.endDate = getDay(block.timestamp * 1000, -1)
+				this.startDate = getDay(block.timestamp * 1000, -60)
+				this.today = this.date2block(this.startDate)
+				var start = this.date2block(this.startDate)
+				var end = this.date2block(this.endDate)
+				console.log("block------", start, "end--", end)
 
-		onLoad() {
-
-			this.rbPrice = getApp().globalData.rbPrice
-
-			var that = this;
-			try {
-
-				const provider = new ethers.providers.Web3Provider(window.ethereum);
-				provider.getBlock().then(block => {
-					//按天算，默认查询近7天数据,不含当天
-					console.log(block);
-					this.endDate = getDay(block.timestamp * 1000, -1)
-					this.startDate = getDay(block.timestamp * 1000, -60)
-
-					var start = this.date2block(this.startDate)
-					var end = this.date2block(this.endDate)
-					console.log("block------", start, "end--", end)
-
-					provider.send("eth_requestAccounts", []).then(accounts => {
-						this.myAccount = accounts[0]
-						this.getHistory();
-						this.getLotteryRecords();
-						this.getEarningList();
-						useContract(RBAddress, RBAbi).then(RBContract => {
-							//获取rb余额
-							RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
-								this.balanceOfRB = big2num(balanceOfRB)
-							})
-
-						});
-						//获取属性卡碎片
-						useContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
-							this.RBCTContract = RBCTContract
-							RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
-								console.log(balanceofRBCT);
-								this.balanceofRBCT = parseFloat(balanceofRBCT)
-							})
-						});
-						//获取装备碎片
-						useContract(RBETAddress, RBETAbi).then(RBETContract => {
-							this.RBETContract = RBETContract
-							RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
-								this.balanceofRBET = parseFloat(balanceofRBET)
-							})
+				provider.send("eth_requestAccounts", []).then(accounts => {
+					this.myAccount = accounts[0]
+					this.getHistory();
+					this.getLotteryRecords();
+					this.getEarningList();					
+					getUnharvestReward(this.myAccount, end, start).then(res => {
+						this.harvest = res
+					})
+					useQuickContract(RBAddress, RBAbi).then(RBContract => {
+						//获取rb余额
+						RBContract.balanceOf(this.myAccount).then(balanceOfRB => {
+							this.balanceOfRB = big2num(balanceOfRB)
 						})
-						useContract(RunbitAddress, RunbitAbi).then(runContract => {
-							this.runContract = runContract
-							for (let day = end; day >= start; day--) {
-								this.runContract.getUserState(this.myAccount, day).then(res => {
 
-									//未收获
-									this.runContract.getUnharvestReward(this.myAccount,
-										day).then(rew => {
-
-										if (!rew.eq(0)) {
-											var data = {}
-											data.amount = big2num(rew)
-											data.status = res.status
-											this.harvest[day] = data
-										}
-									})
-
-									// //有步数查询是否中奖，抽奖状态
-									// if (!res.lastSteps.eq(0)) {
-									// 	this.runContract.isLucky(this.myAccount, day).then(
-									// 		lott => {
-									// 			if (!lott[0].eq(0) || !lott[1].eq(0) ||
-									// 				!lott[2].eq(0)) {
-									// 				//中奖
-									// 				var data = {}
-									// 				data.rb = big2num(lott[0])
-									// 				data.rbct = lott[1]
-									// 				data.rbet = lott[2]
-									// 				data.status = res.lottery
-
-									// 				console.log("state------", lott)
-									// 				this.lotteryRec[day] = data
-
-									// 			}
-									// 		})
-									// }
-								})
-
-							}
+					});
+					//获取属性卡碎片
+					useQuickContract(RBCTAddress, RBCTAbi).then(RBCTContract => {
+						RBCTContract.balanceOf(this.myAccount).then(balanceofRBCT => {
+							console.log(balanceofRBCT);
+							this.balanceofRBCT = parseFloat(balanceofRBCT)
 						})
 					});
+					//获取装备碎片
+					useQuickContract(RBETAddress, RBETAbi).then(RBETContract => {
+						RBETContract.balanceOf(this.myAccount).then(balanceofRBET => {
+							this.balanceofRBET = parseFloat(balanceofRBET)
+						})
+					})
 				});
+			});
+		} catch (e) {
+			console.error(e);
+		}
+	},
+	onReachBottom() { //上拉触底函数
 
-				setTimeout(() => {
+		if (!this.isLoadMore) { //此处判断，上锁，防止重复请求
+			this.isLoadMore = true
+			this.page += 1
+			this.getEarningList()
+		}
+	},
+	methods: {
+		big2num,
+		async getLottery(index) {
+			uni.showLoading({
+				title: '正在收获...',
+				mask: true
+			})
+			try {
+				this.runContract.lottery(this.lotteryRec[this.lotindex].day).then(res => {
+					uni.hideLoading()
 
-				}, 5000);
+					uni.showToast({
+						title: '获取成功',
+						mask: true,
+						icon: 'success'
+					})
+				})
+
+			} catch (e) { } finally {
+				this.getLotteryRecords();
+				uni.hideLoading()
+			}
+		},
+		displayAdddress(address) {
+			return address.substring(0, 4) + "..." + address.substring(address.length - 5, address.length - 1)
+		},
+		getFix2(num) {
+			var value = Math.floor(num * 100) / 100
+			return value
+		},
+		async getLotterySum() {
+			await myRequest({
+				url: 'game/getLotteryTotal',
+				data: {
+					addr: this.myAccount,
+					// start: start,
+					// end: end
+				}
+			}).then(data => {
+				console.log(data);
+				this.lottery.rb = data.rb ? data.rb : 0
+				this.lottery.rbct = data.rbct ? data.rbct : 0
+				this.lottery.rbet = data.rbet ? data.rbet : 0
+
+			})
+		},
+		async getHarvest(index) {
+			//一键收获
+			if (index == -1) {
+				//提示框，是否继续
+				uni.showLoading({
+					title: '一键收获...',
+					mask: true
+				})
+				var start = this.date2block(this.startDate)
+				var end = this.date2block(this.endDate) + 1
+			} else {
+				var start = index
+				var end = index + 1
+
+			}
+			uni.showLoading({
+				title: '正在收获...',
+				mask: true
+			})
+			try {
+				this.runContract.harvest(start, end).then(res => {
+					uni.hideLoading()
+					uni.showToast({
+						title: '获取成功',
+						mask: true,
+						icon: 'success'
+					})
+				})
+
 			} catch (e) {
-				console.error(e);
+				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				uni.showToast({
+					title: "收获失败" + ":" + reason,
+					icon: "none"
+				})
+			} finally {
+				uni.hideLoading()
 			}
-		},
-		onReachBottom() { //上拉触底函数
 
-			if (!this.isLoadMore) { //此处判断，上锁，防止重复请求
-				this.isLoadMore = true
-				this.page += 1
-				this.getEarningList()
+		},
+		block2date(block) {
+			let date = new Date((block * 86400 - 28800) * 1000)
+			let month = date.getMonth() + 1
+			return date.getFullYear() + '-' + month + '-' + date.getDate()
+		},
+		date2block(date) {
+			return Math.trunc((new Date(date).getTime() / 1000 + 28800) / 86400)
+		},
+
+		//切换tab
+		sectionChange(index) {
+			this.curNow = index;
+			//加载收益
+			if (index === 1) {
+				this.getUnclaimReward()
+				this.getClaimedReward()
 			}
+			if (index == 2) {
+
+				this.getLotterySum()
+			}
+
 		},
-		methods: {
-			big2num,
-			async getLottery(index) {
-				uni.showLoading({
-					title: '正在收获...',
-					mask: true
-				})
-				try {
-					this.runContract.lottery(this.lotteryRec[this.lotindex].day).then(res => {
-						uni.hideLoading()
+		recordList(index) {
+			this.curList = index;
+		},
+		back() {
+			uni.navigateBack({
+				delta: 1
+			});
+		},
+		openRb() {
+			uni.navigateTo({
+				url: '../userRb/userRb'
+			});
+		},
+		setting() {
+			uni.navigateTo({
+				url: '../userSetting/userSetting'
+			});
+		},
+		winClick(status, index) {
+			debugger
+			this.lotindex = index
+			if (!status) this.$refs.inputDialog2.open()
 
-						uni.showToast({
-							title: '获取成功',
-							mask: true,
-							icon: 'success'
-						})
-					})
+		},
+		/**钱包相关 */
 
-				} catch (e) {} finally {
-					this.getLotteryRecords();
-					uni.hideLoading()
+		/**收益 */
+		//未领取收益
+		getUnclaimReward() {
+			this.runContract.getUnclaimReward(this.myAccount).then(reward => {
+				this.unclaimReward = reward
+			})
+
+		},
+		//已领取记录
+		async getClaimedReward() {
+			await myRequest({
+				url: 'game/getEarningsTotal',
+				data: {
+					addr: this.myAccount
 				}
-			},
-			displayAdddress(address) {
-				return address.substring(0, 4) + "..." + address.substring(address.length - 5, address.length - 1)
-			},
-			getFix2(num) {
-				var value = Math.floor(num * 100) / 100
-				return value
-			},
-			async getLotterySum() {
-				await myRequest({
-					url: 'game/getLotteryTotal',
-					data: {
-						addr: this.myAccount,
-						// start: start,
-						// end: end
-					}
-				}).then(data => {
-					console.log(data);
-					this.lottery.rb = data.rb ? data.rb : 0
-					this.lottery.rbct = data.rbct ? data.rbct : 0
-					this.lottery.rbet = data.rbet ? data.rbet : 0
-
+			}).then(res => {
+				this.claimedReward = res
+			})
+		},
+		displayTime(time) {
+			let appointDate = /\d{4}-\d{1,2}-\d{1,2}/g.exec(time)[0];
+			return appointDate;
+		},
+		//领取收益
+		async claim() {
+			if (this.unclaimReward == 0) {
+				uni.showToast({
+					title: "无可领取收益",
+					icon: "none"
 				})
-			},
-			async getHarvest(index) {
-				//一键收获
-				if (index == -1) {
-					//提示框，是否继续
-					uni.showLoading({
-						title: '一键收获...',
-						mask: true
-					})
-					var start = this.date2block(this.startDate)
-					var end = this.date2block(this.endDate) + 1
-				} else {
-					var start = index
-					var end = index + 1
-
-				}
-				uni.showLoading({
-					title: '正在收获...',
-					mask: true
-				})
-				try {
-					this.runContract.harvest(start, end).then(res => {
-						uni.hideLoading()
-						uni.showToast({
-							title: '获取成功',
-							mask: true,
-							icon: 'success'
-						})
-					})
-
-				} catch (e) {
-					let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
+				return
+			}
+			let tx = await this.runContract.claim(this.unclaimReward, this.myAccount)
+			try {
+				tx.wait().then(res => {
 					uni.showToast({
-						title: "收获失败" + ":" + reason,
-						icon: "none"
+						title: "领取成功",
+						icon: "success"
 					})
-				} finally {
-					uni.hideLoading()
-				}
-
-			},
-			block2date(block) {
-				let date = new Date((block * 86400 - 28800) * 1000)
-				let month = date.getMonth() + 1
-				return date.getFullYear() + '-' + month + '-' + date.getDate()
-			},
-			date2block(date) {
-				return Math.trunc((new Date(date).getTime() / 1000 + 28800) / 86400)
-			},
-
-			//切换tab
-			sectionChange(index) {
-				this.curNow = index;
-				//加载收益
-				if (index === 1) {
-					this.getUnclaimReward()
-					this.getClaimedReward()
-				}
-				if (index == 2) {
-
-					this.getLotterySum()
-				}
-
-			},
-			recordList(index) {
-				this.curList = index;
-			},
-			back() {
-				uni.navigateBack({
-					delta: 1
-				});
-			},
-			openRb() {
-				uni.navigateTo({
-					url: '../userRb/userRb'
-				});
-			},
-			setting() {
-				uni.navigateTo({
-					url: '../userSetting/userSetting'
-				});
-			},
-			winClick(status, index) {
-				debugger
-				this.lotindex = index
-				if (!status) this.$refs.inputDialog2.open()
-
-			},
-			/**钱包相关 */
-
-			/**收益 */
-			//未领取收益
-			getUnclaimReward() {
-				this.runContract.getUnclaimReward(this.myAccount).then(reward => {
-					this.unclaimReward = reward
 				})
-
-			},
-			//已领取记录
-			async getClaimedReward() {
-				await myRequest({
-					url: 'game/getEarningsTotal',
-					data: {
-						addr: this.myAccount
-					}
-				}).then(res => {
-					this.claimedReward = res
+			} catch (e) {
+				uni.showToast({
+					title: "领取失败，请稍后再试",
+					icon: "none"
 				})
-			},
-			displayTime(time) {
-				let appointDate = /\d{4}-\d{1,2}-\d{1,2}/g.exec(time)[0];
-				return appointDate;
-			},
-			//领取收益
-			async claim() {
-				if (this.unclaimReward == 0) {
-					uni.showToast({
-						title: "无可领取收益",
-						icon: "none"
-					})
-					return
+			}
+
+		},
+		//已领取记录
+		async getHistory() {
+			await myRequest({
+				url: 'game/getHistory',
+				data: {
+					addr: this.myAccount
 				}
-				let tx = await this.runContract.claim(this.unclaimReward, this.myAccount)
-				try {
-					tx.wait().then(res => {
-						uni.showToast({
-							title: "领取成功",
-							icon: "success"
-						})
-					})
-				} catch (e) {
-					uni.showToast({
-						title: "领取失败，请稍后再试",
-						icon: "none"
-					})
+			}).then(res => {
+				console.log(res);
+				this.history = res.list
+			})
+		},
+
+		//获取领奖记录
+		async getLotteryRecords() {
+			await myRequest({
+				url: 'game/getLotteryRecords',
+				data: {
+					addr: this.myAccount
 				}
+			}).then(res => {
+				console.log(res);
+				this.lotteryRec = res.list
+			})
+		},
+		//收益记录
+		async getEarningList() {
 
-			},
-			//已领取记录
-			async getHistory() {
-				await myRequest({
-					url: 'game/getHistory',
-					data: {
-						addr: this.myAccount
-					}
-				}).then(res => {
-					console.log(res);
-					this.history = res.list
-				})
-			},
-
-			//获取领奖记录
-			async getLotteryRecords() {
-				await myRequest({
-					url: 'game/getLotteryRecords',
-					data: {
-						addr: this.myAccount
-					}
-				}).then(res => {
-					console.log(res);
-					this.lotteryRec = res.list
-				})
-			},
-			//收益记录
-			async getEarningList() {
-
-				this.baseurl = 'https://gapi.runbit.org/api/v1/'
-				uni.request({
-					url: this.baseurl + 'game/teamEarning',
-					data: {
-						addr: this.myAccount,
-						page: this.page,
-						page_size: this.page_size
-					},
-					method: "GET",
-					success: res => {
-						if (res.data.code === 0) {
-							if (res.data.data.list) {
-								this.amount_total = res.data.data.amount_total
-								this.EarningList = this.EarningList.concat(res.data.data.list)
-								if (res.data.data.list.length < this
-									.page_size) { //判断接口返回数据量小于请求数据量，则表示此为最后一页
-									this.isLoadMore = true
-									this.loadStatus = 'nomore'
-								} else {
-									this.isLoadMore = false
-								}
-								// this.EarningList = res.data.data.list
+			this.baseurl = 'https://gapi.runbit.org/api/v1/'
+			uni.request({
+				url: this.baseurl + 'game/teamEarning',
+				data: {
+					addr: this.myAccount,
+					page: this.page,
+					page_size: this.page_size
+				},
+				method: "GET",
+				success: res => {
+					if (res.data.code === 0) {
+						if (res.data.data.list) {
+							this.amount_total = res.data.data.amount_total
+							this.EarningList = this.EarningList.concat(res.data.data.list)
+							if (res.data.data.list.length < this
+								.page_size) { //判断接口返回数据量小于请求数据量，则表示此为最后一页
+								this.isLoadMore = true
+								this.loadStatus = 'nomore'
 							} else {
 								this.isLoadMore = false
-								if (this.page > 1) {
-									this.page -= 1
-								}
 							}
+							// this.EarningList = res.data.data.list
 						} else {
+							this.isLoadMore = false
 							if (this.page > 1) {
 								this.page -= 1
 							}
 						}
+					} else {
+						if (this.page > 1) {
+							this.page -= 1
+						}
 					}
-				})
-			},
+				}
+			})
+		},
 
 
 
 
 
 
-		}
 	}
+}
 </script>
 
 <style>
-	.id4 {
-		margin-top: 0.625rem;
-		width: 100%;
-		text-align: center;
-		color: #000000;
-		font-size: 0.9375rem;
-		font-weight: bold;
-	}
+.id4 {
+	margin-top: 0.625rem;
+	width: 100%;
+	text-align: center;
+	color: #000000;
+	font-size: 0.9375rem;
+	font-weight: bold;
+}
 
-	.win1Logo {
-		margin-top: 0.9375rem;
-	}
+.win1Logo {
+	margin-top: 0.9375rem;
+}
 
-	.win1 {
-		margin: 0.625rem;
-		text-align: center;
-		background-color: #F4F5F6;
-		height: 4.5rem;
-		width: 4.5rem;
-		border-radius: 1rem;
-	}
+.win1 {
+	margin: 0.625rem;
+	text-align: center;
+	background-color: #F4F5F6;
+	height: 4.5rem;
+	width: 4.5rem;
+	border-radius: 1rem;
+}
 
-	.nocard {
-		display: inline-block;
-		margin: 0 auto;
-		margin-top: 6rem;
-		width: 35%;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
+.nocard {
+	display: inline-block;
+	margin: 0 auto;
+	margin-top: 6rem;
+	width: 35%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
 
-	.leLogo {
-		width: 3.125rem;
-	}
+.leLogo {
+	width: 3.125rem;
+}
 
-	.leLogo2 {
-		width: 3.125rem;
-		position: absolute;
-		right: 1.25rem;
-	}
+.leLogo2 {
+	width: 3.125rem;
+	position: absolute;
+	right: 1.25rem;
+}
 
-	.head {
-		width: 100%;
-		height: 5.25rem;
-		position: absolute;
-	}
+.head {
+	width: 100%;
+	height: 5.25rem;
+	position: absolute;
+}
 
-	.gp5 {
-		display: inline-block;
-		margin: 1.8rem auto;
-		width: 40%;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-	}
+.gp5 {
+	display: inline-block;
+	margin: 1.8rem auto;
+	width: 40%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
 
-	.logo1 {
-		width: 1.5625rem;
-		height: 1.5625rem;
-		margin: auto 0;
-		position: absolute;
-		left: 1.625rem;
-		top: 30%;
-	}
+.logo1 {
+	width: 1.5625rem;
+	height: 1.5625rem;
+	margin: auto 0;
+	position: absolute;
+	left: 1.625rem;
+	top: 30%;
+}
 
-	.logo2 {
-		width: 1.5625rem;
-		height: 1.5625rem;
-		margin: auto 0;
-		position: absolute;
-		right: 1.625rem;
-		top: 30%;
-	}
+.logo2 {
+	width: 1.5625rem;
+	height: 1.5625rem;
+	margin: auto 0;
+	position: absolute;
+	right: 1.625rem;
+	top: 30%;
+}
 
-	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		height: 100%;
+.content {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
 
-	}
+}
 
-	.logoTx {
-		font-size: 1rem;
-		color: #000000;
-		font-weight: bold;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		margin: auto;
+.logoTx {
+	font-size: 1rem;
+	color: #000000;
+	font-weight: bold;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: auto;
 
 
-	}
+}
 
-	.top {
-		position: absolute;
-		width: 100%;
-		height: 27.375rem;
-		left: 0px;
-		top: 0px;
+.top {
+	position: absolute;
+	width: 100%;
+	height: 27.375rem;
+	left: 0px;
+	top: 0px;
 
-		background: linear-gradient(180deg, #F3F3F3 0%, rgba(255, 177, 20, 0.0) 100%);
-		border-radius: 0px 0px 36px 36px;
-	}
+	background: linear-gradient(180deg, #F3F3F3 0%, rgba(255, 177, 20, 0.0) 100%);
+	border-radius: 0px 0px 36px 36px;
+}
 
-	.level {
-		color: #000;
-		width: 180.55rpx;
-		height: 50.72rpx;
-		text-align: left;
-		padding-left: 0.625rem;
-		font-size: 1rem;
-		line-height: 50rpx;
-	}
+.level {
+	color: #000;
+	width: 180.55rpx;
+	height: 50.72rpx;
+	text-align: left;
+	padding-left: 0.625rem;
+	font-size: 1rem;
+	line-height: 50rpx;
+}
 
-	.level2 {
-		font-weight: bold;
-		color: #000;
-		width: 160.55rpx;
-		height: 50.72rpx;
-		text-align: left;
-		font-size: 0.875rem;
-		line-height: 50rpx;
-	}
+.level2 {
+	font-weight: bold;
+	color: #000;
+	width: 160.55rpx;
+	height: 50.72rpx;
+	text-align: left;
+	font-size: 0.875rem;
+	line-height: 50rpx;
+}
 
-	.level4 {
-		font-weight: bold;
-		color: #000;
-		width: 190.55rpx;
-		height: 50.72rpx;
-		font-size: 0.775rem;
-		line-height: 50rpx;
-		text-align: center;
-	}
+.level4 {
+	font-weight: bold;
+	color: #000;
+	width: 190.55rpx;
+	height: 50.72rpx;
+	font-size: 0.775rem;
+	line-height: 50rpx;
+	text-align: center;
+}
 
-	.level3 {
-		font-weight: bold;
-		color: #FF5C00;
-		width: 160.55rpx;
-		height: 50.72rpx;
-		font-size: 0.875rem;
-		line-height: 50rpx;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		margin: auto;
-		text-align: center;
-	}
+.level3 {
+	font-weight: bold;
+	color: #FF5C00;
+	width: 160.55rpx;
+	height: 50.72rpx;
+	font-size: 0.875rem;
+	line-height: 50rpx;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: auto;
+	text-align: center;
+}
 
-	.level3-2 {
-		font-weight: bold;
-		color: #FF5C00;
-		width: 160.55rpx;
-		height: 50.72rpx;
-		font-size: 0.875rem;
-		line-height: 50rpx;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		margin: auto;
-	}
+.level3-2 {
+	font-weight: bold;
+	color: #FF5C00;
+	width: 160.55rpx;
+	height: 50.72rpx;
+	font-size: 0.875rem;
+	line-height: 50rpx;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: auto;
+}
 
-	.rare {
-		color: #000;
-		height: 50.72rpx;
-		text-align: center;
-		position: absolute;
-		right: 2rem;
-		font-size: 1rem;
-		line-height: 50rpx;
-		font-weight: bold;
+.rare {
+	color: #000;
+	height: 50.72rpx;
+	text-align: center;
+	position: absolute;
+	right: 2rem;
+	font-size: 1rem;
+	line-height: 50rpx;
+	font-weight: bold;
 
-	}
+}
 
-	.smicon {
-		width: 50.88rpx;
-		height: 50.88rpx;
-	}
+.smicon {
+	width: 50.88rpx;
+	height: 50.88rpx;
+}
 
-	.recordList {
-		font-size: 1.125rem;
-		font-weight: bold;
-		color: #000000;
-		margin-left: 1.25rem;
-	}
+.recordList {
+	font-size: 1.125rem;
+	font-weight: bold;
+	color: #000000;
+	margin-left: 1.25rem;
+}
 
-	.recordList2 {
-		font-size: 1.125rem;
-		font-weight: bold;
-		color: #C4C4C4;
-		margin-left: 1.25rem;
-	}
+.recordList2 {
+	font-size: 1.125rem;
+	font-weight: bold;
+	color: #C4C4C4;
+	margin-left: 1.25rem;
+}
 </style>
