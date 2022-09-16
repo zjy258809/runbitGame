@@ -162,7 +162,7 @@ export async function getUnharvestReward(account, end, start) {
                 var data = {}
                 data.amount = ethers.utils.formatEther(rew)
                 data.status = state.status
-                rewards[i] = data
+                rewards.push(data)
             }
         }
         return rewards

@@ -129,7 +129,7 @@
 
 
 								<view class="curId uni-flex uni-row">
-									<view class="level4">{{ block2date(index+today) }}</view>
+									<view class="level4">{{ block2date(today-index) }}</view>
 									<view class="level3">+{{ getFix2(item.amount) }}RB </view>
 									<view v-if="item.status == 0" style="width: 3.125rem; color: #FF5C00;">未收穫</view>
 									<view v-if="item.status == 1" style="width: 3.125rem; color: #969696;">已收穫</view>
@@ -398,7 +398,7 @@ export default {
 				console.log(block);
 				this.endDate = getDay(block.timestamp * 1000, -1)
 				this.startDate = getDay(block.timestamp * 1000, -60)
-				this.today = this.date2block(this.startDate)
+				this.today = this.date2block(this.endDate)
 				var start = this.date2block(this.startDate)
 				var end = this.date2block(this.endDate)
 				console.log("block------", start, "end--", end)
