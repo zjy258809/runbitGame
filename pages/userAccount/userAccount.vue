@@ -124,7 +124,7 @@
 							</view>
 						</view>
 						<view style="" class="text" v-for="(item, index) in harvest" :key="index">
-							<uni-card title="" extra=""
+							<uni-card v-if="item"  title="" extra=""
 								style="width: 90%; border-radius: 0.825rem; background-color:#FFF ; margin: 0.35rem auto;">
 
 
@@ -534,7 +534,10 @@ export default {
 		block2date(block) {
 			let date = new Date((block * 86400 - 28800) * 1000)
 			let month = date.getMonth() + 1
-			return date.getFullYear() + '-' + month + '-' + date.getDate()
+			month = month>9?month:'0'+month
+			let day = date.getDate()
+			day = day >9?day:'0'+day
+			return date.getFullYear() + '-' + month + '-' + day
 		},
 		date2block(date) {
 			return Math.trunc((new Date(date).getTime() / 1000 + 28800) / 86400)

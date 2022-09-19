@@ -16,9 +16,9 @@ import { getBindCards } from '../contract/useRunbit'
 const runContractPromise = useQuickContract(RunbitAddress, RunbitAbi)
 const equipContractPromise = useQuickContract(equipAddress, equipAbi)
 const cardContractPromise = useQuickContract(cardAddress, cardAbi)
-export async function getEquip(equipContract,equipId, account) {
-    var equip = {}
-    var copy = {}
+export async function getEquip(equipContract, equipId, account) {
+    let equip = {}
+    let copy = {}
     const e = equipContract.tokenMetaData(equipId)
     const uri = equipContract.tokenURI(equipId)
     const cards = getBindCards(equipId, account)
@@ -42,9 +42,9 @@ export async function getEquip(equipContract,equipId, account) {
 
 
 }
-export async function getCard(runContract,cardContract, cardId) {
-    var card = {}
-    var copy = {}
+export async function getCard(runContract, cardContract, cardId) {
+    let card = {}
+    let copy = {}
     const cardInfo = cardContract.tokenMetaData(cardId)
     const status = runContract.getCardInfo(cardId)
     const consume = runContract.getCardConsume(cardId)
@@ -67,40 +67,44 @@ export async function getCard(runContract,cardContract, cardId) {
 
 }
 export async function getMyCards(account) {
-    
-    var cardContract = await cardContractPromise
-    var runContract = await runContractPromise
+
+    let cardContract = await cardContractPromise
+    let runContract = await runContractPromise
     //获取属性卡数量numOfCard和属性卡合集cardCollect
     //cardLoading=true获取数据中
-    var cardCollect = []
+    let cardCollect = []
+    let cardIds = []
+
     return cardContract.balanceOf(account).then(async num => {
-        for (let i = 0; i < num; i++) {
-            await cardContract.tokenOfOwnerByIndex(account, i).then(cardId => {
-                cardCollect[i] = getCard(runContract, cardContract, cardId)
-
+        for (let i = 0; i < num; i++)
+            cardIds[i] = cardContract.tokenOfOwnerByIndex(account, i)
+        return Promise.all(cardIds).then(res => {
+            res.map((cardId) => {
+                if (cardId?.toNumber()) cardCollect.push(getCard(runContract, cardContract, cardId))
             })
-        }
-
-        return Promise.all(cardCollect).then(res => {
-            return res
+            return Promise.all(cardCollect).then(res => {
+                return res
+            })
         })
+
     });
 }
 //获取我的装备集合
 export async function getMyEquips(account) {
     //获取装备数量numOfEquip和装备合集equipCollect
-    var equipCollect = []
-    var equipContract = await equipContractPromise
-
+    let equipCollect = []
+    let equipIds = []
+    let equipContract = await equipContractPromise
     return equipContract.balanceOf(account).then(async num => {
-        for (let i = 0; i < num; i++) {
-            await equipContract.tokenOfOwnerByIndex(account, i).then(async equipId => {
-                equipCollect[i] = getEquip(equipContract, equipId, account,2)
+        for (let i = 0; i < num; i++)
+            equipIds[i] = equipContract.tokenOfOwnerByIndex(account, i)
+        return Promise.all(equipIds).then(res => {
+            res.map((equipId) => {
+                if (equipId?.toNumber()) equipCollect.push(getEquip(equipContract, equipId, account))
             })
-        }      
-
-        return  Promise.all(equipCollect).then(res => {
-            return res
+            return Promise.all(equipCollect).then(res => {
+                return res
+            })
         })
     });
 }

@@ -89,7 +89,7 @@ export async function getBindEquips(account) {
 
 //查看equipId的装备的所有卡槽情况
 //0-没属性卡 非0-绑定的cardId
-export async function getBindCards(equipId, account, flag) {
+export async function getBindCards(equipId, account) {
     let cards = []
     let cardIds = []
     let owners = []
@@ -102,6 +102,10 @@ export async function getBindCards(equipId, account, flag) {
             if (res[i].toNumber() != 0) owners[i] = cardContract.ownerOf(res[i])
         if (owners.length != 0)
             return Promise.all(owners).then(results => {
+                return cardIds.filter((cardId,i)=>{
+                    if (results[i] && ethers.utils.getAddress(results[i]) == ethers.utils.getAddress(account)) return cardId
+                })
+
                 //getBindEquips
                 if (flag == 1) {
                     for (let i = 0; i < 3; i++) {
@@ -146,23 +150,23 @@ export async function getUnharvestReward(account, end, start) {
     var runContract = await runContractPromise
     let rewardPromise = []
     let statePromise = []
-    for (let day = end; day >= start; day--) {
-        statePromise[day-start] = runContract.getUserState(account, day)
-        rewardPromise[day-start] = runContract.getUnharvestReward(account,
-            day)
+    for (let day = end - start; day >= 0; --day) {
+        statePromise[day] = runContract.getUserState(account, end-day)
+        rewardPromise[day] = runContract.getUnharvestReward(account,
+            end-day)
 
     }
-    return Promise.all([...statePromise,...rewardPromise]).then(res => {
+    return Promise.all([...statePromise, ...rewardPromise]).then(res => {
         let rewards = []
-        for (let i = 0;i<end-start; ++i) {
+        for (let i = 0; i <end-start; i++) {
             let state = res[i]
-            let rew = res[end-start+i+1]
-            
+            let rew = res[end - start+i+1]
+
             if (!rew?.eq(0)) {
                 var data = {}
                 data.amount = ethers.utils.formatEther(rew)
                 data.status = state.status
-                rewards.push(data)
+                rewards[i]=data
             }
         }
         return rewards
