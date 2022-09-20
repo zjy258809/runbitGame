@@ -99,28 +99,14 @@ export async function getBindCards(equipId, account) {
         cardIds[index] = runContract.getBindCard(equipId, index)
     return Promise.all([...cardIds, cardContract]).then(res => {
         for (let i = 0; i < 3; i++)
-            if (res[i].toNumber() != 0) owners[i] = cardContract.ownerOf(res[i])
+            if (res[i].toNumber() != 0) owners[i] = cardContract.ownerOf(res[i]) 
         if (owners.length != 0)
             return Promise.all(owners).then(results => {
-                return cardIds.filter((cardId,i)=>{
-                    if (results[i] && ethers.utils.getAddress(results[i]) == ethers.utils.getAddress(account)) return cardId
-                })
-
-                //getBindEquips
-                if (flag == 1) {
-                    for (let i = 0; i < 3; i++) {
-                        if (results[i] && ethers.utils.getAddress(results[i]) == ethers.utils.getAddress(account))
-                            cards[i] = getCard(runContract, cardContract, res[i])
-                        else cards[i] = 0
-                    }
-                    return cards
-
-                }
-                //getMyEquips
-                else {
+         
                     results.map((item, index) => {
                         if (item && ethers.utils.getAddress(item) == ethers.utils.getAddress(account))
                             cards[index] = getCard(runContract, cardContract, res[index])
+                        
                     })
                     return Promise.all(cards).then(res2 => {
                         let cardResults = []
@@ -132,7 +118,6 @@ export async function getBindCards(equipId, account) {
                         return cardResults
                     })
 
-                }
 
             })
         else return [0, 0, 0]
