@@ -59,7 +59,7 @@
 
 						<view class="curId uni-flex uni-row">
 							<view class="flex-item">预计收益</view>
-							<view class="flex-item idvalue">{{ getFix2(reward) }} RB</view>
+							<view class="uni-flex flex-item idvalue"><view style="">{{ getFix2(reward) }}RB</view> <view style="position: absolute; right: 20.94rpx; font-size: 20rpx;">({{getFix2(reward*RBPRICE)}}$)</view> </view>
 						</view>
 
 					</view>
@@ -259,6 +259,7 @@ import {
 export default {
 	data() {
 		return {
+			RBPRICE:1,
 			stepStaus: 1,
 			stepLogo: '../../../static/Ellipse38.png',
 			stack: '烈日沙滩',
@@ -342,14 +343,14 @@ export default {
 	},
 	onShow() {
 		
-		const BASE_URL = 'https://gapi.runbit.org/api/v1/'
+		const BASE_URL = 'https://gapi.runbit.lol/api/v1/'
 		 uni.request({
 			url: BASE_URL + 'game/getPrice',
 			method: "GET",
 			success: res => {
 				if (res.data.code === 0) {
 					// var data =res.data.data;
-				// this.RBPRICE = res.data.data
+				 this.RBPRICE = res.data.data
 				getApp().globalData.rbPrice =res.data.data;
 				
 				}
@@ -385,10 +386,10 @@ export default {
 				method: "eth_chainId"
 			}).then(chainId => {
 				if (chainId != 137) {
-					uni.showToast({
-						title: "请使用polygon网络!",
-						icon: "error"
-					})
+					// uni.showToast({
+					// 	title: "请使用polygon网络!",
+					// 	icon: "error"
+					// })
 				}
 			});
 			const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -401,7 +402,9 @@ export default {
 
 			})
 			provider.send("eth_requestAccounts", []).then(async accounts => {
+				
 				this.myAccount = accounts[0];
+				
 				getApp().globalData.userAccount = this.myAccount;
 				uni.clearStorage();
 				this.getStep();
@@ -438,7 +441,9 @@ export default {
 		displayNum,
 		async getRef() {
 			this.refContract = await useContract(refStoreAddress, refAbi)
+			
 			var refer = await this.refContract.referrer(this.myAccount)
+			
 			if (refer === '0x0000000000000000000000000000000000000000') {
 				this.$refs.isopen.open();
 				//没有推荐人
@@ -1029,7 +1034,7 @@ export default {
 			//从接口获取最新步数
 			return new Promise((resolve, reject) => {
 				//todo 设置baseurl
-				this.baseurl = 'https://gapi.runbit.org/api/v1/'
+				this.baseurl = 'https://gapi.runbit.lol/api/v1/'
 				uni.request({
 					url: this.baseurl + 'game/getUserLastSteps',
 					data: {
@@ -1094,6 +1099,7 @@ export default {
 				return
 			}
 			try {
+				debugger
 				await this.runContract.updateSteps(this.check_sum)
 				this.steps = this.getSteps
 				uni.setStorageSync('steps', this.steps);

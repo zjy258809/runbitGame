@@ -20,7 +20,7 @@ export async function contractApprove(tokenContract, spender) {
 var  provider,quickProvider
 if(window.ethereum){
 	 provider = new ethers.providers.Web3Provider(window.ethereum);
-	 quickProvider = new ethers.providers.JsonRpcProvider("https://hardworking-purple-leaf.matic.quiknode.pro/e1643782b57442cc5a0cf0cc3870474adad502c9")
+	  quickProvider = new ethers.providers.JsonRpcProvider("https://hardworking-purple-leaf.matic.quiknode.pro/e1643782b57442cc5a0cf0cc3870474adad502c9")
 	
 }export async function useContract(address, abi) {
 

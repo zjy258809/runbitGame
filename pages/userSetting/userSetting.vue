@@ -74,7 +74,7 @@
 			if(values)
 				this.inviter=hideBankCards(values);
 				if(setp)
-				this.distance=setp*0.7/1000;
+				this.distance=this.getFix2(setp*0.7/1000);
 			
 			
 		},
@@ -95,13 +95,17 @@
 					url: '../invite/invite'
 				});
 			},
+			getFix2(num) {
+				var value = Math.floor(num * 100) / 100
+				return value
+			},
 			//获取最新等级
 			getLevel() {
 				//从接口获取最新步数
 					//todo 设置baseurl
 				
 					var addr =getApp().globalData.userAccount;
-					this.baseurl = 'https://gapi.runbit.org/api/v1/'
+					this.baseurl = 'https://gapi.runbit.lol/api/v1/'
 					uni.request({
 						url: this.baseurl + 'game/getClassLevel',
 						data: {

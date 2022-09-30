@@ -11,9 +11,9 @@
 					<progress :percent="item.balance" activeColor="#10AEFF" stroke-width="8" />
 				</view>
 				<view class="uni-flex uni-row itemdesc-box">
-					<image class="itemprice1" src="https://gapi.runbit.org/images/runbit.png" />
+					<image class="itemprice1" src="https://gapi.runbit.lol/images/runbit.png" />
 					<view class="itemdesc-boxtxt">{{item.card.price1}}</view>
-					<image class="itemprice1" src="https://gapi.runbit.org/images/chip.png" />
+					<image class="itemprice1" src="https://gapi.runbit.lol/images/chip.png" />
 					<view class="itemdesc-boxtxt">{{item.card.price0}}</view>
 				</view>
 				<!-- <view class="item--content">

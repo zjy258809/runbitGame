@@ -4,14 +4,14 @@
 			<view class="goods--item" v-for="(item, index) in lists" :key="index" @click="$emit('onGoods', index)">
 				<view class="imgtop uni-flex uni-row">
 					<view class="flex-item">
-						<image class="smicon " src="https://gapi.runbit.org/images/star.png"></image>
-						<image v-if="item.equip.level>=2" class="smicon " src="https://gapi.runbit.org/images/star.png">
+						<image class="smicon " src="https://gapi.runbit.lol/images/star.png"></image>
+						<image v-if="item.equip.level>=2" class="smicon " src="https://gapi.runbit.lol/images/star.png">
 						</image>
-						<image v-if="item.equip.level>=3" class="smicon " src="https://gapi.runbit.org/images/star.png">
+						<image v-if="item.equip.level>=3" class="smicon " src="https://gapi.runbit.lol/images/star.png">
 						</image>
-						<image v-if="item.equip.level>=4" class="smicon " src="https://gapi.runbit.org/images/star.png">
+						<image v-if="item.equip.level>=4" class="smicon " src="https://gapi.runbit.lol/images/star.png">
 						</image>
-						<image v-if="item.equip.level>=5" class="smicon " src="https://gapi.runbit.org/images/star.png">
+						<image v-if="item.equip.level>=5" class="smicon " src="https://gapi.runbit.lol/images/star.png">
 						</image>
 					</view>
 					<view class="smtxt" v-if="item.equip.equip_type==0">鞋子</view>
@@ -25,9 +25,9 @@
 					<progress :percent="item.balance" activeColor="#10AEFF" stroke-width="8" />
 				</view>
 				<view class="uni-flex uni-row itemdesc-box">
-					<image class="itemprice1" src="https://gapi.runbit.org/images/runbit.png" />
+					<image class="itemprice1" src="https://gapi.runbit.lol/images/runbit.png" />
 					<view class="itemdesc-boxtxt">{{item.equip.price1}}</view>
-					<image class="itemprice1" src="https://gapi.runbit.org/images/chip.png" />
+					<image class="itemprice1" src="https://gapi.runbit.lol/images/chip.png" />
 					<view class="itemdesc-boxtxt">{{item.equip.price0}}</view>
 				</view>
 				<!-- <view class="item--content">

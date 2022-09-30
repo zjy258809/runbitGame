@@ -281,7 +281,7 @@ export default {
 			equipCollect: [],
 			equipCollectImgs: [],
 			buttonRect: {},
-			baseurl: 'https://gapi.runbit.org/api/v1/',
+			baseurl: 'https://gapi.runbit.lol/api/v1/',
 			value: 10,
 			carvalue: '',
 			carRange: [{
@@ -593,6 +593,7 @@ export default {
 		},
 		//点击装备列表
 		onGoods(item) {
+			debugger
 			this.collectionId = this.equipCollect[item].equip.collection_id;
 			this.currentEquips = this.equipCollect[item];
 			this.currentprice0 = this.currentEquips.equip.price0;
@@ -671,7 +672,7 @@ export default {
 			uni.showLoading({
 				title: '加载中....'
 			});
-			this.baseurl = 'https://gapi.runbit.org/api/v1/'
+			this.baseurl = 'https://gapi.runbit.lol/api/v1/'
 			uni.request({
 				url: this.baseurl + 'game/storeInfo',
 				data: {
@@ -690,7 +691,7 @@ export default {
 							var resultObj = {};
 							resultObj.balance = res.data.data.equip[i].sales / res.data.data.equip[i]
 								.stock * 100
-							resultObj.cover = "https://gapi.runbit.org/images/" + res.data.data
+							resultObj.cover = "https://gapi.runbit.lol/images/" + res.data.data
 								.equip[i].cover;
 							resultObj.equip = res.data.data.equip[i];
 							if (res.data.data.equip[i].status != '0') {
@@ -703,7 +704,7 @@ export default {
 							resultObj.balance = res.data.data.card[i].sales / res.data.data.card[i]
 								.stock * 100
 							resultObj.card = res.data.data.card[i];
-							resultObj.cover = "https://gapi.runbit.org/images/" + res.data.data.card[
+							resultObj.cover = "https://gapi.runbit.lol/images/" + res.data.data.card[
 								i].cover;
 							if (res.data.data.card[i].status != '0') {
 
@@ -771,7 +772,7 @@ export default {
 					collection_id: collection_id, //每一页12个数据
 				},
 			}).then(res => {
-				imgs = "https://gapi.runbit.org/images/" + res;
+				imgs = "https://gapi.runbit.lol/images/" + res;
 				if (img_type == 1) {
 					var resultObj = {};
 					resultObj.balance = currentObj.sales / currentObj.stock * 100

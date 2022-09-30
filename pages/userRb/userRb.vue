@@ -7,7 +7,7 @@
 				<img @tap="setting" class="logo2" src="../../static/Group12016.png" />
 			</view>
 			<img class="gp5" @tap="inputDialogToggle()" src="../../static/Group12009.png" />
-			<view class="gp5-txt">{{ balanceOfRB }} RB</view>
+			<view class="gp5-txt">{{ getFix2(balanceOfRB) }} RB</view>
 
 			<view class="uni-flex uni-row">
 				<view class="uni-flex uni-column accept" @click="buy">
@@ -37,7 +37,7 @@
 
 						<view class="curId uni-flex uni-row">
 							<view class="level2">{{ displayAdddress(item.address )}}</view>
-							<view class="level3">{{ item.value }} RB</view>
+							<view class="level3">{{ getFix2(item.value) }} RB</view>
 							<view class="level4">{{ item.create_time.substring(0,10) }}</view>
 						</view>
 
@@ -55,7 +55,7 @@
 
 						<view class="curId uni-flex uni-row">
 							<view class="level2">{{ displayAdddress(item.address) }}</view>
-							<view class="level3">{{ item.value }} RB</view>
+							<view class="level3">{{ getFix2(item.value) }} RB</view>
 							<view class="level4">{{ item.create_time.substring(0,10) }}</view>
 						</view>
 
@@ -133,6 +133,10 @@ export default {
 				delta: 1
 			});
 		},
+		getFix2(num) {
+			var value = Math.floor(num * 100) / 100
+			return value
+		},
 		recordList(index) {
 			this.curList = index;
 			this.getTransactions(index+1)
@@ -157,7 +161,7 @@ export default {
 			})
 		},
 		  displayAdddress(address) {
-	return address.substring(0, 6) + "..." + address.substring(address.length - 8, address.length - 1)
+	return address.substring(0, 4) + "..." + address.substring(address.length - 5, address.length - 1)
 }
 	}
 }

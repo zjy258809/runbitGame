@@ -22,7 +22,7 @@
 
 			<view class="uni-flex uni-row">
 				<view class="recordList">邀請記錄</view>
-				<view class="recordList4">4级总人数{{total}}  活跃度完成率{{finished}}%</view>
+				<view class="recordList4">4级总人数:{{total}}  活跃度:{{finished}}</view>
 			</view>
 
 			<view v-if="curList == 0">
@@ -120,7 +120,7 @@
 				// 	this.total =data.total
 				// })
 				
-					this.baseurl = 'https://gapi.runbit.org/api/v1/'
+					this.baseurl = 'https://gapi.runbit.lol/api/v1/'
 				uni.request({
 					url: this.baseurl + 'game/getSubActivity',
 					data: {
@@ -129,7 +129,7 @@
 					method: "GET",
 					success: res => {
 						if (res.data.code === 0) {
-							this.finished =res.data.data.finished;
+							this.finished =res.data.data.current;
 						}
 					}
 				})

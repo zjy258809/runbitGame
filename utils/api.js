@@ -1,6 +1,6 @@
 //功能：暴露接口
 
-const BASE_URL = 'https://gapi.runbit.org/api/v1/' //域名或选取所有接口不变的那一部分
+const BASE_URL = 'https://gapi.runbit.lol/api/v1/' //域名或选取所有接口不变的那一部分
 export const myRequest = (options) => { //暴露一个function：myRequest，使用options接收页面传过来的参数
         return new Promise((resolve, reject) => { //异步封装接口，使用Promise处理异步请求
             uni.request({ //发送请求
@@ -24,6 +24,8 @@ export const myRequest = (options) => { //暴露一个function：myRequest，使
             })
         })
     }
+	
+
 
 /*下面代码不作用途：仅参照演示，模仿页面调用函数，将实参传进myRequest，也就是上面myRequest使用(options)接收。
 myRequest({
