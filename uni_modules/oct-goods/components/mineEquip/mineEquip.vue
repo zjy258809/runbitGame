@@ -5,7 +5,7 @@
 				
 
 
-				<image class="logo" :src="item.img" />
+				<image class="logo" :src="item.img.replace('org','lol')" />
 				
 				
 			</view>

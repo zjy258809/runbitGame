@@ -5,7 +5,7 @@
 				
 			<view class="goods--item" v-for="(item, index) in lists"  :key="index" @click="onGoods(item,index)">
 				
-				<image  :class="currentIndex== index?'active':'active2'"   :src="item.img"  />
+				<image  :class="currentIndex== index?'active':'active2'"   :src="item.img.replace('org','lol')"  />
 				
 				<!-- <view class="item--content">
 					<view class="title">{{item.name}}</view>

@@ -58,8 +58,8 @@
 					value="對話方塊預置提示內容!" placeholder="請輸入內容" @confirm="forgeEquipDialog">
 					<view>
 						<view class="uni-flex uni-row">
-							<image class="dialogimg" @tap="changeShop(1)" :src="card1.img"></image>
-							<image class="dialogimg" @tap="changeShop(2)" :src="card2.img"></image>
+							<image class="dialogimg" @tap="changeShop(1)" :src="card1.img.replace('org','lol')"></image>
+							<image class="dialogimg" @tap="changeShop(2)" :src="card2.img.replace('org','lol')"></image>
 						</view>
 						<uni-card title="" extra=""
 							style="width: 90%; border:1px solid black; border-radius: 0.825rem; background-color:#F4F5F6 ; margin: 2rem auto;">
@@ -138,7 +138,7 @@
 					:confirmText="cardconfirm" title="屬性卡信息" @close="cancleCard" value="對話框預置提示內容!" placeholder="請輸入內容"
 					@confirm="dialogInputConfirm4(0)">
 					<view>
-						<img class="cards" :src="curCard.img" />
+						<img class="cards" :src="curCard.img.replace('org','lol')" />
 						<uni-card title="" extra=""
 							style="width: 90%; border:1px solid black; border-radius: 0.825rem; background-color:#F4F5F6 ; margin: 1rem auto;">
 							<view class="curId uni-flex uni-row">
@@ -171,7 +171,7 @@
 					@confirm="dialogInputConfirm4(1)">
 					<view>
 
-						<img class="cards2" :src="curEquip.img" />
+						<img class="cards2" :src="curEquip.img.replace('org','lol')" />
 
 						<view class="uni-flex uni-row">
 							<img class="addcards" @tap="addCard(0)" :src="cards[0].img" />
@@ -827,17 +827,17 @@ export default {
 		async getEquitCard(equip) {
 			let cards = equip.cards
 			if (cards[0].img) {
-				this.cards[0].img = cards[0].img;
+				this.cards[0].img = cards[0].img.replace("org","lol");;
 			} else {
 				this.cards[0].img = '../../../static/Group12032.png';
 			}
 			if (cards[1].img) {
-				this.cards[1].img = cards[1].img;
+				this.cards[1].img = cards[1].img.replace("org","lol");;
 			} else {
 				this.cards[1].img = '../../../static/Group12032.png';
 			}
 			if (cards[2].img) {
-				this.cards[2].img = cards[2].img;
+				this.cards[2].img = cards[2].img.replace("org","lol");;
 			} else {
 				this.cards[2].img = '../../../static/Group12032.png';
 			}

@@ -370,9 +370,9 @@
 				startDate: '2022-08-25',
 				endDate: '2022-08-25',
 				lottery: {
-					rb: 10,
-					rbct: 20,
-					rbet: 30
+					rb: 0,
+					rbct: 0,
+					rbet: 0
 				},
 				lotindex: null
 

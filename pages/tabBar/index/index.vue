@@ -139,7 +139,7 @@
 					value="對話框預置提示內容!" placeholder="請輸入內容" @close="unEquip">
 					<view>
 
-						<img class="cards2" :src="currentequips.img" />
+						<img class="cards2" :src="currentequips.img.replace('org','lol')" />
 
 						<view class="uni-flex uni-row">
 							<img class="addcards" @tap="addCard(0)" :src="cards[0].img" />
@@ -751,17 +751,17 @@ export default {
 		getequipsImg(equips) {
 			if (equips.length > 0) {
 				if (equips[0].img) {
-					this.equipsImgs[0].img = equips[0].img;
+					this.equipsImgs[0].img = equips[0].img.replace("org","lol");
 				} else {
 					this.equipsImgs[0].img = '../../../static/chooseImg.png';
 				}
 				if (equips[1].img) {
-					this.equipsImgs[1].img = equips[1].img;
+					this.equipsImgs[1].img = equips[1].img.replace("org","lol");
 				} else {
 					this.equipsImgs[1].img = '../../../static/chooseImg.png';
 				}
 				if (equips[2].img) {
-					this.equipsImgs[2].img = equips[2].img;
+					this.equipsImgs[2].img = equips[2].img.replace("org","lol");
 				} else {
 					this.equipsImgs[2].img = '../../../static/chooseImg.png';
 				}
@@ -827,17 +827,17 @@ export default {
 		async getEquitCard(index) {
 			let cards = this.equips[index].cards
 			if (cards && cards[0] && cards[0].img) {
-				this.cards[0].img = cards[0].img;
+				this.cards[0].img = cards[0].img.replace("org","lol");
 			} else {
 				this.cards[0].img = '../../../static/Group12032.png';
 			}
 			if (cards && cards[1] && cards[1]?.img) {
-				this.cards[1].img = cards[1].img;
+				this.cards[1].img = cards[1].img.replace("org","lol");
 			} else {
 				this.cards[1].img = '../../../static/Group12032.png';
 			}
 			if (cards && cards[2] && cards[2]?.img) {
-				this.cards[2].img = cards[2].img;
+				this.cards[2].img = cards[2].img.replace("org","lol");
 			} else {
 				this.cards[2].img = '../../../static/Group12032.png';
 			}
