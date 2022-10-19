@@ -22,8 +22,10 @@
 
 			<view class="uni-flex uni-row">
 				<view class="recordList">邀請記錄</view>
-				<view class="recordList4">4级总人数:{{total}}  活跃度:{{finished}}</view>
+				<view class="recordList4">当前级别层数:{{floor1}}  人数:{{total1}}  活跃度:{{activity1}}</view>
+				
 			</view>
+			<view v-if="level>2 && level<6" class="recordList5">下一级别层数:{{floor2}}  人数:{{total2}}  活跃度:{{activity2}}</view>
 
 			<view v-if="curList == 0">
 				<view style="" class="text" v-for="(item, index) in data" :key="index">
@@ -85,6 +87,13 @@
 				data2: [],
 				curList: 0,
 				myAccount: '',
+				level:'',
+				floor1:'',
+				total1:'',
+				activity1:'',
+				floor2:'',
+				total2:'',
+				activity2:'',
 			}
 		},
 		onLoad() {
@@ -109,30 +118,21 @@
 				this.curList = index;
 			},
 			getRecord() {
-				// myRequest({
-				// 	url: 'game/getSubUser',
-				// 	method: 'GET',
+			
+				
+				 	this.baseurl = 'https://gapi.runbit.lol/api/v1/'
+				// uni.request({
+				// 	url: this.baseurl + 'game/getSubActivity',
 				// 	data: {
 				// 		addr: this.myAccount
+				// 	},
+				// 	method: "GET",
+				// 	success: res => {
+				// 		if (res.data.code === 0) {
+				// 			this.finished =res.data.data.current;
+				// 		}
 				// 	}
-				// }).then(data => {
-				// 	this.data = data.list
-				// 	this.total =data.total
 				// })
-				
-					this.baseurl = 'https://gapi.runbit.lol/api/v1/'
-				uni.request({
-					url: this.baseurl + 'game/getSubActivity',
-					data: {
-						addr: this.myAccount
-					},
-					method: "GET",
-					success: res => {
-						if (res.data.code === 0) {
-							this.finished =res.data.data.current;
-						}
-					}
-				})
 				
 				uni.request({
 					url: this.baseurl + 'game/getSubUser',
@@ -153,8 +153,14 @@
 									res.data.data.list[i].level =res.data.data.list[i].level+'级社区长'
 								}
 							}
+							this.level = res.data.data.level;
+							this.floor1 = res.data.data.floor1;
+							this.total1 = res.data.data.total1;
+							this.activity1 = res.data.data.activity1;
+							this.floor2 = res.data.data.floor2;
+							this.total2 = res.data.data.total2;
+							this.activity2 = res.data.data.activity2;
 							this.data = res.data.data.list
-							this.total =res.data.data.total
 						}
 					}
 				})
@@ -189,12 +195,21 @@
 		font-weight: bold;
 		color: #000000;
 		margin-left: 1.25rem;
+		width: 4.5rem;
 	}
 	.recordList4 {
 		font-size: 26rpx;
 		font-weight: bold;
 		color: #000000;
 		margin-left: 1rem;
+		height: 45.83rpx;
+		line-height:  45.83rpx;
+	}
+	.recordList5 {
+		font-size: 26rpx;
+		font-weight: bold;
+		color: #000000;
+		margin-left: 6.8rem;
 		height: 45.83rpx;
 		line-height:  45.83rpx;
 	}

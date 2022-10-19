@@ -19,6 +19,7 @@ const cardContractPromise = useQuickContract(cardAddress, cardAbi)
 export async function getEquip(equipContract, equipId, account) {
     let equip = {}
     let copy = {}
+	debugger
     const e = equipContract.tokenMetaData(equipId)
     const uri = equipContract.tokenURI(equipId)
     const cards = getBindCards(equipId, account)
@@ -96,6 +97,7 @@ export async function getMyEquips(account) {
     let equipIds = []
     let equipContract = await equipContractPromise
     return equipContract.balanceOf(account).then(async num => {
+		debugger
         for (let i = 0; i < num; i++)
             equipIds[i] = equipContract.tokenOfOwnerByIndex(account, i)
         return Promise.all(equipIds).then(res => {

@@ -133,13 +133,14 @@
 		</view>
 
 		<!-- 装备信息 -->
+
 		<view>
 			<uni-popup ref="equipInfo" type="dialog">
 				<uni-popup-dialog ref="inputClose" :mask-click="true" cancelText="卸下" confirmText="确认" title="裝備信息"
 					value="對話框預置提示內容!" placeholder="請輸入內容" @close="unEquip">
 					<view>
 
-						<img class="cards2" :src="currentequips.img.replace('org','lol')" />
+						<img   v-if="currentequips.img!=null "class="cards3" :src= "currentequips.img.replace('org','lol')"" />
 
 						<view class="uni-flex uni-row">
 							<img class="addcards" @tap="addCard(0)" :src="cards[0].img" />
@@ -533,6 +534,7 @@ export default {
 				key: 'myEquips'
 			}).then(async res => {
 				//有缓存
+				debugger
 				if (!res[0]) {
 					this.myEquips = JSON.parse(res[1].data);
 				} else {
@@ -649,9 +651,19 @@ export default {
 			}
 
 			this.carIndex = index;
+			
 			this.cardsList = this.myCards?.filter((item) => {
-				if (item.status == 0 && item.card.level <= this.equips[this
-					.curequipIndex].equip.level) return item
+				debugger
+				let a= this.myEquips;
+				let b = this.equips;
+				if (item.card.level <= this.equips[this.curequipIndex].equip.level) {
+				if(item.status==0 || this.getFixEquip(item.status)!=1){
+				
+				
+				return item	
+				}
+				}
+				
 			})
 			this.$refs.equipInfo.close()
 			this.$refs.choosecardDialog.open() //装备筛选
@@ -660,6 +672,15 @@ export default {
 					title: "没有可绑定的卡片",
 					icon: "error"
 				})
+		},
+		getFixEquip(equipId)
+		{
+			for (var i = 0; i < this.myEquips.length; i++) {
+				if(equipId==this.myEquips[i].id)
+				{
+					return 1
+				}
+			}
 		},
 		getFix2(num) {
 			var value = Math.floor(num * 1000) / 1000
@@ -751,17 +772,17 @@ export default {
 		getequipsImg(equips) {
 			if (equips.length > 0) {
 				if (equips[0].img) {
-					this.equipsImgs[0].img = equips[0].img.replace("org","lol");
+					this.equipsImgs[0].img = (equips[0].img).replace("org","lol");
 				} else {
 					this.equipsImgs[0].img = '../../../static/chooseImg.png';
 				}
 				if (equips[1].img) {
-					this.equipsImgs[1].img = equips[1].img.replace("org","lol");
+					this.equipsImgs[1].img = (equips[1].img).replace("org","lol");
 				} else {
 					this.equipsImgs[1].img = '../../../static/chooseImg.png';
 				}
 				if (equips[2].img) {
-					this.equipsImgs[2].img = equips[2].img.replace("org","lol");
+					this.equipsImgs[2].img = (equips[2].img).replace("org","lol");
 				} else {
 					this.equipsImgs[2].img = '../../../static/chooseImg.png';
 				}
@@ -827,17 +848,17 @@ export default {
 		async getEquitCard(index) {
 			let cards = this.equips[index].cards
 			if (cards && cards[0] && cards[0].img) {
-				this.cards[0].img = cards[0].img.replace("org","lol");
+				this.cards[0].img = ((cards[0].img).replace("org","lol"));
 			} else {
 				this.cards[0].img = '../../../static/Group12032.png';
 			}
 			if (cards && cards[1] && cards[1]?.img) {
-				this.cards[1].img = cards[1].img.replace("org","lol");
+				this.cards[1].img = (cards[1].img).replace("org","lol");
 			} else {
 				this.cards[1].img = '../../../static/Group12032.png';
 			}
 			if (cards && cards[2] && cards[2]?.img) {
-				this.cards[2].img = cards[2].img.replace("org","lol");
+				this.cards[2].img = (cards[2].img).replace("org","lol");
 			} else {
 				this.cards[2].img = '../../../static/Group12032.png';
 			}
@@ -899,6 +920,9 @@ export default {
 
 			this.$refs.inputDialog.open()
 		},
+		
+		f001(p1) {
+		    return p1.replace("org","lol");    },
 
 		//赛道确认
 		async dialogInputConfirm() {
@@ -920,13 +944,13 @@ export default {
 			try {
 				let tx = await setTrack(this.runContract, this.setTrackId, this.gasPriceString)
 				await tx.wait()
-				id = this.trackId;
-				if (id == 0)
-					this.stack = "石子路"
-				if (id == 1)
-					this.stack = "芳草地"
-				if (id == 2)
-					this.stack = "烈日沙滩"
+				
+				// if (this.setTrackId == 0)
+				// 	this.stack = "石子路"
+				// if (this.setTrackId == 1)
+				// 	this.stack = "芳草地"
+				// if (this.setTrackId == 2)
+				// 	this.stack = "烈日沙滩"
 				uni.showToast({
 					title: "您选择的跑道将在明天生效",
 					icon: "success"
@@ -935,7 +959,8 @@ export default {
 				let reason = e.reason ? e.reason : e.code ? (e.code == 4001 ? "拒绝交易" : e.massage) : ""
 
 				uni.showToast({
-					title: "更新失败" + ":" + reason,
+					title: "请等待......." + ":" + reason,
+					//title: "更新失败" + ":" + reason,
 					icon: "none"
 				})
 
@@ -1099,7 +1124,6 @@ export default {
 				return
 			}
 			try {
-				debugger
 				await this.runContract.updateSteps(this.check_sum)
 				this.steps = this.getSteps
 				uni.setStorageSync('steps', this.steps);
@@ -1124,6 +1148,11 @@ export default {
 		//
 	}
 }
+
+		
+		
+        
+	
 </script>
 
 <style>
@@ -1257,7 +1286,7 @@ export default {
 	margin-bottom: 50rpx;
 }
 
-.cards2 {
+.cards3 {
 	width: 40%;
 	margin: 0 auto;
 	display: inline-block;

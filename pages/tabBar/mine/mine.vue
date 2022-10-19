@@ -421,6 +421,7 @@ export default {
 	onShow() {
 		this.loadMine = getApp().globalData.loadMine;
 		if (this.loadMine == 1) {
+		
 			this.myCards = JSON.parse(uni.getStorageSync('myCards'));
 			this.myEquips = JSON.parse(uni.getStorageSync('myEquips'));
 			this.equips = JSON.parse(uni.getStorageSync('bindEquips'));
@@ -498,6 +499,8 @@ export default {
 					//有缓存
 					if (!res[0]) {
 						this.myEquips = JSON.parse(res[1].data);
+						let a =JSON.parse(res[1].data);
+						debugger
 						uni.hideLoading()
 					}
 					else {
@@ -537,6 +540,7 @@ export default {
 					.then(res => {
 						//有缓存
 						if (!res[0]) {
+							debugger
 							this.equips = JSON.parse(res[1].data);
 						}
 						//无缓存
@@ -570,6 +574,7 @@ export default {
 									equipItem.cards = cards
 									equips[i] = equipItem
 								}
+								debugger
 								this.equips = equips
 								uni.setStorage({
 									key: 'bindEquips',
@@ -827,17 +832,17 @@ export default {
 		async getEquitCard(equip) {
 			let cards = equip.cards
 			if (cards[0].img) {
-				this.cards[0].img = cards[0].img.replace("org","lol");;
+				this.cards[0].img = (cards[0].img).replace("org","lol");;
 			} else {
 				this.cards[0].img = '../../../static/Group12032.png';
 			}
 			if (cards[1].img) {
-				this.cards[1].img = cards[1].img.replace("org","lol");;
+				this.cards[1].img = (cards[1].img).replace("org","lol");;
 			} else {
 				this.cards[1].img = '../../../static/Group12032.png';
 			}
 			if (cards[2].img) {
-				this.cards[2].img = cards[2].img.replace("org","lol");;
+				this.cards[2].img = (cards[2].img).replace("org","lol");;
 			} else {
 				this.cards[2].img = '../../../static/Group12032.png';
 			}
@@ -924,12 +929,21 @@ export default {
 			}
 			this.goodsArr = []
 			Object.keys(this.myCards).forEach((key, index) => {
-				if (this.myCards[key].status == 0 && this.myCards[key].card.level <= this.curEquip.equip
-					.level) {
+				if (this.myCards[key].card.level <= this.curEquip.equip.level) {
+					if(this.myCards[key].status == 0 || this.getFixEquip(this.myCards[key].status)!=1)
 					this.goodsArr.push(this.myCards[key])
 				}
 
 			})
+		},
+		getFixEquip(equipId)
+		{
+			for (var i = 0; i < this.myEquips.length; i++) {
+				if(equipId==this.myEquips[i].id)
+				{
+					return 1
+				}
+			}
 		},
 		// 卡片详情取消按钮
 		cancleCard() {
@@ -957,6 +971,7 @@ export default {
 			this.runContract.getCardInfo(item.id).then(
 				card => {
 					if (card[0] == 0) {
+						debugger
 						this.cardStatus = "未装备"
 						this.cardconfirm = "转让"
 						this.cardCancle = "取消"

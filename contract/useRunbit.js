@@ -92,13 +92,15 @@ export async function getBindEquips(account) {
 export async function getBindCards(equipId, account) {
     let cards = []
     let cardIds = []
-    let owners = []
+    let owners = [] 
     var cardContract = await cardContractPromise
+	debugger
     var runContract = await runContractPromise
-    for (let index = 0; index < 3; index++)
+    for (var index = 0; index < 3; index++)
         cardIds[index] = runContract.getBindCard(equipId, index)
+		debugger
     return Promise.all([...cardIds, cardContract]).then(res => {
-        for (let i = 0; i < 3; i++)
+        for (var i = 0; i < 3; i++)
             if (res[i].toNumber() != 0) owners[i] = cardContract.ownerOf(res[i]) 
         if (owners.length != 0)
             return Promise.all(owners).then(results => {
@@ -111,7 +113,7 @@ export async function getBindCards(equipId, account) {
                     return Promise.all(cards).then(res2 => {
                         let cardResults = []
                         for (let index = 0; index < 3; index++) {
-                            if (res2[index]?.consume < res2[index]?.card.durability)
+                            if (res2[index]?.consume <= res2[index]?.card.durability)
                                 cardResults[index] = res2[index]
                             else cardResults[index] = 0
                         }
