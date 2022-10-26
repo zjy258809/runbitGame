@@ -500,7 +500,6 @@ export default {
 					if (!res[0]) {
 						this.myEquips = JSON.parse(res[1].data);
 						let a =JSON.parse(res[1].data);
-						debugger
 						uni.hideLoading()
 					}
 					else {
@@ -540,7 +539,6 @@ export default {
 					.then(res => {
 						//有缓存
 						if (!res[0]) {
-							debugger
 							this.equips = JSON.parse(res[1].data);
 						}
 						//无缓存
@@ -574,7 +572,6 @@ export default {
 									equipItem.cards = cards
 									equips[i] = equipItem
 								}
-								debugger
 								this.equips = equips
 								uni.setStorage({
 									key: 'bindEquips',
@@ -971,7 +968,6 @@ export default {
 			this.runContract.getCardInfo(item.id).then(
 				card => {
 					if (card[0] == 0) {
-						debugger
 						this.cardStatus = "未装备"
 						this.cardconfirm = "转让"
 						this.cardCancle = "取消"
@@ -1176,13 +1172,14 @@ export default {
 				//2.再查询equip对collect授权情况
 				if (!that.approveEquip) {
 					uni.showToast({
-						title: "授权中",
+						title: "开始授权",
 						icon: "success"
 					})
 					//确认授权
 					await approveNFT(that.equipContract, RunbitCollectionAddress)
 					that.approveEquip = true
-					return
+					
+					// return
 				}
 
 				//3.如果合成需要费用，则判断RB是否授权
@@ -1202,11 +1199,15 @@ export default {
 						this.approveState = true
 
 						uni.showToast({
-							title: "授权中,授权后重新点击购买",
+							title: "授权成功,开始合并",
 							icon: "none"
 						})
 					}
 				}
+				uni.showToast({
+					title: "授权成功,开始合并",
+					icon: "success"
+				})
 
 				that.$refs.inputDialog2.open();
 
@@ -1218,7 +1219,7 @@ export default {
 
 				this.updateMyEquips()
 				uni.showToast({
-					title: "合成成功",
+					title: "合成成功,稍后刷新查看",
 					icon: "success"
 				})
 				that.$refs.inputDialog2.close();

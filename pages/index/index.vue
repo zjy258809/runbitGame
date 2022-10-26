@@ -1032,7 +1032,6 @@
 				  
 				 async  getDay() {
 					   
-					   debugger
 					   const _this = this
 					       window.web3 = new this.Web3(window.ethereum)
 						   

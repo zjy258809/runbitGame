@@ -593,7 +593,6 @@ export default {
 		},
 		//点击装备列表
 		onGoods(item) {
-			debugger
 			this.collectionId = this.equipCollect[item].equip.collection_id;
 			this.currentEquips = this.equipCollect[item];
 			this.currentprice0 = this.currentEquips.equip.price0;

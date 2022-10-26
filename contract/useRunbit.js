@@ -94,11 +94,9 @@ export async function getBindCards(equipId, account) {
     let cardIds = []
     let owners = [] 
     var cardContract = await cardContractPromise
-	debugger
     var runContract = await runContractPromise
     for (var index = 0; index < 3; index++)
         cardIds[index] = runContract.getBindCard(equipId, index)
-		debugger
     return Promise.all([...cardIds, cardContract]).then(res => {
         for (var i = 0; i < 3; i++)
             if (res[i].toNumber() != 0) owners[i] = cardContract.ownerOf(res[i]) 

@@ -588,7 +588,6 @@
 				});
 			},
 			winClick(status, index) {
-				debugger
 				this.lotindex = index
 				if (!status) this.$refs.inputDialog2.open()
 

@@ -19,7 +19,6 @@ const cardContractPromise = useQuickContract(cardAddress, cardAbi)
 export async function getEquip(equipContract, equipId, account) {
     let equip = {}
     let copy = {}
-	debugger
     const e = equipContract.tokenMetaData(equipId)
     const uri = equipContract.tokenURI(equipId)
     const cards = getBindCards(equipId, account)
