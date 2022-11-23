@@ -49,19 +49,51 @@ export async function getCard(runContract, cardContract, cardId) {
     const status = runContract.getCardInfo(cardId)
     const consume = runContract.getCardConsume(cardId)
     const uri = cardContract.tokenURI(cardId)
-    return Promise.all([cardInfo, status, consume, uri]).then(results => {
+    return  Promise.all([cardInfo, status, consume, uri]).then(results => {
         let e = results[0]
 
         Object.keys(e).forEach((key, index) => {
             copy[key] = typeof e[key] == 'number' ? e[key] : e[key].toNumber()
 
         })
+		debugger
         card.card = copy
         card.id = cardId.toNumber()
         card.status = results[1][0].toNumber()
-        card.consume = results[2].toNumber()
-        card.img = results[3]
+		card.cardIndex = results[1][1].toNumber()
+		card.consume = results[2].toNumber()
+		card.img = results[3]
+		
+		 console.log("11111"+card.img);
+		const cardValues =  runContract.getBindCard(card.status,card.cardIndex)
+		
+		return Promise.all([cardValues]).then(res => {
+		    let e = res[0].toNumber();
+			  console.log(22222);
+		   if(e!=card.id)
+		   {
+		   	card.status =0;
+		   }
+		     return card
+		
+		})
+		
+       debugger
         return card
+
+    })
+
+}
+
+export async function getCardvalues(runContract,equip, cardIndex) {
+    let card = {}
+    let copy = {}
+    const cardInfo =  runContract.getBindCard(equip,cardIndex)
+    
+    return Promise.all([cardInfo]).then(results => {
+        let e = results[0].toNumber();
+		  console.log(22222);
+        return e
 
     })
 

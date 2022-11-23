@@ -534,7 +534,6 @@ export default {
 				key: 'myEquips'
 			}).then(async res => {
 				//有缓存
-				debugger
 				if (!res[0]) {
 					this.myEquips = JSON.parse(res[1].data);
 				} else {
@@ -641,23 +640,24 @@ export default {
 		},
 		//打开卡片筛选
 		addCard(index) {
-			if (this.steps != 0) {
+			debugger
+			// if (this.steps != 0) {
 
-				uni.showToast({
-					title: "已更新步数，无法更换属性卡",
-					icon: "error"
-				})
-				return
-			}
+			// 	uni.showToast({
+			// 		title: "已更新步数，无法更换属性卡",
+			// 		icon: "error"
+			// 	})
+			// 	return
+			// }
 
 			this.carIndex = index;
 			
 			this.cardsList = this.myCards?.filter((item) => {
-				debugger
+				
 				let a= this.myEquips;
 				let b = this.equips;
 				if (item.card.level <= this.equips[this.curequipIndex].equip.level) {
-				if(item.status==0 || this.getFixEquip(item.status)!=1){
+				if(item.status==0 || this.getFixEquip(item.status,item.cardIndex)!=1){
 				
 				
 				return item	
@@ -673,11 +673,13 @@ export default {
 					icon: "error"
 				})
 		},
-		getFixEquip(equipId)
+		getFixEquip(equipId,cardIndex)
 		{
+			
 			for (var i = 0; i < this.myEquips.length; i++) {
-				if(equipId==this.myEquips[i].id)
+				if(equipId==this.myEquips[i].id )
 				{
+					//var equipIds =this.runContract.getBindCard(equipId, cardIndex)  备注
 					return 1
 				}
 			}
